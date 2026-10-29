@@ -122,6 +122,10 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:250px;
 .wacc-research-form .field{min-width:0}
 .wacc-research-form textarea{min-height:55px}
 .wacc-research-form small{align-self:center}
+.wacc-research-actions{grid-column:1/-1;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.wacc-research-actions button{font-size:12px;padding:7px 12px}
+.wacc-research-actions button[type="submit"]{font-size:13px;padding:9px 16px}
+.wacc-research-form small{grid-column:1/-1}
 .wacc-calculator{margin:22px 0;padding:19px;border:1px solid #cdded2;border-radius:10px;background:#f8fbf7}
 .wacc-calculator h4{margin:0 0 7px;font-size:18px}
 .wacc-calculator .section-head{align-items:center}
