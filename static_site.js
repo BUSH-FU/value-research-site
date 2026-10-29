@@ -20,6 +20,7 @@
     'state': 'data/state.json',
     'market-mood': 'data/market-mood.json',
     'risk-free-rate': 'data/risk-free-rate.json',
+    'valuation-scenarios': 'data/valuation-scenarios.json',
     'export': 'data/export.json',
     'candidates.csv': 'data/candidates.csv',
   };
@@ -36,7 +37,8 @@
 
   const nativeFetch = window.fetch.bind(window);
   window.fetch = function (input, init) {
-    const raw = typeof input === 'string' ? input : (input && input.url) || '';
+    const inputPath = typeof input === 'string' ? input : (input && input.url) || '';
+    const raw = inputPath.startsWith('api/') ? '/' + inputPath : inputPath;
     if (!raw.startsWith('/api/')) return nativeFetch(input, init);
     const method = String((init && init.method) || 'GET').toUpperCase();
     if (method !== 'GET' && method !== 'HEAD') {

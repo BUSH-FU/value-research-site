@@ -34,7 +34,7 @@ window.MarketMood = (() => {
  }
 
  // CSSOM 赋值：宽度与颜色都来自后端数据，避免前端写死一份分段常量。
- // 摘要卡与优选池卡各有一条刻度尺，两条都要上色。
+ // 摘要卡与精选标的卡各有一条刻度尺，两条都要上色。
  function paintBandStrip(mood){
   const bands=mood?.bands||[];
   const total=bands.reduce((sum,band)=>sum+(Number(band.to)-Number(band.from)),0)||100;
@@ -114,7 +114,7 @@ window.MarketMood = (() => {
   </div>`;
  }
 
- // 优选池顶部的一张紧凑摘要卡：整体读数 + 落点 + 五项分位 + 情绪带指针。
+ // 精选标的顶部的一张紧凑摘要卡：整体读数 + 落点 + 五项分位 + 情绪带指针。
  function renderPoolCard(mood){
   if(!mood||mood.status!=='available'){
    return `<div class="mood-pool-card muted" data-mood-pool-card><div><strong>市场情绪 · 市场先生状态</strong><p class="small">${esc(mood?.message||'市场情绪数据尚未取得，打开「市场情绪」页即可更新。')}</p></div></div>`;

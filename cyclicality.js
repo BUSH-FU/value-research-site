@@ -30,7 +30,7 @@ window.Cyclicality = (() => {
   return POSITION_BANDS[POSITION_BANDS.length-1];
  }
 
- // ── 优选池表格里的「周期属性」单元格 ──────────────────────────────────────
+ // ── 精选标的表格里的「周期属性」单元格 ──────────────────────────────────────
  function poolCell(record){
   if(!record||record.status!=='available'){
    return `<div class="cyc-cell"><span class="muted">${esc((record&&record.message)||'周期数据待补')}</span></div>`;

@@ -37,7 +37,7 @@
   const prior=history.slice(-8);history.push({role:'user',content:question});input.value='';send.disabled=true;send.textContent='回答中…';render();
   const waiting=document.createElement('div');waiting.className='assistant-message assistant waiting';waiting.textContent='正在读取当前页面和研究档案…';messages.appendChild(waiting);messages.scrollTop=messages.scrollHeight;
   try{
-   const ctx=current(),response=await fetch('/api/assistant',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question,code:ctx.code,page:ctx.view,history:prior})});
+   const ctx=current(),response=await fetch('api/assistant',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question,code:ctx.code,page:ctx.view,history:prior})});
    const data=await response.json();if(!response.ok)throw Error(data.error||'助手暂时无法回答');
    history.push({role:'assistant',content:data.answer});save();render();
   }catch(err){history.push({role:'assistant',content:`这次没有回答成功：${err.message}`});render();}
