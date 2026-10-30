@@ -318,3 +318,12 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:250px;
 .checklist-item-invalid{border-left:3px solid #d4463f;background:#fdf7f6;padding-left:13px}
 .checklist-item-invalid .checklist-fields textarea,.checklist-item-invalid .checklist-fields select{border-color:#e0b4ae}
 .checklist-item-why{margin-top:9px;padding:8px 11px;border:1px solid #e3b3ac;border-left:3px solid #d4463f;background:#fdf5f3;border-radius:5px;color:#8c3b33;font-size:12px}
+
+/* 表单就地反馈：成功、失败、逐项不合格，都显示在表单末尾（提交按钮旁）。
+   提示落在页面顶部等于没提示——表单很长，用户看不到。 */
+.form-notice{margin:14px 0 6px;padding:12px 15px;border:1px solid var(--line);border-left:3px solid var(--green);background:#f2f6f1;border-radius:6px;color:var(--green);font-size:13px}
+.form-notice.bad{border-color:#e3b3ac;border-left-color:#d4463f;background:#fdf5f3;color:#8c3b33}
+.review-item-invalid{border-left:3px solid #d4463f;background:#fdf7f6;padding-left:12px}
+.review-item-invalid textarea,.review-item-invalid input,.review-item-invalid select{border-color:#e0b4ae}
+.review-why{margin-top:8px;padding:8px 11px;border:1px solid #e3b3ac;border-left:3px solid #d4463f;background:#fdf5f3;border-radius:5px;color:#8c3b33;font-size:12px}
+.form-row>.review-why{grid-column:1/-1;margin-top:-4px}
