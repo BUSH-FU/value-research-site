@@ -158,8 +158,9 @@ window.Cyclicality = (() => {
    ])}
    <div class="cyc-charts">
     <div class="cyc-chart-block"><h4>① 行业周期曲线 · 申万二级行业指数</h4>
-     <p class="small muted">▲ 是显著高点，▼ 是显著低点；灰色区间是当前这一段。右侧轴是行业 PE。</p>
-     <div id="cyc-industry-chart" class="cyc-chart cyc-chart-industry" role="img" aria-label="行业指数收盘价曲线、显著峰谷与当前所处段落"></div></div>
+     <p class="small muted">图上两条线是<strong>两个量纲</strong>：<strong>深绿实线＝行业指数收盘价</strong>（读左轴，指数点位）；<strong>棕色虚线＝行业 PE</strong>（读右轴，申万官方发布的行业市盈率倍数）。▲▼ 标的是<strong>指数</strong>的显著高点与低点，不是 PE 的高低点；灰色区间是当前这一段，红点是当前指数位置。</p>
+     <p class="small muted">怎么读这两条线：指数与 PE 走势背离时（指数在涨、PE 反而在跌，或反过来），说明推动指数的不是估值倍数本身——那段时间变的是盈利预期，方向要另查，不能从这张图直接得出买卖结论。</p>
+     <div id="cyc-industry-chart" class="cyc-chart cyc-chart-industry" role="img" aria-label="行业指数收盘价曲线、行业 PE 曲线、显著峰谷与当前所处段落"></div></div>
     <div class="cyc-chart-block"><h4>② 公司盈利周期 · 净利率与 ROE</h4>
      <p class="small muted">柱子是净利率，折线是 ROE，都按年度取自年报原始数据。</p>
      <div id="cyc-profit-chart" class="cyc-chart cyc-chart-profit" role="img" aria-label="公司历年净利率与 ROE"></div></div>
@@ -187,7 +188,9 @@ window.Cyclicality = (() => {
   const markArea=segmentStart&&dates.length?[[{xAxis:segmentStart},{xAxis:dates[dates.length-1]}]]:[];
   return {
    animation:false,
-   grid:{left:56,right:54,top:24,bottom:40},
+   grid:{left:56,right:54,top:46,bottom:40},
+   // 两条线量纲不同（左轴指数点位 / 右轴 PE 倍数），没有图例就分不清谁是谁。
+   legend:{top:0,right:0,itemGap:14,textStyle:{fontSize:11,color:'#5b6b62'},itemWidth:16,itemHeight:8},
    tooltip:{trigger:'axis',backgroundColor:'#fffdf9',borderColor:'#e0e6df',textStyle:{color:'#20372f',fontSize:12},
     formatter:params=>{
      if(!Array.isArray(params)||!params.length)return '';
@@ -199,13 +202,13 @@ window.Cyclicality = (() => {
     axisLabel:{fontSize:10,color:'#829087',formatter:value=>String(value).slice(0,7)},
     axisLine:{lineStyle:{color:'#e0e6df'}},axisTick:{show:false}},
    yAxis:[
-    {type:'value',scale:true,name:'收盘',nameTextStyle:{fontSize:11,color:'#829087'},
+    {type:'value',scale:true,name:'行业指数',nameTextStyle:{fontSize:11,color:'#829087'},
      axisLabel:{fontSize:10,color:'#829087'},splitLine:{lineStyle:{color:'#eef1ec'}},axisLine:{show:false}},
     {type:'value',scale:true,name:'PE',nameTextStyle:{fontSize:11,color:'#829087'},
      axisLabel:{fontSize:10,color:'#829087'},splitLine:{show:false},axisLine:{show:false}},
    ],
    series:[
-    {name:'行业指数收盘',type:'line',showSymbol:false,symbol:'none',smooth:false,
+    {name:'行业指数收盘（左轴）',type:'line',showSymbol:false,symbol:'none',smooth:false,
      lineStyle:{width:1.8,color:'#2f6f5c'},itemStyle:{color:'#2f6f5c'},
      areaStyle:{color:'rgba(47,111,92,0.08)'},
      data:series.map(row=>row.close),
@@ -215,10 +218,10 @@ window.Cyclicality = (() => {
       .concat(troughs.map(item=>({...item,symbol:'pin',symbolSize:12,itemStyle:{color:'#4f7d45'},
        label:{fontSize:9,color:'#3c6035',formatter:()=>'▼',position:'bottom'}})))},
     },
-    {name:'行业 PE',type:'line',yAxisIndex:1,showSymbol:false,symbol:'none',smooth:false,
+    {name:'行业 PE（右轴）',type:'line',yAxisIndex:1,showSymbol:false,symbol:'none',smooth:false,
      lineStyle:{width:1,color:'#b8a68a',type:'dashed'},itemStyle:{color:'#b8a68a'},
      data:series.map(row=>isNum(row.pe)?row.pe:null)},
-    {name:'当前',type:'scatter',symbolSize:13,data:[{value:[dates[dates.length-1],series[series.length-1]?.close],
+    {name:'当前指数位置',type:'scatter',symbolSize:13,data:[{value:[dates[dates.length-1],series[series.length-1]?.close],
       itemStyle:{color:'#c0392b',borderColor:'#ffffff',borderWidth:2}}],
      label:{show:true,position:'top',distance:8,fontSize:11,color:'#c0392b',
       formatter:()=>isNum(series[series.length-1]?.close)?`当前 ${num(series[series.length-1].close,2)}`:''}},
