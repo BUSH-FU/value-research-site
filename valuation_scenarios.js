@@ -164,7 +164,7 @@ window.ValuationScenarios = (() => {
   if(!rows.length) return '<p class="small muted">目前没有能测算的公司。</p>';
   const threshold = Number(data?.margin_min_pct) || 0;
   const {lo, hi} = axisDomain(data);
-  const W = 1080, NAME_W = 158, VAL_W = 96, TOP = 34, ROW_H = 32, BOTTOM = 48;
+  const W = 1080, NAME_W = 158, VAL_W = 132, TOP = 34, ROW_H = 32, BOTTOM = 48;
   const plotLeft = NAME_W, plotRight = W - VAL_W;
   const height = TOP + rows.length * ROW_H + BOTTOM;
   const x = v => plotLeft + (plotRight - plotLeft) * (Math.min(hi, Math.max(lo, v)) - lo) / (hi - lo);
@@ -209,7 +209,8 @@ window.ValuationScenarios = (() => {
     const s = scenarioOf(row, k);
     const per = s.valid === false ? '股权价值为负（不参与比较）' : (isNum(s.per_share) ? '¥' + num(s.per_share) : '无效');
     return `${k}：每股 ${per}，安全边际 ${pct1(s.margin)}`;
-   }).join('；') + (stressLow !== null && isNum(midScenario.price)
+   }).join('；') + (hasBand ? `；带宽 ${num(high - low, 1)} 个百分点（永续增长率 1%～3% 之间安全边际的摆动幅度）` : '')
+   + (stressLow !== null && isNum(midScenario.price)
     ? `；压力校验下限 ¥${num(stressLow)}，按它算安全边际只剩 ${pct1(1 - Number(midScenario.price) / stressLow)}（仅供辅助观察，不控制价格条件）` : '')
    + (!hasBand ? (() => { const cash = cashAdjusted(row);
         return cash ? `；自动草案把报表货币资金 ${num(cash.cashYi)} 亿按 0 计，计入后 2% 档股权价值 ${num(cash.equityWithCashYi)} 亿、每股 ${num(cash.perShare)} 元` : ''; })() : '');
@@ -217,12 +218,17 @@ window.ValuationScenarios = (() => {
    const dot = midValid ? `<circle cx="${x(midPct).toFixed(1)}" cy="${y(index)}" r="5.5" class="vs-dot ${tone}"/>` : '';
    const label = midValid ? pct1(mid) : (isNum(midScenario.per_share) ? '股权为负' : '—');
    const band = hasBand ? `<rect x="${x1.toFixed(1)}" y="${(y(index) - 7).toFixed(1)}" width="${Math.max(2, x2 - x1).toFixed(1)}" height="14" rx="4" class="vs-band ${tone}"/>` : '';
+   // 带宽写在数值下面：条越宽说明这个结论越依赖永续增长率这一个假设。
+   // 光看条的长短说不清是「区间宽」还是「画得长」，所以把宽度写成数字。
+   const widthText = hasBand
+    ? `<text x="${plotRight + 12}" y="${y(index) + 15}" class="vs-width">带宽 ${num(high - low, 1)}pp</text>` : '';
    return `<g class="vs-row">
     <text x="${NAME_W - 14}" y="${y(index) + 4}" text-anchor="end" class="vs-name">${esc(row.name || row.code)}</text>
     ${band}
     ${stressLink}
     ${dot}${stressMark}${mark}
-    <text x="${plotRight + 12}" y="${y(index) + 4}" class="vs-value ${tone}">${esc(label)}</text>
+    <text x="${plotRight + 12}" y="${y(index) + 2}" class="vs-value ${tone}">${esc(label)}</text>
+    ${widthText}
     <title>${esc(row.name || row.code)}（${esc(row.code)}）：${esc(title)}</title>
    </g>`;
   }).join('');
@@ -392,11 +398,13 @@ window.ValuationScenarios = (() => {
   </div>
   <div class="panel">
    <div class="vs-chart-head">
-    <div><h3>中性情景安全边际区间与落点</h3><p class="small muted">横轴是安全边际（现价相对中性情景估值折了多少）。每条横带是永续增长率 1%～3% 之间的中性区间，圆点是 2% 档的落点；竖虚线是 ${threshold}% 中性门槛，竖实线是 0 轴。细竖线是压力校验下限折算后的位置，淡虚线把它连到中性带左端——那一段就是中性结论离灾难情景还有多远；只作辅助观察，不控制价格条件。</p></div>
+    <div><h3>中性情景安全边际区间与落点</h3><p class="small muted">横轴是安全边际（现价相对中性情景估值折了多少）。每条横带的<strong>左端是永续增长率 1% 档、右端是 3% 档</strong>，中间圆点是 2% 档落点；数值下面那行<strong>带宽</strong>＝三档之间安全边际的摆动幅度，越宽说明这个结论越依赖永续增长率这一个假设。竖虚线是 ${threshold}% 中性门槛，竖实线是 0 轴：<strong>区间跨过 0 轴的，说明换个假设「贵」就变成「便宜」，这类最需要警惕</strong>。带的颜色按 2% 档落点分：绿＝已达门槛，橙＝在 0 与门槛之间，灰＝落点为负。细竖线是压力校验下限折算后的位置，淡虚线把它连到中性带左端——那一段就是中性结论离灾难情景还有多远；只作辅助观察，不控制价格条件。</p></div>
     <div class="vs-legend"><span><i class="vs-key vs-key-band"></i>中性三档区间</span><span><i class="vs-key vs-key-dot"></i>2% 档落点</span><span><i class="vs-key vs-key-threshold"></i>${threshold}% 中性门槛</span><span><i class="vs-key vs-key-safe"></i>达标段</span><span><i class="vs-key vs-key-stress"></i>压力校验下限</span></div>
    </div>
    <div class="vs-chart-wrap">${bandChart(data)}</div>
-   <p class="small muted">横轴范围 ${axisDomain(data).lo}% ～ ${axisDomain(data).hi}%；低于左端的区间折叠到边缘并标 ◀，确切数字见下表。区间越长，说明这家的结论越依赖永续增长率这一个假设。压力校验下限折到左端（虚线）表示它远在坐标轴之外，那一档本来就不参与价格判断。</p>
+   <p class="small muted">横轴范围 ${axisDomain(data).lo}% ～ ${axisDomain(data).hi}%；低于左端的区间折叠到边缘并标 ◀，确切数字见下表。压力校验下限折到左端（虚线）表示它远在坐标轴之外，那一档本来就不参与价格判断。</p>
+   <p class="small muted"><strong>带宽为什么有的宽有的窄</strong>——由三件事共同决定（实测三因素合起来对带宽的解释力约 0.76）：①<strong>终值占企业价值的比重</strong>，永续增长率只影响终值，比重越高越敏感（本页 70%～88%）；②<strong>WACC 与永续增长率的间距</strong>，终值 ∝ 1÷(WACC−g)，WACC 越低、g 越靠近它，同样挪 2 个百分点，估值变动越大（法拉电子 WACC 9.13% 时终值只涨 35%，华润江中 WACC 4.56% 时涨 109%）；③<strong>落点离 0 的距离</strong>，安全边际 ＝ 1 − 市值÷企业价值，落点接近 0 时，企业价值的相对变化几乎 1:1 映射到安全边际，条自然更宽。</p>
+   <p class="small muted"><strong>带宽怎么用</strong>：条窄、且整条都在门槛右侧，说明三档假设下都达标，结论稳；条宽、并跨过 0 轴，说明「贵还是便宜」取决于永续增长率取 1% 还是 3%，这类不该按单一落点下判断。</p>
   </div>
   <div class="panel">
    <h3>逐家测算结果</h3>

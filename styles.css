@@ -272,6 +272,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:250px;
 .vs-value.positive{fill:#245e49;font-weight:600}
 .vs-value.thin{fill:#8c6331}
 .vs-value.negative{fill:#7d857c}
+.vs-width{fill:#98a199;font-size:10px;font-family:inherit;font-variant-numeric:tabular-nums}
 .vs-band{stroke-width:1}
 .vs-band.positive{fill:#cfe3d2;stroke:#6d9b7d}
 .vs-band.thin{fill:#f1e7d2;stroke:#b79a5f}
