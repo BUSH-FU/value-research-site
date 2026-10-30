@@ -29,6 +29,8 @@ const yi=x=>x==null?'—':num(x/1e8);
 const pct=x=>x==null?'—':num(x*100)+'%';
 // 上市日期：19931119 读不出年份，改成「1993 年 11 月 19 日」。
 const cnDate=value=>window.ValueReport?.fmtCnDate?window.ValueReport.fmtCnDate(value):value;
+// 时间戳：ISO 串太长，改成「2026-10-30 08:19」。
+const stamp=value=>window.ValueReport?.fmtStamp?window.ValueReport.fmtStamp(value):value;
 // 检查项数值的单位后缀：门槛与实测值都来自同一份政策，避免同一个数在两处读法不同。
 const unitText=u=>u==='%'?'%':u==='个百分点'?' 个百分点':u==='年'?' 年':u==='倍'?' 倍':'';
 const reviewFields=[['business','商业模式简单可理解'],['moat','护城河有事实支撑'],['roe_stability','十年 ROE 波动可接受'],['integrity','管理层诚信'],['related_transactions','无异常大额关联交易'],['delisting_risk','退市风险公告已核验']];
@@ -93,7 +95,7 @@ function renderState(){
  $('candidate-criteria').textContent=`严格财务通过 + 定性审核有效 + 安全边际至少 ${state.quality_policy.margin_min}% + 清单逐项人工核查；完成仍需自行决定是否投资。`;renderQualitySettings();
  $('management-count').textContent=`管理层 ${state.management_ready||0} / ${state.quality_counts.passed} · 历年事件 ${state.history_ready||0} / ${state.quality_counts.passed} · 掌舵人资讯 ${state.people_news_ready||0} / ${state.quality_counts.passed} · 全历史财务 ${state.financial_archive_ready||0} / ${state.quality_counts.passed} · 行业档案 ${state.industry_ready||0} / ${state.quality_counts.passed}`;
  for(const id of ['update-management-pool','update-company-history-pool','update-people-news-pool','update-financial-archive-pool','update-financial-filings-pool','update-industry-research-pool'])$(id).disabled=state.job.state==='running'||state.quality_counts.passed===0;
- $('job').textContent=state.job.message;$('job').className='job '+state.job.state;$('refresh-market').disabled=state.job.state==='running';$('updated').textContent=state.market_fetched_at?'主表更新：'+state.market_fetched_at+' · 来源：'+(state.market_source||'待核'):'尚未连接股票数据';renderPool();renderCandidates();
+ $('job').textContent=state.job.message;$('job').className='job '+state.job.state;$('refresh-market').disabled=state.job.state==='running';$('updated').textContent=state.market_fetched_at?'主表更新：'+stamp(state.market_fetched_at)+' · 来源：'+(state.market_source||'待核'):'尚未连接股票数据';renderPool();renderCandidates();
 }
 function renderQualitySettings(){
  const box=$('quality-settings'),p=state.quality_policy,signature=JSON.stringify(p);
