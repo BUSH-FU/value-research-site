@@ -309,3 +309,12 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:250px;
 .tt-sticky thead tr:first-child th{position:sticky;top:0;z-index:5}
 .tt-sticky thead tr.tt-filters th{position:sticky;z-index:4;background:#f4f6f2}
 .table-wrap>.tt-toolbar{padding:12px 18px 6px}
+
+/* 逐项核查：保存失败或未填完整时，就地在按钮旁说明缺什么，并把不合格的条目标出来。
+   颜色走 CSS 类，不写行内 style —— 页面有 CSP，style-src 'self' 会静默忽略行内样式。 */
+.checklist-feedback{margin:14px 0 6px;padding:12px 15px;border:1px solid #e3b3ac;border-left:3px solid #d4463f;background:#fdf5f3;border-radius:6px;color:#8c3b33;font-size:12px}
+.checklist-feedback ul{margin:7px 0 0;padding-left:19px}
+.checklist-feedback li{margin:3px 0}
+.checklist-item-invalid{border-left:3px solid #d4463f;background:#fdf7f6;padding-left:13px}
+.checklist-item-invalid .checklist-fields textarea,.checklist-item-invalid .checklist-fields select{border-color:#e0b4ae}
+.checklist-item-why{margin-top:9px;padding:8px 11px;border:1px solid #e3b3ac;border-left:3px solid #d4463f;background:#fdf5f3;border-radius:5px;color:#8c3b33;font-size:12px}

@@ -574,7 +574,7 @@ function capitalReturnOption(model){
   const list=detail.investment_checklist;if(!list)return '';
   const sections=[...new Set(list.items.map(item=>item.section))],s=list.summary||{};
   const stateName=s.ready?'核心问题已人工核查':s.stale?'有资料更新待复核':s.no?'有未解决疑点':'研究清单未完成';
-  return `<form id="investment-checklist-form" class="panel investment-checklist"><div class="section-head"><div><h3>投资核查清单 <span class="pill ${s.ready?'':'warning'}">${stateName}</span></h3><p class="small muted">核心项已核对 ${s.required_yes||0}/${s.required_total||0} · 待复核 ${s.stale||0} · 未通过 ${s.no||0} · 未知 ${s.unknown||0}。勾选只表示你完成了核查，不会自动决定买入。</p></div><button type="submit" class="primary">保存逐项核查</button></div><p class="notice small">每项明确结论须填写至少八字理由和来源。请将“实际控制人品行”落实到可查的履历、处罚、诉讼、关联交易与利益冲突，避免给人贴无法证实的标签。</p>${sections.map(section=>`<details class="checklist-section" ${section==='生意与能力圈'?'open':''}><summary>${esc(section)} · ${list.items.filter(x=>x.section===section&&x.status==='yes'&&!x.stale).length}/${list.items.filter(x=>x.section===section).length} 项已核</summary>${list.items.filter(x=>x.section===section).map(item=>`<div class="checklist-item" data-checklist-item="${esc(item.id)}" ${item.custom?'data-custom="true"':''}><div class="checklist-question"><strong>${esc(item.prompt)}</strong>${item.hard_gate?'<span class="pill">核心项</span>':''}${item.stale?'<span class="pill warning">资料更新，待复核</span>':''}</div><div class="checklist-fields"><label class="field">核查结果<select name="status"><option value="unknown" ${item.status==='unknown'?'selected':''}>待核实</option><option value="yes" ${item.status==='yes'?'selected':''}>已核实且通过</option><option value="no" ${item.status==='no'?'selected':''}>未通过 / 存在疑点</option></select></label><label class="field">依据<textarea name="note" placeholder="核对了什么，结论为何成立">${esc(item.note||'')}</textarea></label><label class="field">来源链接或 data: 内部证据引用，每行一条<textarea name="sources" placeholder="https://...">${esc((item.sources||[]).join('\n'))}</textarea></label>${item.stale?'<label class="checkline"><input type="checkbox" name="reconfirm">我已按更新后的资料重新核对本项</label>':''}</div>${item.custom?`<input type="hidden" name="custom_section" value="${esc(item.section)}"><input type="hidden" name="custom_prompt" value="${esc(item.prompt)}"><input type="hidden" name="custom_hard_gate" value="${item.hard_gate?'true':'false'}">`:''}</div>`).join('')}</details>`).join('')}<div id="custom-checklist-items"></div><div class="checklist-add"><h4>添加自己的核查问题</h4><div class="form-row"><label class="field">分类<input id="custom-checklist-section" placeholder="例如：产品与客户"></label><label class="field">问题<input id="custom-checklist-prompt" placeholder="写成能够核对证据的具体问题"></label></div><label class="checkline"><input id="custom-checklist-hard-gate" type="checkbox">列为核心项</label><button type="button" id="add-checklist-item">增加问题</button></div><button type="submit" class="primary">保存逐项核查</button><p class="small muted">${esc(s.meaning||'清单只帮助你完整核查，不构成投资建议。')}</p></form>`;
+  return `<form id="investment-checklist-form" class="panel investment-checklist"><div class="section-head"><div><h3>投资核查清单 <span class="pill ${s.ready?'':'warning'}">${stateName}</span></h3><p class="small muted">核心项已核对 ${s.required_yes||0}/${s.required_total||0} · 待复核 ${s.stale||0} · 未通过 ${s.no||0} · 未知 ${s.unknown||0}。勾选只表示你完成了核查，不会自动决定买入。</p></div><button type="submit" class="primary">保存逐项核查</button></div><div id="checklist-feedback" class="checklist-feedback" hidden></div><p class="notice small">每项明确结论须填写至少八字理由和来源。请将“实际控制人品行”落实到可查的履历、处罚、诉讼、关联交易与利益冲突，避免给人贴无法证实的标签。来源可以写公开网址，或 data: 内部证据指针（写法 data:<数据文件>#<定位>，例如 data:financial-archive/600690.json#2025）；系统只保存这个指针，不替你打开原文。</p>${sections.map(section=>`<details class="checklist-section" ${section==='生意与能力圈'?'open':''}><summary>${esc(section)} · ${list.items.filter(x=>x.section===section&&x.status==='yes'&&!x.stale).length}/${list.items.filter(x=>x.section===section).length} 项已核</summary>${list.items.filter(x=>x.section===section).map(item=>`<div class="checklist-item" data-checklist-item="${esc(item.id)}" ${item.custom?'data-custom="true"':''}><div class="checklist-question"><strong>${esc(item.prompt)}</strong>${item.hard_gate?'<span class="pill">核心项</span>':''}${item.stale?'<span class="pill warning">资料更新，待复核</span>':''}</div><div class="checklist-fields"><label class="field">核查结果<select name="status"><option value="unknown" ${item.status==='unknown'?'selected':''}>待核实</option><option value="yes" ${item.status==='yes'?'selected':''}>已核实且通过</option><option value="no" ${item.status==='no'?'selected':''}>未通过 / 存在疑点</option></select></label><label class="field">依据<textarea name="note" placeholder="核对了什么，结论为何成立（明确结论至少八字）">${esc(item.note||'')}</textarea></label><label class="field">来源链接或 data: 内部证据引用，每行一条<textarea name="sources" placeholder="https://… 或 data:financial-archive/600690.json#2025">${esc((item.sources||[]).join('\n'))}</textarea></label>${item.stale?'<label class="checkline"><input type="checkbox" name="reconfirm">我已按更新后的资料重新核对本项</label>':''}</div><div class="checklist-item-why" hidden></div>${item.custom?`<input type="hidden" name="custom_section" value="${esc(item.section)}"><input type="hidden" name="custom_prompt" value="${esc(item.prompt)}"><input type="hidden" name="custom_hard_gate" value="${item.hard_gate?'true':'false'}">`:''}</div>`).join('')}</details>`).join('')}<div id="custom-checklist-items"></div><div class="checklist-add"><h4>添加自己的核查问题</h4><div class="form-row"><label class="field">分类<input id="custom-checklist-section" placeholder="例如：产品与客户"></label><label class="field">问题<input id="custom-checklist-prompt" placeholder="写成能够核对证据的具体问题"></label></div><label class="checkline"><input id="custom-checklist-hard-gate" type="checkbox">列为核心项</label><button type="button" id="add-checklist-item">增加问题</button></div><div id="checklist-feedback-bottom" class="checklist-feedback" hidden></div><button type="submit" class="primary">保存逐项核查</button><p class="small muted">${esc(s.meaning||'清单只帮助你完整核查，不构成投资建议。')}</p></form>`;
  }
  function collectChecklist(form){
   const answers={},custom_items=[];
@@ -587,6 +587,66 @@ function capitalReturnOption(model){
     prompt:node.querySelector('[name=custom_prompt]').value,hard_gate:node.querySelector('[name=custom_hard_gate]').value==='true'});
   }
   return {answers,custom_items};
+ }
+ // 与后端同一套规则：来源格式与条数对每一项都查；下了明确结论（已核实且通过 / 未通过）
+ // 的项，还必须至少八字依据 + 一条可追溯来源。
+ // 放在提交前检查，是为了当场说清缺什么，而不是让服务端退回一句笼统的错误。
+ const SOURCE_PATTERN=/^(?:https?:\/\/\S+|data:[^\s]+)$/i;
+ function checklistProblems(form){
+  const problems=[];
+  for(const node of form.querySelectorAll('[data-checklist-item]')){
+   const status=(node.querySelector('[name=status]')?.value||'unknown');
+   const note=(node.querySelector('[name=note]')?.value||'').trim();
+   const sources=(node.querySelector('[name=sources]')?.value||'').split('\n').map(x=>x.trim()).filter(Boolean);
+   const reasons=[];
+   const bad=sources.filter(source=>!SOURCE_PATTERN.test(source));
+   if(bad.length)reasons.push(`来源格式不对：${bad.join('、')}（要用 https:// 开头的网址，或 data: 内部证据引用）`);
+   if(sources.length>8)reasons.push(`来源 ${sources.length} 条，超过八条`);
+   if(note.length>4000)reasons.push('依据超过四千字');
+   if(status!=='unknown'){
+    if(note.length<8)reasons.push(`依据只有 ${note.length} 字，未满八字`);
+    if(!sources.length)reasons.push('没有填来源');
+   }
+   if(reasons.length)problems.push({id:node.dataset.checklistItem,
+    prompt:(node.querySelector('.checklist-question strong')?.textContent||'').trim(),reasons});
+  }
+  return problems;
+ }
+ // 提示就地显示：不合格的条目自己写明缺什么并高亮，汇总提示在表单上下两处各写一份，
+ // 保证无论点的是上面还是下面的保存按钮，都能在眼前看到。
+ function showChecklistProblems(form,problems){
+  for(const node of form.querySelectorAll('.checklist-item-invalid'))node.classList.remove('checklist-item-invalid');
+  for(const node of form.querySelectorAll('.checklist-item-why')){node.textContent='';node.hidden=true;}
+  const first=[];
+  for(const problem of problems){
+   for(const node of form.querySelectorAll('[data-checklist-item]')){
+    if(node.dataset.checklistItem!==problem.id)continue;
+    node.classList.add('checklist-item-invalid');
+    const why=node.querySelector('.checklist-item-why');
+    if(why){why.textContent='还不能保存：'+problem.reasons.join('；');why.hidden=false;}
+    if(!first.length)first.push(node);
+   }
+  }
+  const html='<strong>还保存不了：</strong><ul>'+problems.map(problem=>`<li>${esc(problem.prompt)} —— ${esc(problem.reasons.join('；'))}</li>`).join('')+'</ul>';
+  for(const box of form.querySelectorAll('#checklist-feedback,#checklist-feedback-bottom')){box.innerHTML=html;box.hidden=false;}
+  if(first.length){
+   const section=first[0].closest('details');
+   if(section)section.open=true;
+   first[0].scrollIntoView({behavior:'smooth',block:'center'});
+  }
+ }
+ // 后端退回的错误：没有具体到哪一项，就写进上下两个提示框，并滚到离视线最近的那个。
+ function showChecklistError(form,message){
+  for(const box of form.querySelectorAll('#checklist-feedback,#checklist-feedback-bottom')){
+   box.textContent=message;box.hidden=false;
+  }
+  let best=null,bestDistance=Infinity;
+  for(const box of form.querySelectorAll('#checklist-feedback,#checklist-feedback-bottom')){
+   const rect=box.getBoundingClientRect();
+   const distance=Math.abs(rect.top+rect.height/2-window.innerHeight/2);
+   if(distance<bestDistance){bestDistance=distance;best=box;}
+  }
+  if(best)best.scrollIntoView({behavior:'smooth',block:'center'});
  }
  function addCustomItem(){
   const section=document.getElementById('custom-checklist-section').value.trim();
@@ -652,5 +712,5 @@ function renderCurrentWaccLine(){
   requestAnimationFrame(()=>chartInstances.forEach(chart=>chart.resize()));
  }
  function resizeCharts(){for(const chart of chartInstances)chart.resize();}
- return {renderFinancial,explainFinancialMetric,renderIndustry,renderChecklist,collectChecklist,addCustomItem,disposeCharts,renderCharts,resizeCharts,renderCurrentWaccLine,capitalReturnModel,capitalReturnCaption,capitalReturnOption,renderBalanceAudit,fmtCnDate,fmtStamp};
+ return {renderFinancial,explainFinancialMetric,renderIndustry,renderChecklist,collectChecklist,checklistProblems,showChecklistProblems,showChecklistError,addCustomItem,disposeCharts,renderCharts,resizeCharts,renderCurrentWaccLine,capitalReturnModel,capitalReturnCaption,capitalReturnOption,renderBalanceAudit,fmtCnDate,fmtStamp};
 })();
