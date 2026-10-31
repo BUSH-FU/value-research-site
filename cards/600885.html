@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>600885 宏发股份 · DCF 决策卡</title>
+<style>
+:root{--bg:#f6f7f4;--ink:#20372f;--muted:#738078;--line:#e0e6df;--green:#245e49;--light:#e8f1e9;--amber:#8c6331;--red:#8c3b33}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.65 -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}
+main{max-width:1120px;margin:0 auto;padding:38px 26px 60px}
+h1{font-size:27px;font-weight:600;margin:6px 0 8px} h2{font-size:18px;font-weight:600;margin:0 0 4px}
+h3{font-size:15px;font-weight:600;margin:22px 0 10px}
+.eyebrow{font-size:11px;letter-spacing:2px;color:#789084}
+.small{font-size:12px} .muted{color:var(--muted)} .strong{font-weight:600}
+.panel{background:#fff;border:1px solid var(--line);border-radius:10px;padding:22px;margin-bottom:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.kpi strong{display:block;font-size:28px;font-weight:600;margin:4px 0}
+.kpi .small{color:var(--muted)}
+.hero{border-left:3px solid var(--green);background:#f2f6f1;border-radius:6px;padding:16px 20px;margin:18px 0}
+.warn{border-left:3px solid #c1a570;background:#f3efe5;border-radius:6px;padding:14px 18px;margin:14px 0;color:#7e693f}
+table{border-collapse:collapse;width:100%;font-size:13px} th,td{padding:9px 11px;border-bottom:1px solid #edf0eb;text-align:left;white-space:nowrap}
+th{background:#fafbf8;color:var(--muted);font-weight:400;font-size:12px}
+.tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+td.fragile{white-space:normal;min-width:300px}
+tr.on td{background:#f2f6f1} td.hit{background:#fdf5f3;font-weight:600;color:var(--red)}
+tr.bad td{background:#fdf7f6}
+td.neg{color:var(--red)} td.pos{color:var(--green)}
+.chart{height:330px;margin:8px 0} .chart.tall{height:390px}
+ul{margin:6px 0 12px;padding-left:20px} li{margin:5px 0}
+.pill{display:inline-block;padding:3px 9px;border-radius:4px;font-size:11px;background:var(--light);color:var(--green)}
+.pill.warn{background:#f6f0e3;color:var(--amber)}
+.decide{border:1px solid var(--line);border-radius:9px;padding:14px 16px;margin:10px 0;background:#fff}
+.decide b{color:var(--green)}
+code{background:#eef1eb;padding:1px 5px;border-radius:4px;font-size:12px}
+footer{font-size:11px;color:var(--muted);margin-top:26px;border-top:1px solid var(--line);padding-top:14px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}}
+</style></head><body><main>
+
+<div class="eyebrow">VALUE RESEARCH · 决策卡</div>
+<h1>600885 宏发股份 · DCF 假设摊开</h1>
+<p class="muted">行业 电气设备 ｜ 行情 20261030 收盘 ¥31.19（Tushare daily，未复权）｜
+年报 2025 年 ｜ 本卡所有数字由工作台自己的 <code>dcf()</code> 算出，脚本 <code>scripts/build_dcf_card.py</code>，只读不改任何数据。</p>
+
+<div class="kpis">
+  <div class="kpi"><span class="small">现价</span><strong>¥31.19</strong><span class="small">总股本 15.4759 亿股</span></div>
+  <div class="kpi"><span class="small">中性内在价值（g=2%）</span><strong>¥14.88</strong><span class="small">安全边际 -52%</span></div>
+  <div class="kpi"><span class="small">价值区间（g 1%~3%）</span><strong>¥13.21 ~ ¥17.19</strong><span class="small">终值现值占 74%</span></div>
+  <div class="kpi"><span class="small">价格条件（中性 −20%）</span><strong>¥11.90</strong><span class="small">现价比条件低 -162%</span></div>
+</div>
+
+<div class="hero">
+<b>中性情景</b>：FCFF 基数 15.31 亿（最近五年中位数）→ 未来五年平推；WACC 8.12%；
+永续增长 2%；股权桥 +现金 36.24 亿 +交易性金融资产 3.01 亿 −有息负债 9.01 亿 −少数股东权益 33.80 亿。
+企业价值 233.81 亿，股权价值 230.25 亿，<b>每股 ¥14.88</b>，现价 ¥31.19。
+</div>
+
+
+
+<div class="warn">
+<b>三件必须先说清的事</b>
+<ol style="margin:8px 0 0">
+<li><b>终值占 74%</b>：价值大部分压在永续假设上，所以下面的区间比单点重要得多。</li>
+<li><b>WACC 8.12% 偏低</b>：无风险利率只有 1.65%（中债 10 年国债），β 取近 5 年 1.082。换成 近 1 年 β，WACC 掉到 8.38%，每股变成 ¥14.25——模型对 β 极度敏感，别把一个数字当定论。</li>
+<li><b>2025 年 FCFF 高达 21.58 亿</b>（五年中位数 15.31 亿，最近一年高出 41%），中位数基数已经把它平滑掉——这也正是保守组合改用中位数基数的原因。中位数基数 15.31 亿 与「剔除 ΔNWC 后中位数」18.82 亿 相差 +22.9%，基数本身受营运资本影响不小，取哪个基数会直接改变结论。</li>
+</ol>
+</div>
+
+<h2>图一 · 每股价值区间，现价落在哪一段</h2>
+<div class="panel"><div class="chart tall" id="chart-band"></div><p class="small muted">灰蓝=不同永续增长下的中位基数情景，深绿=中性情景（g=2%），浅蓝=最保守组合。竖线为现价 ¥31.19 与 20% 安全边际价 ¥11.90；绿区是「价格条件以内 = 通过」的范围。</p></div>
+
+<h2>图二 · FCFF 五年分解：利润、折旧与营运资本各占多少</h2>
+<div class="panel"><div class="chart" id="chart-fcff"></div>
+<p class="small muted">柱=FCFF（亿），折线=营运资本变动 ΔNWC（亿，正=占用现金）。2025 年 ΔNWC +1.8 亿，把当年 FCFF 从 15.31 亿 的量级压到 21.58 亿。</p></div>
+
+<h2>图三 · 敏感度矩阵：基数 × 永续增长率</h2>
+<div class="panel"><div class="chart" id="chart-matrix"></div>
+<div class="tablewrap"><table style="margin-top:12px;min-width:720px"><thead><tr><th>FCFF 基数</th><th>g=1.0%</th><th>g=1.5%</th><th>g=2.0%</th><th>g=2.5%</th><th>g=3.0%</th></tr></thead><tbody><tr><td>最近一年 21.58</td><td class="">18.72</td><td class="">19.81</td><td class="">21.07</td><td class="">22.55</td><td class="">24.33</td></tr><tr><td>剔除ΔNWC后中位数</td><td class="">16.29</td><td class="">17.24</td><td class="">18.34</td><td class="">19.63</td><td class="">21.18</td></tr><tr><td>五年均值</td><td class="">10.71</td><td class="">11.34</td><td class="">12.07</td><td class="">12.93</td><td class="">13.95</td></tr><tr><td>五年中位数</td><td class="">13.21</td><td class="">13.98</td><td class="hit">14.88</td><td class="">15.93</td><td class="">17.19</td></tr></tbody></table></div>
+<p class="small muted">全部 20 格都在现价 ¥31.19 之下。 中性格（红底）¥14.88。</p></div>
+
+<h2>图四 · β 窗口怎么选：同一个公司，结论能翻转</h2>
+<div class="panel"><div class="chart" id="chart-beta"></div>
+<div class="tablewrap"><table style="margin-top:12px;min-width:720px"><thead><tr><th>回归窗口</th><th>β</th><th>R²</th><th>n</th><th>WACC</th><th>每股（g=2%）</th><th></th></tr></thead><tbody><tr class=""><td>近 1 年</td><td>1.1264</td><td>0.217</td><td>250</td><td>8.38%</td><td>¥14.25</td><td class=muted></td></tr><tr class=""><td>近 2 年</td><td>1.0462</td><td>0.230</td><td>480</td><td>7.90%</td><td>¥15.42</td><td class=muted></td></tr><tr class=""><td>近 3 年</td><td>1.0964</td><td>0.291</td><td>750</td><td>8.20%</td><td>¥14.67</td><td class=muted></td></tr><tr class="on"><td>近 5 年</td><td>1.0819</td><td>0.276</td><td>1200</td><td>8.12%</td><td>¥14.88</td><td class=muted>工具默认填入</td></tr></tbody></table></div>
+<p class="small muted">工具默认填入「近 5 年」窗口（样本最多）。R² 全线偏低（个股用前复权收益率、指数用价格指数，口径不完全一致），所以 β 本身不稳定——这一格是最该由你拍板的地方。</p>
+</div>
+
+<h2>表一 · FCFF 五年构成</h2>
+<div class="panel"><div class="tablewrap"><table><thead><tr><th>年</th><th>EBIT</th><th>折旧摊销</th><th>税率</th><th>NWC</th><th>上年 NWC</th><th>ΔNWC</th><th>FCFF</th></tr></thead><tbody><tr><td>2021</td><td>16.7</td><td>6.0</td><td>10.3%</td><td>39.3</td><td>32.5</td><td class="neg">+6.7</td><td><strong>5.0</strong></td></tr><tr><td>2022</td><td>19.6</td><td>7.3</td><td>9.1%</td><td>50.2</td><td>39.3</td><td class="neg">+11.0</td><td><strong>-1.0</strong></td></tr><tr><td>2023</td><td>23.5</td><td>9.1</td><td>14.5%</td><td>47.6</td><td>50.2</td><td class="pos">-2.6</td><td><strong>21.5</strong></td></tr><tr><td>2024</td><td>25.2</td><td>10.2</td><td>11.5%</td><td>53.2</td><td>47.6</td><td class="neg">+5.6</td><td><strong>15.3</strong></td></tr><tr><td>2025</td><td>27.6</td><td>11.2</td><td>13.0%</td><td>54.9</td><td>53.2</td><td class="neg">+1.8</td><td><strong>21.6</strong></td></tr></tbody></table></div>
+<p class="small muted">口径：EBIT×(1−所得税/利润总额)+折旧摊销−资本开支−营运流动资本增量；异常税率或缺项不计算。单位：亿元，NWC 为负表示经营占用供应商资金（负营运资本）。</p></div>
+
+<h2>表二 · 股权桥：逐项，以及每一项值多少钱</h2>
+<div class="panel"><div class="tablewrap"><table><thead><tr><th>项目</th><th>金额（亿）</th><th>每股影响</th><th>来源</th></tr></thead><tbody><tr><td>报表货币资金</td><td>+36.24</td><td>¥2.34</td><td class="muted">2025 年报 money_cap</td></tr><tr><td>交易性金融资产</td><td>+3.01</td><td>¥0.19</td><td class="muted">2025 年报 trad_asset</td></tr><tr><td>有息负债（含租赁负债）</td><td>-9.01</td><td>¥-0.58</td><td class="muted">2025 年报 indicators.interestdebt</td></tr><tr><td>少数股东权益</td><td>-33.80</td><td>¥-2.18</td><td class="muted">2025 年报 minority_int</td></tr></tbody></table></div>
+<p class="small">净调整 <strong>-3.56 亿</strong>，每股 <strong>¥-0.23</strong>。</p>
+<div class="warn" style="margin-bottom:0">
+<b>这里有一个必须你自己拍板的口径差</b>：工作台的自动草案把现金按 <b>0</b> 计，却把有息负债 9.01 亿 全额扣除——现金和债务口径不对等，会让每股价值被压低约 <b>¥2.34</b>（加交易性金融资产共 ¥2.54）。
+本卡按「全额计入货币资金 + 交易性金融资产」计算（标准 FCFF 桥）；若你只认净现金（27.23 亿），中性每股为 ¥14.30，已低于现价 ¥31.19。
+另：股本用行情日 15.4759 亿股（当前股本），不是 2025 年报期末 15.4759 亿股——两者差 +0.00%，用当前股本每股高约 0.00 元。
+</div></div>
+
+<h2>表三 · WACC 参数与来源</h2>
+<div class="panel"><div class="tablewrap"><table><thead><tr><th>参数</th><th>取值</th><th>来源</th><th>性质</th></tr></thead><tbody>
+<tr><td>无风险利率 Rf</td><td>1.65%</td><td>中国债券信息网 / 中债收益率曲线 · 10年 · 发布日 2026-10-30</td><td class="muted">市场利率</td></tr>
+<tr><td>β</td><td>1.0819</td><td>沪深300 官方指数回归 · 近 5 年 · n=1200 · R²=0.276</td><td class="muted">估计值，窗口间差别大</td></tr>
+<tr><td>股权风险溢价</td><td>6.0946%</td><td>盈利收益率（1÷PE_TTM）减无风险利率 · 沪深300 PE_TTM 12.9122 → 盈利收益率 7.74% − Rf</td><td class="muted">市场隐含口径，不是官方发布的溢价</td></tr>
+<tr><td>税前债务成本 Rd</td><td>1.5045%</td><td>中债中短期票据收益率曲线(AAA) · 1年 · 2026-10-30</td><td class="muted">同类无风险信用债利率，非本公司实际融资利率</td></tr>
+<tr><td>适用边际税率 T</td><td>13.00%</td><td>2025 年报 所得税÷利润总额</td><td class="muted">有效税率代理边际税率</td></tr>
+<tr><td>股权市值 E</td><td>482.69 亿</td><td>20261030 收盘 ¥31.19 × 当日总股本 15.4759 亿股</td><td class="muted">行情口径</td></tr>
+<tr><td>有息债务 D</td><td>9.01 亿</td><td>2025 年报 indicators.interestdebt（含借款、应付债券、租赁负债）</td><td class="muted">账面值代替市场价值</td></tr>
+<tr><td><strong>WACC</strong></td><td><strong>8.1164%</strong></td><td>E/(E+D)×Re 8.2435% ＋ D/(E+D)×Rd×(1−T) 1.3089%（权重 98.17% / 1.83%）</td><td class="muted">研究情景估计值</td></tr>
+</tbody></table>
+<p class="small muted">口径已对齐：股权溢价与 WACC 用的是同一个 Rf 1.65%（中债发布日 2026-10-30），ERP 口径日期 2026-10-30，没有两处读法不同的问题。</p></div>
+
+<h2>表四 · FCFF 口径自检：档案 FCFF 与现金流量表对照</h2>
+<div class="panel"><div class="tablewrap"><table><thead><tr><th>年</th><th>档案 FCFF（亿）</th><th>经营现金流−资本开支（亿）</th><th>缺口（亿）</th><th>EBIT(1−t)+折旧摊销（亿）</th><th>判定</th></tr></thead><tbody><tr class=""><td>2021</td><td>5.0</td><td>-0.1</td><td>+5.1</td><td>21.0</td><td class=muted>—</td></tr><tr class=""><td>2022</td><td>-1.0</td><td>0.8</td><td>-1.8</td><td>25.1</td><td class=muted>—</td></tr><tr class=""><td>2023</td><td>21.5</td><td>16.3</td><td>+5.2</td><td>29.2</td><td class=muted>—</td></tr><tr class=""><td>2024</td><td>15.3</td><td>10.8</td><td>+4.5</td><td>32.5</td><td class=muted>—</td></tr><tr class=""><td>2025</td><td>21.6</td><td>17.9</td><td>+3.7</td><td>35.2</td><td class=muted>—</td></tr></tbody></table></div>
+<p class="small muted">两个口径本该接近：FCFF 与「经营现金流−资本开支」的差主要来自营运资本口径与税费/利息归属。差得远说明 Tushare 的 <code>networking_capital</code> 字段与现金流量表打架，该年 FCFF 不可用。中位数基数取自 <strong>2024</strong> 年（15.31 亿）。</p>
+</div>
+
+<h2>要你拍板的四件事</h2>
+<div class="panel">
+<div class="decide"><b>① 审核结论</b><br>要保存正式情景，后端要求审核结论必须是「明确保留，进入估值」（<code>require_approved</code>），并且六项依据齐全、证据链接 ≥1 条、核验日期 = 今天。这一步是你的研究结论，工具不替你做。</div>
+<div class="decide"><b>② 股权桥口径</b><br>全额货币资金 36.24 亿 ＋交易性金融资产 3.01 亿，还是只认净现金 27.23 亿？差 ¥2.54 元/股。两种口径结论方向一致，但数字会变。</div>
+<div class="decide"><b>③ β 窗口与 WACC</b><br>默认近 5 年（β 1.082）→ WACC 8.12%，中性每股 ¥14.88。换成 近 1 年 β，WACC 掉到 8.38%，每股变成 ¥14.25——模型对 β 极度敏感，别把一个数字当定论。建议沿用默认窗口，但你要知道它偏保守（偏高的 WACC → 偏低的价值）。</div>
+<div class="decide"><b>④ 永续增长率</b><br>中性取 2%，区间 1%~3%。考虑终值占 74%，这一项对结果的影响远大于现金流基数。保守起见，若拿不准就取 1%：每股 ¥13.21，价格条件 ¥10.57，现价 ¥31.19 已不通过。</div>
+</div>
+
+<h2>下一步（我不替你做）</h2>
+<div class="panel">
+<ol>
+<li>在工作台里把海尔智家的审核结论改成「明确保留，进入估值」，补一条证据链接（年报或公告 URL），核验日期填今天 <code>2026-10-31</code>（服务器当天，不是行情日期 20261030），然后点「保存审核结论」。</li>
+<li>进「估值与情景」，按上面表三的 WACC（8.12%）和表二的口径填参数；现金流基数若沿用草案就是 15.31 亿 平推五年。</li>
+<li>假设依据（basis）要写清：FCFF 口径、基数怎么来的、现金为什么这么算、WACC 各参数来源、永续增长率为什么取 2%。</li>
+</ol>
+<p class="small muted">工作台的「批量测算」会自动给草案，但那不是结论——草案的 <code>cash</code> 默认按 0，正是上面第 ② 条要修正的地方。</p>
+</div>
+
+<footer>
+生成于服务器当天 2026-10-31（行情日 20261030）｜脚本 scripts/build_dcf_card.py｜数据来源：工作台 /api/company/600885（Tushare 行情 + 年报财务档案）｜
+本页只做计算与展示，不写入任何数据。FCFF 口径：EBIT×(1−所得税/利润总额)+折旧摊销−资本开支−营运流动资本增量；异常税率或缺项不计算
+</footer>
+</main>
+<script src="../vendor/echarts.min.js"></script>
+<script>
+const PRICE = 31.19, CONDITION = 11.90250935833772;
+const bandLabels = ["最保守组合（五年中位数基数 · g=1% · 只认净现金）", "g=1% · 五年中位数基数", "g=2% · 五年中位数基数（中性）", "g=3% · 五年中位数基数"];
+const bandValues = [13.02, 13.21, 14.88, 17.19];
+const bandColors = ["#9fb6c9", "#c8d8e6", "#245e49", "#c8d8e6"];
+const years = ["2021", "2022", "2023", "2024", "2025"];
+const fcffValues = [4.98, -1.01, 21.46, 15.31, 21.58];
+const deltaValues = [6.73, 10.95, -2.64, 5.56, 1.77];
+const mx = ["1.0%", "1.5%", "2.0%", "2.5%", "3.0%"], my = ["\u6700\u8fd1\u4e00\u5e74 21.58", "\u5254\u9664\u0394NWC\u540e\u4e2d\u4f4d\u6570", "\u4e94\u5e74\u5747\u503c", "\u4e94\u5e74\u4e2d\u4f4d\u6570"], mv = [[18.72, 19.81, 21.07, 22.55, 24.33], [16.29, 17.24, 18.34, 19.63, 21.18], [10.71, 11.34, 12.07, 12.93, 13.95], [13.21, 13.98, 14.88, 15.93, 17.19]];
+const betaLabels = ["\u8fd1 1 \u5e74\uff08\u03b2=1.126\uff09", "\u8fd1 2 \u5e74\uff08\u03b2=1.046\uff09", "\u8fd1 3 \u5e74\uff08\u03b2=1.096\uff09", "\u8fd1 5 \u5e74\uff08\u03b2=1.082\uff09"], betaWacc = [8.38, 7.9, 8.2, 8.12], betaPs = [14.25, 15.42, 14.67, 14.88];
+const base = {textStyle:{fontFamily:'-apple-system,PingFang SC,sans-serif'}};
+
+// DCF 不适用时页面里没有 chart-band 容器（图一不画），这里必须留空。
+let band = null; const bandEl = document.getElementById('chart-band');
+if (bandEl) band = echarts.init(bandEl);
+if (band) band.setOption({...base, tooltip:{trigger:'axis',axisPointer:{type:'shadow'},formatter:p=>{const i=p[0].dataIndex;return p[0].name+'<br/>每股 '+p[0].value.toFixed(2)+' 元';}},
+ grid:{left:230,right:70,top:28,bottom:30}, xAxis:{type:'value',name:'元/股',min:0,max:18.0000,splitLine:{lineStyle:{color:'#edf0eb'}}},
+ yAxis:{type:'category',data:bandLabels,axisLabel:{width:210,overflow:'break',color:'#20372f',fontSize:12},axisLine:{lineStyle:{color:'#e0e6df'}}},
+ series:[{type:'bar',data:bandValues.map((v,i)=>({value:v,itemStyle:{color:bandColors[i]}})),barWidth:22,
+  markLine:{symbol:'none',label:{fontSize:11,color:'#245e49'},data:[
+    {xAxis:PRICE,name:'现价 '+PRICE,label:{position:'end',distance:-30,formatter:'现价 '+PRICE,backgroundColor:'#fff',padding:[2,5],borderRadius:3,color:'#20372f'}},
+    {xAxis:CONDITION,name:'价格条件 '+CONDITION.toFixed(2),label:{position:'end',distance:0,formatter:'价格条件 '+CONDITION.toFixed(2),backgroundColor:'#fff',padding:[2,5],borderRadius:3}}]},
+  markArea:{silent:true,itemStyle:{color:'rgba(36,94,73,.07)'},data:[[{xAxis:0,yAxis:bandLabels[0]},{xAxis:CONDITION,yAxis:bandLabels[0]}]]}}]});
+
+const fcff = echarts.init(document.getElementById('chart-fcff'));
+fcff.setOption({...base, tooltip:{trigger:'axis'},legend:{data:['FCFF','营运资本变动 ΔNWC'],top:0},
+ grid:{left:52,right:52,top:34,bottom:32}, xAxis:{type:'category',data:years},
+ yAxis:[{type:'value',name:'FCFF 亿',splitLine:{lineStyle:{color:'#edf0eb'}}},{type:'value',name:'ΔNWC 亿',splitLine:{show:false}}],
+ series:[{name:'FCFF',type:'bar',data:fcffValues,itemStyle:{color:'#245e49'},barWidth:'46%',
+  label:{show:true,position:'top',formatter:p=>p.value.toFixed(1)}},
+  {name:'营运资本变动 ΔNWC',type:'line',yAxisIndex:1,data:deltaValues,symbol:'circle',symbolSize:8,
+   lineStyle:{color:'#c1a570',width:2},itemStyle:{color:'#c1a570'},
+   label:{show:true,position:'top',formatter:p=>(p.value>0?'+':'')+p.value.toFixed(1)}}]});
+
+const matrix = echarts.init(document.getElementById('chart-matrix'));
+matrix.setOption({...base, tooltip:{position:'top',formatter:p=>p.value[2]==null?my[p.value[1]]+' × '+mx[p.value[0]]+'：模型无解':my[p.value[1]]+' × '+mx[p.value[0]]+'：'+p.value[2].toFixed(2)+' 元/股'},
+ grid:{left:150,right:96,top:20,bottom:56}, xAxis:{type:'category',data:mx,splitArea:{show:true},name:'永续增长率',nameLocation:'middle',nameGap:26,axisLabel:{interval:0}},
+ yAxis:{type:'category',data:my,splitArea:{show:true},inverse:true},
+ visualMap:{min:10.71,max:24.33,calculable:true,orient:'vertical',right:0,top:'middle',itemHeight:150,itemWidth:12,inRange:{color:['#fdf5f3','#f6f0e3','#e8f1e9','#245e49']},textStyle:{color:'#738078'}},
+ series:[{type:'heatmap',data:mx.flatMap((x,j)=>my.map((y,i)=>[j,i,mv[i][j]])),label:{show:true,fontSize:11,color:'#20372f',formatter:p=>p.value[2]==null?'无解':p.value[2].toFixed(2)},
+  itemStyle:{borderColor:'#fff',borderWidth:2},emphasis:{itemStyle:{shadowBlur:8,shadowColor:'rgba(0,0,0,.18)'}}}]});
+
+const beta = echarts.init(document.getElementById('chart-beta'));
+beta.setOption({...base, tooltip:{trigger:'axis'},legend:{data:['WACC %','每股价值 元'],top:0},
+ grid:{left:56,right:56,top:34,bottom:56}, xAxis:{type:'category',data:betaLabels,axisLabel:{interval:0,rotate:14,fontSize:11}},
+ yAxis:[{type:'value',name:'WACC %',splitLine:{lineStyle:{color:'#edf0eb'}}},{type:'value',name:'元/股',splitLine:{show:false}}],
+ series:[{name:'WACC %',type:'bar',data:betaWacc,barWidth:'42%',itemStyle:{color:'#8fae9c'},
+   label:{show:true,position:'top',formatter:'{c}%'}},
+  {name:'每股价值 元',type:'line',yAxisIndex:1,data:betaPs,symbol:'circle',symbolSize:9,lineStyle:{color:'#245e49',width:2},
+   itemStyle:{color:'#245e49'},label:{show:true,position:'top',formatter:p=>p.value==null?'无解':p.value.toFixed(2)}}]});
+
+window.addEventListener('resize',()=>{if(band)band.resize();fcff.resize();matrix.resize();beta.resize();});
+</script></body></html>
