@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" type="image/png" href="../favicon.png">
 <title>600690 海尔智家 · DCF 决策卡</title>
 <style>
 :root{--bg:#f6f7f4;--ink:#20372f;--muted:#738078;--line:#e0e6df;--green:#245e49;--light:#e8f1e9;--amber:#8c6331;--red:#8c3b33}
@@ -10,6 +11,11 @@ main{max-width:1120px;margin:0 auto;padding:38px 26px 60px}
 h1{font-size:27px;font-weight:600;margin:6px 0 8px} h2{font-size:18px;font-weight:600;margin:0 0 4px}
 h3{font-size:15px;font-weight:600;margin:22px 0 10px}
 .eyebrow{font-size:11px;letter-spacing:2px;color:#789084}
+.card-nav{display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin:0 0 20px;padding:0 0 12px;border-bottom:1px solid var(--line);font-size:12px}
+.card-nav:empty{display:none}
+.card-nav a{color:var(--green);text-decoration:none;border-bottom:1px solid transparent}
+.card-nav a:hover{border-bottom-color:var(--green)}
+.card-nav .sep{color:var(--muted)}
 .small{font-size:12px} .muted{color:var(--muted)} .strong{font-weight:600}
 .panel{background:#fff;border:1px solid var(--line);border-radius:10px;padding:22px;margin-bottom:16px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -37,6 +43,7 @@ footer{font-size:11px;color:var(--muted);margin-top:26px;border-top:1px solid va
 @media(max-width:900px){.grid2{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}}
 </style></head><body><main>
 
+<div class="card-nav" data-card-nav><a href="index.html">← 决策卡索引</a><span class="sep">·</span><a href="批量对比.html">横向对比</a><span class="sep">·</span><a href="../index.html">← 回到工作台</a></div>
 <div class="eyebrow">VALUE RESEARCH · 决策卡</div>
 <h1>600690 海尔智家 · DCF 假设摊开</h1>
 <p class="muted">行业 家用电器 ｜ 行情 20261030 收盘 ¥20.74（Tushare daily，未复权）｜
@@ -44,15 +51,15 @@ footer{font-size:11px;color:var(--muted);margin-top:26px;border-top:1px solid va
 
 <div class="kpis">
   <div class="kpi"><span class="small">现价</span><strong>¥20.74</strong><span class="small">总股本 92.9854 亿股</span></div>
-  <div class="kpi"><span class="small">中性内在价值（g=2%）</span><strong>¥40.00</strong><span class="small">安全边际 93%</span></div>
-  <div class="kpi"><span class="small">价值区间（g 1%~3%）</span><strong>¥32.17 ~ ¥54.15</strong><span class="small">终值现值占 84%</span></div>
-  <div class="kpi"><span class="small">价格条件（中性 −20%）</span><strong>¥32.00</strong><span class="small">现价比条件低 35%</span></div>
+  <div class="kpi"><span class="small">主情景内在价值（g=1%）</span><strong>¥32.17</strong><span class="small">安全边际 55%</span></div>
+  <div class="kpi"><span class="small">价值区间（g 1%~3%）</span><strong>¥32.17 ~ ¥54.15</strong><span class="small">终值现值占 80%</span></div>
+  <div class="kpi"><span class="small">价格条件（主情景 −20%）</span><strong>¥25.74</strong><span class="small">现价比条件低 19%</span></div>
 </div>
 
 <div class="hero">
-<b>中性情景</b>：FCFF 基数 140.13 亿（最近五年中位数）→ 未来五年平推；WACC 5.48%；
+<b>主情景</b>（永续增长 1%）：FCFF 基数 140.13 亿（最近五年中位数）→ 未来五年平推；WACC 5.48%；
 永续增长 2%；股权桥 +现金 476.22 亿 +交易性金融资产 20.34 亿 −有息负债 453.17 亿 −少数股东权益 72.79 亿。
-企业价值 3,748.65 亿，股权价值 3,719.25 亿，<b>每股 ¥40.00</b>，现价 ¥20.74。
+企业价值 3,020.92 亿，股权价值 2,991.52 亿，<b>每股 ¥32.17</b>，现价 ¥20.74。
 </div>
 
 
@@ -60,14 +67,14 @@ footer{font-size:11px;color:var(--muted);margin-top:26px;border-top:1px solid va
 <div class="warn">
 <b>三件必须先说清的事</b>
 <ol style="margin:8px 0 0">
-<li><b>终值占 84%</b>：价值大部分压在永续假设上，所以下面的区间比单点重要得多。</li>
-<li><b>WACC 5.48% 偏低</b>：无风险利率只有 1.65%（中债 10 年国债），β 取近 5 年 0.789。换成 近 1 年 β，WACC 掉到 2.55%，每股变成 ¥254.90——模型对 β 极度敏感，别把一个数字当定论。</li>
+<li><b>终值占 80%</b>：价值大部分压在永续假设上，所以下面的区间比单点重要得多。</li>
+<li><b>WACC 5.48% 偏低</b>：无风险利率只有 1.65%（中债 10 年国债），β 取近 5 年 0.789。换成 近 1 年 β，WACC 掉到 2.55%，每股变成 ¥93.49——模型对 β 极度敏感，别把一个数字当定论。</li>
 <li><b>2025 年 FCFF 只有 95.04 亿</b>，不是盈利变差（EBIT 从 160.6 亿到 244.4 亿还在涨），是营运资本一次性占用 +113.8 亿。中位数基数 140.13 亿 与「剔除 ΔNWC 后中位数」141.54 亿 相差 +1.0%，说明这个基数本身就是营运资本中性的。</li>
 </ol>
 </div>
 
 <h2>图一 · 每股价值区间，现价落在哪一段</h2>
-<div class="panel"><div class="chart tall" id="chart-band"></div><p class="small muted">灰蓝=不同永续增长下的中位基数情景，深绿=中性情景（g=2%），浅蓝=最保守组合。竖线为现价 ¥20.74 与 20% 安全边际价 ¥32.00；绿区是「价格条件以内 = 通过」的范围。</p></div>
+<div class="panel"><div class="chart tall" id="chart-band"></div><p class="small muted">灰蓝=不同永续增长下的中位基数情景，深绿=主情景（g=1%），浅蓝=最保守组合。竖线为现价 ¥20.74 与 20% 安全边际价 ¥25.74；绿区是「价格条件以内 = 通过」的范围。</p></div>
 
 <h2>图二 · FCFF 五年分解：利润、折旧与营运资本各占多少</h2>
 <div class="panel"><div class="chart" id="chart-fcff"></div>
@@ -75,12 +82,12 @@ footer{font-size:11px;color:var(--muted);margin-top:26px;border-top:1px solid va
 
 <h2>图三 · 敏感度矩阵：基数 × 永续增长率</h2>
 <div class="panel"><div class="chart" id="chart-matrix"></div>
-<div class="tablewrap"><table style="margin-top:12px;min-width:720px"><thead><tr><th>FCFF 基数</th><th>g=1.0%</th><th>g=1.5%</th><th>g=2.0%</th><th>g=2.5%</th><th>g=3.0%</th></tr></thead><tbody><tr><td>最近一年 95.04</td><td class="">21.72</td><td class="">24.04</td><td class="">27.03</td><td class="">31.02</td><td class="">36.62</td></tr><tr><td>剔除ΔNWC后中位数</td><td class="">32.50</td><td class="">35.96</td><td class="">40.41</td><td class="">46.35</td><td class="">54.70</td></tr><tr><td>五年均值</td><td class="">31.85</td><td class="">35.23</td><td class="">39.60</td><td class="">45.42</td><td class="">53.60</td></tr><tr><td>五年中位数</td><td class="">32.17</td><td class="">35.59</td><td class="hit">40.00</td><td class="">45.88</td><td class="">54.15</td></tr></tbody></table></div>
-<p class="small muted">全部 20 格都在现价 ¥20.74 之上。 中性格（红底）¥40.00。</p></div>
+<div class="tablewrap"><table style="margin-top:12px;min-width:720px"><thead><tr><th>FCFF 基数</th><th>g=1.0%</th><th>g=1.5%</th><th>g=2.0%</th><th>g=2.5%</th><th>g=3.0%</th></tr></thead><tbody><tr><td>最近一年 95.04</td><td class="">21.72</td><td class="">24.04</td><td class="">27.03</td><td class="">31.02</td><td class="">36.62</td></tr><tr><td>剔除ΔNWC后中位数</td><td class="">32.50</td><td class="">35.96</td><td class="">40.41</td><td class="">46.35</td><td class="">54.70</td></tr><tr><td>五年均值</td><td class="">31.85</td><td class="">35.23</td><td class="">39.60</td><td class="">45.42</td><td class="">53.60</td></tr><tr><td>五年中位数</td><td class="hit">32.17</td><td class="">35.59</td><td class="">40.00</td><td class="">45.88</td><td class="">54.15</td></tr></tbody></table></div>
+<p class="small muted">全部 20 格都在现价 ¥20.74 之上。 主情景格（红底）¥32.17。</p></div>
 
 <h2>图四 · β 窗口怎么选：同一个公司，结论能翻转</h2>
 <div class="panel"><div class="chart" id="chart-beta"></div>
-<div class="tablewrap"><table style="margin-top:12px;min-width:720px"><thead><tr><th>回归窗口</th><th>β</th><th>R²</th><th>n</th><th>WACC</th><th>每股（g=2%）</th><th></th></tr></thead><tbody><tr class=""><td>近 1 年</td><td>0.1954</td><td>0.025</td><td>250</td><td>2.55%</td><td>¥254.90</td><td class=muted></td></tr><tr class=""><td>近 2 年</td><td>0.4905</td><td>0.125</td><td>480</td><td>4.00%</td><td>¥69.47</td><td class=muted></td></tr><tr class=""><td>近 3 年</td><td>0.6071</td><td>0.185</td><td>750</td><td>4.58%</td><td>¥53.96</td><td class=muted></td></tr><tr class="on"><td>近 5 年</td><td>0.7891</td><td>0.269</td><td>1200</td><td>5.48%</td><td>¥40.00</td><td class=muted>工具默认填入</td></tr></tbody></table></div>
+<div class="tablewrap"><table style="margin-top:12px;min-width:720px"><thead><tr><th>回归窗口</th><th>β</th><th>R²</th><th>n</th><th>WACC</th><th>每股（g=2%）</th><th></th></tr></thead><tbody><tr class=""><td>近 1 年</td><td>0.1954</td><td>0.025</td><td>250</td><td>2.55%</td><td>¥93.49</td><td class=muted></td></tr><tr class=""><td>近 2 年</td><td>0.4905</td><td>0.125</td><td>480</td><td>4.00%</td><td>¥48.05</td><td class=muted></td></tr><tr class=""><td>近 3 年</td><td>0.6071</td><td>0.185</td><td>750</td><td>4.58%</td><td>¥40.30</td><td class=muted></td></tr><tr class="on"><td>近 5 年</td><td>0.7891</td><td>0.269</td><td>1200</td><td>5.48%</td><td>¥32.17</td><td class=muted>工具默认填入</td></tr></tbody></table></div>
 <p class="small muted">工具默认填入「近 5 年」窗口（样本最多）。R² 全线偏低（个股用前复权收益率、指数用价格指数，口径不完全一致），所以 β 本身不稳定——这一格是最该由你拍板的地方。</p>
 </div>
 
@@ -93,8 +100,8 @@ footer{font-size:11px;color:var(--muted);margin-top:26px;border-top:1px solid va
 <p class="small">净调整 <strong>-29.40 亿</strong>，每股 <strong>¥-0.32</strong>。</p>
 <div class="warn" style="margin-bottom:0">
 <b>这里有一个必须你自己拍板的口径差</b>：工作台的自动草案把现金按 <b>0</b> 计，却把有息负债 453.17 亿 全额扣除——现金和债务口径不对等，会让每股价值被压低约 <b>¥5.12</b>（加交易性金融资产共 ¥5.34）。
-本卡按「全额计入货币资金 + 交易性金融资产」计算（标准 FCFF 桥）；若你只认净现金（货币资金 476.22 亿 − 有息负债 453.17 亿 = 23.05 亿，债务不再重复扣），中性每股为 ¥39.78，仍高于现价 ¥20.74，与全额口径差 ¥0.22 元/股。
-另：股本用行情日 92.9854 亿股（当前股本），不是 2025 年报期末 93.7763 亿股——两者差 -0.84%，用当前股本每股高约 0.34 元。
+本卡按「全额计入货币资金 + 交易性金融资产」计算（标准 FCFF 桥）；若你只认净现金（货币资金 476.22 亿 − 有息负债 453.17 亿 = 23.05 亿，债务不再重复扣），主情景每股为 ¥31.95，仍高于现价 ¥20.74，与全额口径差 ¥0.22 元/股。
+另：股本用行情日 92.9854 亿股（当前股本），不是 2025 年报期末 93.7763 亿股——两者差 -0.84%，用当前股本每股高约 0.27 元。
 </div></div>
 
 <h2>表三 · WACC 参数与来源</h2>
@@ -115,20 +122,20 @@ footer{font-size:11px;color:var(--muted);margin-top:26px;border-top:1px solid va
 <p class="small muted">两个口径本该接近：FCFF 与「经营现金流−资本开支」的差主要来自营运资本口径与税费/利息归属。差得远说明 Tushare 的 <code>networking_capital</code> 字段与现金流量表打架，该年 FCFF 不可用。中位数基数取自 <strong>2024</strong> 年（140.13 亿）。</p>
 </div>
 
-<h2>要你拍板的四件事</h2>
+<h2>四件口径的取舍：本卡采用值 + 换一个取值会怎样</h2>
 <div class="panel">
-<div class="decide"><b>① 审核结论</b><br>要保存正式情景，后端要求审核结论必须是「明确保留，进入估值」（<code>require_approved</code>），并且六项依据齐全、证据链接 ≥1 条、核验日期 = 今天。这一步是你的研究结论，工具不替你做。</div>
-<div class="decide"><b>② 股权桥口径</b><br>全额货币资金 476.22 亿 ＋交易性金融资产 20.34 亿（本卡采用），还是只认净现金 23.05 亿（有息负债不再重复扣）？中性每股 ¥40.00 → ¥39.78，差 ¥0.22 元/股。两种口径结论方向一致，但数字会变——注意这个差是交易性金融资产那一项带来的，不是「全额 vs 现金按 0」的差。</div>
-<div class="decide"><b>③ β 窗口与 WACC</b><br>默认近 5 年（β 0.789）→ WACC 5.48%，中性每股 ¥40.00。换成 近 1 年 β，WACC 掉到 2.55%，每股变成 ¥254.90——模型对 β 极度敏感，别把一个数字当定论。建议沿用默认窗口，但你要知道它偏保守（偏高的 WACC → 偏低的价值）。</div>
-<div class="decide"><b>④ 永续增长率</b><br>中性取 2%，区间 1%~3%。考虑终值占 84%，这一项对结果的影响远大于现金流基数。保守起见，若拿不准就取 1%：每股 ¥32.17，价格条件 ¥25.74，现价 ¥20.74 仍然通过。</div>
+<div class="decide"><b>① 审核结论</b><br>服务器上已保存：<b>明确保留，进入估值</b>（审核者 <span class="reviewer-name">已记录（公开版隐去姓名）</span>，审核身份 本人审核，核验日期 2026-10-31，证据链接 5 条）。要保存正式情景，后端要求审核结论必须是「明确保留，进入估值」（<code>require_approved</code>），并且六项依据齐全、证据链接 ≥1 条、核验日期 = 服务器当天 2026-10-31。</div>
+<div class="decide"><b>② 股权桥口径</b><br>本卡采用「全额货币资金 476.22 亿 ＋交易性金融资产 20.34 亿」（标准 FCFF 桥）。对照口径「只认净现金 23.05 亿」（有息负债不再重复扣）：主情景每股 ¥32.17 → ¥31.95，差 ¥0.22 元/股，两种口径结论方向一致。这个差是交易性金融资产那一项带来的，不是「全额 vs 现金按 0」的差。</div>
+<div class="decide"><b>③ β 窗口与 WACC</b><br>本卡采用近 5 年（β 0.789）→ WACC 5.48%，主情景每股 ¥32.17。换成 近 1 年 β，WACC 掉到 2.55%，每股变成 ¥93.49——模型对 β 极度敏感，别把一个数字当定论。这一档偏保守（偏高的 WACC → 偏低的价值），换成别的窗口结论会大幅变化。</div>
+<div class="decide"><b>④ 永续增长率</b><br>本卡采用永续增长率 保守档 1%（2026-10-31 定）。终值占 80%，这一项对结果的影响远大于现金流基数。若改回 g=2%，每股会变成 ¥40.00，价格条件 ¥32.00，现价 ¥20.74 仍然通过。</div>
 </div>
 
 <h2>下一步（我不替你做）</h2>
 <div class="panel">
 <ol>
-<li>在工作台里把海尔智家的审核结论改成「明确保留，进入估值」，补一条证据链接（年报或公告 URL），核验日期填今天 <code>2026-10-31</code>（服务器当天，不是行情日期 20261030），然后点「保存审核结论」。</li>
+<li>审核结论已保存：<b>明确保留，进入估值</b>，审核者 <span class="reviewer-name">已记录（公开版隐去姓名）</span>，核验日期 2026-10-31——正式情景的前置条件已满足。</li>
 <li>进「估值与情景」，按上面表三的 WACC（5.48%）和表二的口径填参数；现金流基数若沿用草案就是 140.13 亿 平推五年。</li>
-<li>假设依据（basis）要写清：FCFF 口径、基数怎么来的、现金为什么这么算、WACC 各参数来源、永续增长率为什么取 2%。</li>
+<li>假设依据（basis）要写清：FCFF 口径、基数怎么来的、现金为什么这么算、WACC 各参数来源、永续增长率为什么取 1%。</li>
 </ol>
 <p class="small muted">工作台的「批量测算」会自动给草案，但那不是结论——草案的 <code>cash</code> 默认按 0，正是上面第 ② 条要修正的地方。</p>
 </div>
@@ -140,15 +147,15 @@ footer{font-size:11px;color:var(--muted);margin-top:26px;border-top:1px solid va
 </main>
 <script src="../vendor/echarts.min.js"></script>
 <script>
-const PRICE = 20.74, CONDITION = 31.99858232476858;
-const bandLabels = ["最保守组合（最近一年基数 · g=1% · 不计交易性金融资产）", "g=1% · 五年中位数基数", "g=2% · 五年中位数基数（中性）", "g=3% · 五年中位数基数"];
+const PRICE = 20.74, CONDITION = 25.737577998723186;
+const bandLabels = ["最保守组合（最近一年基数 · g=1% · 不计交易性金融资产）", "g=1% · 五年中位数基数（主情景）", "g=2% · 五年中位数基数", "g=3% · 五年中位数基数"];
 const bandValues = [21.5, 32.17, 40.0, 54.15];
-const bandColors = ["#9fb6c9", "#c8d8e6", "#245e49", "#c8d8e6"];
+const bandColors = ["#9fb6c9", "#245e49", "#c8d8e6", "#c8d8e6"];
 const years = ["2021", "2022", "2023", "2024", "2025"];
 const fcffValues = [163.86, 129.41, 165.21, 140.13, 95.04];
 const deltaValues = [-53.57, -2.6, -23.67, 42.86, 113.82];
 const mx = ["1.0%", "1.5%", "2.0%", "2.5%", "3.0%"], my = ["\u6700\u8fd1\u4e00\u5e74 95.04", "\u5254\u9664\u0394NWC\u540e\u4e2d\u4f4d\u6570", "\u4e94\u5e74\u5747\u503c", "\u4e94\u5e74\u4e2d\u4f4d\u6570"], mv = [[21.72, 24.04, 27.03, 31.02, 36.62], [32.5, 35.96, 40.41, 46.35, 54.7], [31.85, 35.23, 39.6, 45.42, 53.6], [32.17, 35.59, 40.0, 45.88, 54.15]];
-const betaLabels = ["\u8fd1 1 \u5e74\uff08\u03b2=0.195\uff09", "\u8fd1 2 \u5e74\uff08\u03b2=0.491\uff09", "\u8fd1 3 \u5e74\uff08\u03b2=0.607\uff09", "\u8fd1 5 \u5e74\uff08\u03b2=0.789\uff09"], betaWacc = [2.55, 4.0, 4.58, 5.48], betaPs = [254.9, 69.47, 53.96, 40.0];
+const betaLabels = ["\u8fd1 1 \u5e74\uff08\u03b2=0.195\uff09", "\u8fd1 2 \u5e74\uff08\u03b2=0.491\uff09", "\u8fd1 3 \u5e74\uff08\u03b2=0.607\uff09", "\u8fd1 5 \u5e74\uff08\u03b2=0.789\uff09"], betaWacc = [2.55, 4.0, 4.58, 5.48], betaPs = [93.49, 48.05, 40.3, 32.17];
 const base = {textStyle:{fontFamily:'-apple-system,PingFang SC,sans-serif'}};
 
 // DCF 不适用时页面里没有 chart-band 容器（图一不画），这里必须留空。

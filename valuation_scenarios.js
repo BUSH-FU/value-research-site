@@ -23,7 +23,7 @@
 // 三条硬规矩（和市场情绪、周期那页一致）：
 // 1. 数字只有一种来源：服务器算好的真实读数。缺数据写「缺什么」，不拿示例值顶替。
 // 2. 区间和阈值必须画成图，并且标出落点——三档永续增长率本身就是一条区间，
-//    所以每家画一条区间带，落点标 2% 档，再把中性门槛线和 0 轴画出来。
+//    所以每家画一条区间带，落点标已定档（1%），再把中性门槛线和 0 轴画出来。
 // 3. 颜色与宽度一律走 CSS 类或 CSSOM 赋值：服务器 CSP 是 style-src 'self'，
 //    行内 style 属性会被浏览器静默忽略（这个坑本项目已经踩过三次）。
 window.ValuationScenarios = (() => {
@@ -32,7 +32,11 @@ window.ValuationScenarios = (() => {
  const isNum = x => x !== null && x !== undefined && x !== '' && Number.isFinite(Number(x));
  const pct1 = x => isNum(x) ? num(Number(x) * 100, 1) + '%' : '—';
  const KEYS = ['g1%','g2%','g3%'];
- const MID = 'g2%';
+ // 中枢档 = 用户 2026-10-31 拍板取的那一档（永续增长率 1%，保守档）。
+ // 展示层仍给全量：1%/2%/3% 三档全画出来、带子全量展示；
+ // 判断层只用已定的那一档——一个数只干一件事，别让页面留两套价格条件。
+ const MID = 'g1%';
+ const MID_LABEL = '1%';
  const AXIS_MIN = -100;   // 横轴左端：低于这个值的区间折叠到边缘并标记 ◀
  const AXIS_MAX = 90;     // 横轴右端
 
@@ -62,7 +66,8 @@ window.ValuationScenarios = (() => {
    .map(s => Number(s.per_share));
   return {low: values.length ? Math.min(...values) : null, high: values.length ? Math.max(...values) : null};
  }
- // 中枢取 2% 档：永续增长率没有官方值，三档并列，2% 只是折中落点，不设默认档。
+ // 中枢取已定档（1%）：永续增长率没有官方值，但用户 2026-10-31 已拍板取保守档 1%。
+ // 三档仍然并列展示（看换一个假设会怎样），判断层只用已定的那一档。
  function neutralOf(row){
   const scen = scenarioOf(row, MID);
   const per = (scen.valid !== false && isNum(scen.per_share) && Number(scen.per_share) > 0) ? Number(scen.per_share) : null;
@@ -84,7 +89,7 @@ window.ValuationScenarios = (() => {
   if(neu.per === null){
    return neu.low === null
     ? '中性情景三档均无法测算，不参与价格判断'
-    : '中性中枢档（2%）无法测算，不参与价格判断（1%/3% 档仍有正估值）';
+    : `中性中枢档（${MID_LABEL}）无法测算，不参与价格判断（另两档仍有正估值）`;
   }
   if(!validThreshold) return '请配置安全边际门槛';
   if(!neu.comparable) return '报价不可比较' + (neu.reason ? '：' + neu.reason : '');
@@ -213,7 +218,7 @@ window.ValuationScenarios = (() => {
    + (stressLow !== null && isNum(midScenario.price)
     ? `；压力校验下限 ¥${num(stressLow)}，按它算安全边际只剩 ${pct1(1 - Number(midScenario.price) / stressLow)}（仅供辅助观察，不控制价格条件）` : '')
    + (!hasBand ? (() => { const cash = cashAdjusted(row);
-        return cash ? `；自动草案把报表货币资金 ${num(cash.cashYi)} 亿按 0 计，计入后 2% 档股权价值 ${num(cash.equityWithCashYi)} 亿、每股 ${num(cash.perShare)} 元` : ''; })() : '');
+        return cash ? `；自动草案把报表货币资金 ${num(cash.cashYi)} 亿按 0 计，计入后 ${MID_LABEL} 档股权价值 ${num(cash.equityWithCashYi)} 亿、每股 ${num(cash.perShare)} 元` : ''; })() : '');
    const mark = clipped ? `<text x="${plotLeft + 6}" y="${y(index) + 4}" class="vs-clipped">◀</text>` : '';
    const dot = midValid ? `<circle cx="${x(midPct).toFixed(1)}" cy="${y(index)}" r="5.5" class="vs-dot ${tone}"/>` : '';
    const label = midValid ? pct1(mid) : (isNum(midScenario.per_share) ? '股权为负' : '—');
@@ -233,14 +238,14 @@ window.ValuationScenarios = (() => {
    </g>`;
   }).join('');
 
-  return `<svg class="vs-chart" viewBox="0 0 ${W} ${height}" role="img" aria-label="各公司安全边际区间与 2% 档落点">${safeZone}${ticks.join('')}${zeroLine}${thresholdLine}${body}</svg>`;
+  return `<svg class="vs-chart" viewBox="0 0 ${W} ${height}" role="img" aria-label="各公司安全边际区间与 ${MID_LABEL} 档落点">${safeZone}${ticks.join('')}${zeroLine}${thresholdLine}${body}</svg>`;
  }
 
  function tableOf(data, slot){
   const rows = rowsOf(data, slot, true);
   if(!rows.length) return '<div class="empty">目前没有能测算的公司。</div>';
   const thr = isNum(data?.margin_min_pct) ? num(Number(data.margin_min_pct), 0) : '未配置';
-  const head = '<tr><th>公司</th><th>收盘价 / 日期</th><th>基准 FCFF / 亿元</th><th>五年中位数 / 亿元</th><th>当前口径 WACC</th><th>中性 1% 档每股</th><th>中性 2% 档每股</th><th>中性 3% 档每股</th><th>中性安全边际（2% 档落点）</th><th>中性 ' + thr + '% 门槛</th><th>终值占企业价值</th><th>报表货币资金未计入</th></tr>';
+  const head = '<tr><th>公司</th><th>收盘价 / 日期</th><th>基准 FCFF / 亿元</th><th>五年中位数 / 亿元</th><th>当前口径 WACC</th><th>中性 1% 档每股</th><th>中性 2% 档每股</th><th>中性 3% 档每股</th><th>中性安全边际（' + MID_LABEL + ' 档落点）</th><th>中性 ' + thr + '% 门槛</th><th>终值占企业价值</th><th>报表货币资金未计入</th></tr>';
   const body = rows.map(row => {
    const s = row.scenario || {};
    const wacc = s.wacc || {};
@@ -305,7 +310,7 @@ window.ValuationScenarios = (() => {
    return `<tr data-tt-key="${esc(row.code)}">
     <td><button type="button" data-company="${esc(row.code)}" data-forecast-basis="${esc(row.scenario.forecast?.basis||'median')}">${esc(row.name||row.code)}</button><br><span class="small muted">自动估值 · 未复核</span></td>
     <td>${isNum(neu.price)?'¥'+num(neu.price):'不可比较'}<br><span class="small muted">${esc(neu.priceDate)}</span></td>
-    <td>${bandCell}<br><span class="small muted">中性中枢 2% 档 ${neu.per===null?'—':'¥'+num(neu.per)}</span></td>
+    <td>${bandCell}<br><span class="small muted">中性中枢 ${MID_LABEL} 档 ${neu.per===null?'—':'¥'+num(neu.per)}</span></td>
     <td>${targetCell}</td>
     <td>${marginCell}</td>
     <td>${condition}</td>
@@ -313,8 +318,8 @@ window.ValuationScenarios = (() => {
     <td>${stressMarginCell}</td>
    </tr>`;
   }).join('');
-  const intro = `<p class="small muted"><strong>中性情景</strong>＝「大概率能实现的内在价值」：现金流用自动草案原值（不预先假设未来变差 20%），WACC 取当前口径，只对永续增长率取 1% / 2% / 3% 三档敏感性——永续增长率没有官方值，所以三档并列，2% 档只是折中落点，不设默认档。</p>
-  <p class="small muted"><strong>价格条件只看中性情景</strong>：中性安全边际 ＝ 1 − 收盘价 ÷ 中性中枢（2% 档）；${thrHead} ＝ 中性中枢 ×（1 − ${thrText}）。安全边际的作用是抵消我自己预测的误差，不是提前假设「未来一定变差」。</p>
+  const intro = `<p class="small muted"><strong>中性情景</strong>＝「大概率能实现的内在价值」：现金流用自动草案原值（不预先假设未来变差 20%），WACC 取当前口径，只对永续增长率取 1% / 2% / 3% 三档敏感性——永续增长率没有官方值，三档并列展示；但主情景取 1%（2026-10-31 已定，保守档），另两档是上行参照。</p>
+  <p class="small muted"><strong>价格条件只看中性情景</strong>：中性安全边际 ＝ 1 − 收盘价 ÷ 中性中枢（${MID_LABEL} 档）；${thrHead} ＝ 中性中枢 ×（1 − ${thrText}）。安全边际的作用是抵消我自己预测的误差，不是提前假设「未来一定变差」。</p>
   <p class="small muted"><strong>压力校验区间</strong>（原 24 组机械情景：现金流原值 / 全部低 20%，WACC 当前 / +1 / +2 个百分点，永续增长 0% / 1% / 2% / 3%）保留为辅助观察，不控制价格条件。那是灾难情景，拿它当门槛会把所有公司都判成不合格。</p>
   <p class="small muted"><strong>顺序别弄反</strong>：先做定性筛选——ROIC 持续高于 WACC、有护城河、现金流稳定、杠杆可控（在「严格财务预筛」和「投资核查清单」里），确认是好生意，再谈估值折扣。本页只管价格这一段。</p>`;
   return `<div class="panel"><h3>股价、自动估值与价格门槛</h3>${intro}<div class="scroll"><table data-tt-sync="${esc(slot||SLOT_MAIN)}"><thead><tr><th>公司 / 状态</th><th>当前收盘价 / 日期</th><th>中性情景范围 / 元每股</th><th>${thrHead}</th><th>中性安全边际（主判断）</th><th>价格条件</th><th>压力校验区间（辅助观察）</th><th>相对压力下限的安全边际（辅助）</th></tr></thead><tbody>${body}</tbody></table></div><p class="small muted">门槛随模型假设变化，达到价格条件仍不等于可以买入。待复核：生意是否可预测、一次性项目、维持经营所需资本支出与营运资本、可分配现金、负债与少数股东权益，以及长期增长能否由再投资支持。历史 FCFF 不等于已经核实的股东盈余。</p></div>`;
@@ -337,7 +342,7 @@ window.ValuationScenarios = (() => {
    return values.length > 1 && Math.max(...values) - Math.min(...values) > 20;
   }).length;
   return `<div class="notice vs-notice">
-   <p><strong>这是自动估值情景，尚未研究复核。</strong>本页采用${data.forecast_basis==='latest'?'最近一年 FCFF 平推五年（零显性增长）。这是假设单年现金流水平持续，尚未剔除一次性项目，也未证明已进入稳定期；请切换五年中位数对照':(data.forecast_basis==='mean'?'最近五年 FCFF 均值平推五年（包括全部负值年份，受极端年份影响）':'最近五年 FCFF 中位数平推五年（零显性增长）')}，永续增长率取 1%/2%/3% 三档——没有任何官方值，所以不设默认档。这三档是中性情景：现金流用原值，不预先假设未来变差。测算结果不写入估值存档，也不进最终候选。</p>
+   <p><strong>这是自动估值情景，尚未研究复核。</strong>本页采用${data.forecast_basis==='latest'?'最近一年 FCFF 平推五年（零显性增长）。这是假设单年现金流水平持续，尚未剔除一次性项目，也未证明已进入稳定期；请切换五年中位数对照':(data.forecast_basis==='mean'?'最近五年 FCFF 均值平推五年（包括全部负值年份，受极端年份影响）':'最近五年 FCFF 中位数平推五年（零显性增长）')}，永续增长率取 1%/2%/3% 三档——没有任何官方值，所以三档并列展示；主情景取 1%（2026-10-31 已定）。这三档是中性情景：现金流用原值，不预先假设未来变差。测算结果不写入估值存档，也不进最终候选。</p>
    <p><strong>判断顺序：先筛生意，再谈折扣。</strong>定性筛选（ROIC 持续高于 WACC、有护城河、现金流稳定、杠杆可控）在「严格财务预筛」和「投资核查清单」里；本页只负责价格这一段——先用中性情景估出「大概率能实现的内在价值」，再在它上面打安全边际折扣，让折扣去抵消我自己的预测误差。</p>
    <p><strong>DCF 股权价值为负的直接剔除。</strong>企业价值连有息债务与少数股东权益都覆盖不了，就谈不上持续创造超额收益——这类标的不进主表、不参与排序、不参与价格判断。${dropped?`本轮剔除了 ${dropped} 家，剔的是谁、剔的理由、以及漏算了多少现金，都列在下面的清单里，可以自己复核。`:'本轮没有出现股权价值为负的标的。'}</p>
    <p>${high} / ${rows.length} 家的终值占企业价值 60% 以上，${swings} 家在三档之间安全边际摆动超过 20 个百分点：这两个数说明结果对假设的依赖程度，请把它当排序参考，不是买入结论。</p>
@@ -365,7 +370,7 @@ window.ValuationScenarios = (() => {
   }).join('');
   return `<div class="panel"><h3>DCF 股权价值为负 · 已剔除 ${dropped.length} 家</h3>
    <p class="small muted">这几家在中性情景三档（永续增长率 1%/2%/3%）下的股权价值都是负的，已从上面的主表与区间图里去掉，不参与排序与价格判断。判定用的是自动草案口径（报表货币资金按 0 计）；下面同时补上漏算的现金与收盘价，方便自己复核这个剔除站不站得住。</p>
-   <div class="scroll"><table><thead><tr><th>公司</th><th>中性 2% 档股权价值</th><th>报表货币资金未计入</th><th>若计入现金</th><th>收盘价</th><th>剔除理由</th></tr></thead><tbody>${body}</tbody></table></div></div>`;
+   <div class="scroll"><table><thead><tr><th>公司</th><th>中性 ${MID_LABEL} 档股权价值</th><th>报表货币资金未计入</th><th>若计入现金</th><th>收盘价</th><th>剔除理由</th></tr></thead><tbody>${body}</tbody></table></div></div>`;
  }
 
  function render(data){
@@ -392,14 +397,14 @@ window.ValuationScenarios = (() => {
   ${droppedPanel(allDropped)}
   <div class="stats">
    <div class="stat"><span class="muted">已生成测算</span><strong>${rows.length+supplementaryKept.length}</strong><span class="small">家${coverage?' · 五年中位数 '+rows.length+' 家，补充 '+supplementaryKept.length+' 家':'（当前统一口径）'}${allDropped.length?' · 已剔除 '+allDropped.length+' 家':''}</span></div>
-   <div class="stat"><span class="muted">${coverage?'五年中位数 · ':''}中性达标（2% 档）</span><strong>${passed}</strong><span class="small">家 · 中性安全边际 ≥ ${threshold}%</span></div>
+   <div class="stat"><span class="muted">${coverage?'五年中位数 · ':''}中性达标（${MID_LABEL} 档）</span><strong>${passed}</strong><span class="small">家 · 中性安全边际 ≥ ${threshold}%</span></div>
    <div class="stat"><span class="muted">需补资料或单独建模</span><strong>${(data?.skipped || []).length}</strong><span class="small">家 · 原因已列明</span></div>
    <div class="stat"><span class="muted">DCF 股权价值为负</span><strong>${allDropped.length}</strong><span class="small">家 · 已剔除，不参与排序与价格判断</span></div>
   </div>
   <div class="panel">
    <div class="vs-chart-head">
-    <div><h3>中性情景安全边际区间与落点</h3><p class="small muted">横轴是安全边际（现价相对中性情景估值折了多少）。每条横带的<strong>左端是永续增长率 1% 档、右端是 3% 档</strong>，中间圆点是 2% 档落点；数值下面那行<strong>带宽</strong>＝三档之间安全边际的摆动幅度，越宽说明这个结论越依赖永续增长率这一个假设。竖虚线是 ${threshold}% 中性门槛，竖实线是 0 轴：<strong>区间跨过 0 轴的，说明换个假设「贵」就变成「便宜」，这类最需要警惕</strong>。带的颜色按 2% 档落点分：绿＝已达门槛，橙＝在 0 与门槛之间，灰＝落点为负。细竖线是压力校验下限折算后的位置，淡虚线把它连到中性带左端——那一段就是中性结论离灾难情景还有多远；只作辅助观察，不控制价格条件。</p></div>
-    <div class="vs-legend"><span><i class="vs-key vs-key-band"></i>中性三档区间</span><span><i class="vs-key vs-key-dot"></i>2% 档落点</span><span><i class="vs-key vs-key-threshold"></i>${threshold}% 中性门槛</span><span><i class="vs-key vs-key-safe"></i>达标段</span><span><i class="vs-key vs-key-stress"></i>压力校验下限</span></div>
+    <div><h3>中性情景安全边际区间与落点</h3><p class="small muted">横轴是安全边际（现价相对中性情景估值折了多少）。每条横带的<strong>左端是永续增长率 1% 档、右端是 3% 档</strong>，圆点是 ${MID_LABEL} 档落点；数值下面那行<strong>带宽</strong>＝三档之间安全边际的摆动幅度，越宽说明这个结论越依赖永续增长率这一个假设。竖虚线是 ${threshold}% 中性门槛，竖实线是 0 轴：<strong>区间跨过 0 轴的，说明换个假设「贵」就变成「便宜」，这类最需要警惕</strong>。带的颜色按 ${MID_LABEL} 档落点分：绿＝已达门槛，橙＝在 0 与门槛之间，灰＝落点为负。细竖线是压力校验下限折算后的位置，淡虚线把它连到中性带左端——那一段就是中性结论离灾难情景还有多远；只作辅助观察，不控制价格条件。</p></div>
+    <div class="vs-legend"><span><i class="vs-key vs-key-band"></i>中性三档区间</span><span><i class="vs-key vs-key-dot"></i>${MID_LABEL} 档落点</span><span><i class="vs-key vs-key-threshold"></i>${threshold}% 中性门槛</span><span><i class="vs-key vs-key-safe"></i>达标段</span><span><i class="vs-key vs-key-stress"></i>压力校验下限</span></div>
    </div>
    <div class="vs-chart-wrap">${bandChart(data)}</div>
    <p class="small muted">横轴范围 ${axisDomain(data).lo}% ～ ${axisDomain(data).hi}%；低于左端的区间折叠到边缘并标 ◀，确切数字见下表。压力校验下限折到左端（虚线）表示它远在坐标轴之外，那一档本来就不参与价格判断。</p>
@@ -408,7 +413,7 @@ window.ValuationScenarios = (() => {
   </div>
   <div class="panel">
    <h3>逐家测算结果</h3>
-   <p class="small muted">每股情景估值来自自动草案 + 当前口径 WACC；报价取最近一个交易日的未复权收盘价（每个交易日 16:30 后自动更新）。表中 1%/2%/3% 档每股与安全边际都是中性情景口径（现金流用原值，只有永续增长率在变）；「中性 ${threshold}% 门槛」＝ 2% 档每股 ×（1 − ${threshold}%）。测算时间 ${esc(generated)}。</p>
+   <p class="small muted">每股情景估值来自自动草案 + 当前口径 WACC；报价取最近一个交易日的未复权收盘价（每个交易日 16:30 后自动更新）。表中 1%/2%/3% 档每股与安全边际都是中性情景口径（现金流用原值，只有永续增长率在变）；「中性 ${threshold}% 门槛」＝ ${MID_LABEL} 档每股 ×（1 − ${threshold}%）。测算时间 ${esc(generated)}。</p>
    ${tableOf(data, SLOT_MAIN)}
   </div>
   ${supplementary.length?`<div class="panel"><h3>补充测算 · ${supplementary.length} 家</h3><p class="small muted">以下公司五年中位数不满足条件，采用表内注明的替代口径。五年均值会受并购、扩产和营运资本波动影响；单年情景假设近期现金流水平持续，尚未证明进入稳定期。补充结果不混入上方排名，也不自动进入最终候选。</p>${supplementary.map(row=>`<p class="small muted"><strong>${esc(row.name)}</strong>：${esc((row.primary_missing||[]).join('；'))}；补充采用 ${esc(row.scenario.forecast.method)}。</p>`).join('')}${decisionTable({...data,rows:supplementary}, SLOT_SUPP)}${tableOf({...data,rows:supplementary}, SLOT_SUPP)}</div>`:''}
