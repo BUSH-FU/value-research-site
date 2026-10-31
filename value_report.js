@@ -570,51 +570,99 @@ function capitalReturnOption(model){
   const timeline=(region)=>{const rows=(report.industry_timeline||[]).filter(row=>region==='china'?/中国|国内|大陆/.test(row.region):!/中国|国内|大陆/.test(row.region));return rows.map(row=>`<div class="history-item"><strong>${esc(row.period)} · ${esc(row.region)}</strong> <span class="pill ${row.kind==='interpretation'?'warning':''}">${row.kind==='interpretation'?'推断':'报道线索'}</span><p>${esc(row.event)}</p><div class="small">${source(row.evidence_ids)}</div></div>`).join('')||'<p class="small muted">暂无可追溯的演化资料。</p>';};
   return `<div id="industry-panel" class="panel industry-panel"><div class="section-head"><div><h3>生意、竞争与行业演化 <span class="pill warning">${esc(bundle.model)} 草稿 · 待核原文</span></h3><p class="small muted">${esc(bundle.created_at)} · ${esc(bundle.scope)}</p></div><button id="update-industry-research">重新搜集</button></div>${oneLine}<div class="report-chart-grid"><div><h4>收入来源</h4>${(report.revenue_drivers||[]).map(row=>`<div class="research-item"><p>${esc(row.claim)}</p><div class="small">${source(row.evidence_ids)}</div></div>`).join('')||'<p class="small muted">待查年报分部披露。</p>'}</div><div><h4>关键牌照与稀缺许可</h4>${licenses}</div></div><div class="report-chart-grid"><div><h4>已发现的竞争者</h4>${competitors}</div><div><h4>壁垒线索</h4>${moats}</div></div><h4>逐年市场份额 <span class="small muted">只比较同产品、地区、分母和计量口径</span></h4>${groups.size?[...groups].map(([key,rows],index)=>`<div class="share-series"><strong>${esc(key)}</strong><p class="small muted">${rows.length} 个有来源的年份；未给出的年份不补线。</p><div id="share-chart-${index}" class="share-chart" role="img" aria-label="${esc(key)}历年份额；点击数据点查看来源"></div><div id="share-detail-${index}" class="chart-selection" aria-live="polite" hidden></div><div class="scroll"><table><thead><tr><th>年份</th><th>份额</th><th>来源</th></tr></thead><tbody>${[...rows].sort((a,b)=>a.year-b.year).map(row=>`<tr><td>${row.year}</td><td>${num(row.share_percent)}%</td><td>${source(row.evidence_ids)}</td></tr>`).join('')}</tbody></table></div></div>`).join(''):'<p class="small muted">尚无满足年份、产品市场、地区、计量口径、分母和来源要求的份额数据。不能估计或绘制逐年变化。</p>'}<div class="report-chart-grid"><div><h4>国内行业演化</h4><div class="industry-timeline">${timeline('china')}</div></div><div><h4>海外可比行业演化</h4><div class="industry-timeline">${timeline('global')}</div></div></div><details><summary>资料缺口和检索覆盖</summary><ul>${(report.missing_information||[]).map(item=>`<li>${esc(item)}</li>`).join('')}</ul>${(bundle.coverage||[]).map(item=>`<p class="small muted">${esc(item.topic)}：${esc(item.state)}，匹配 ${esc(item.matched??'—')} 条${item.message?'；'+esc(item.message):''}</p>`).join('')}</details></div>`;
  }
+ // 核查清单的两条改动（2026-10-31 用户要求）：
+ // ① 来源不再强制「来源链接或 data: 内部证据引用」——写法自由，也可以留空；
+ // ② 每一组都能单独保存，不必等所有分组都填完。
+ // 两条都在页面上落地：来源框去掉格式限定，每组右上角有「保存本组」。
+ const SOURCE_MAX=8,SOURCE_MAX_LEN=2048;
+ // 一个条目属于哪一组：默认项从所在分组容器读；自定义项从隐藏字段读（新建时还没进容器）。
+ function checklistItemSection(node){
+  const holder=node.closest?.('[data-checklist-section]');
+  if(holder)return holder.dataset.checklistSection||'';
+  const custom=node.querySelector('[name=custom_section]');
+  return custom?String(custom.value||'').trim():'';
+ }
+ function checklistSectionNodes(form,section){
+  const nodes=[...form.querySelectorAll('[data-checklist-item]')];
+  return section?nodes.filter(node=>checklistItemSection(node)===section):nodes;
+ }
+ function checklistSectionHolder(form,section){
+  for(const node of form.querySelectorAll('[data-checklist-section]')){
+   if(node.dataset.checklistSection===section)return node;
+  }
+  return null;
+ }
+ function checklistSectionBox(form,section){
+  const holder=checklistSectionHolder(form,section);
+  return holder?holder.querySelector('.checklist-section-feedback'):null;
+ }
+ function checklistItemHtml(item){
+  return `<div class="checklist-item" data-checklist-item="${esc(item.id)}" data-stale="${item.stale?'true':'false'}" ${item.custom?'data-custom="true"':''}><div class="checklist-question"><strong>${esc(item.prompt)}</strong>${item.hard_gate?'<span class="pill">核心项</span>':''}${item.stale?'<span class="pill warning">资料更新，待复核</span>':''}</div><div class="checklist-fields"><label class="field">核查结果<select name="status"><option value="unknown" ${item.status==='unknown'?'selected':''}>待核实</option><option value="yes" ${item.status==='yes'?'selected':''}>已核实且通过</option><option value="no" ${item.status==='no'?'selected':''}>未通过 / 存在疑点</option></select></label><label class="field">依据<textarea name="note" placeholder="核对了什么，结论为何成立（明确结论至少八字）">${esc(item.note||'')}</textarea></label><label class="field">来源（可留空，每行一条）<textarea name="sources" placeholder="年报第 3 章 / 公告编号 / https://… / data:financial-archive/600690.json#2025">${esc((item.sources||[]).join('\n'))}</textarea></label>${item.stale?'<label class="checkline"><input type="checkbox" name="reconfirm">我已按更新后的资料重新核对本项</label>':''}</div><div class="checklist-item-why" hidden></div>${item.custom?`<input type="hidden" name="custom_section" value="${esc(item.section)}"><input type="hidden" name="custom_prompt" value="${esc(item.prompt)}"><input type="hidden" name="custom_hard_gate" value="${item.hard_gate?'true':'false'}">`:''}</div>`;
+ }
+ function checklistSectionHtml(section,items,savedAt,open){
+  const yes=items.filter(item=>item.status==='yes'&&!item.stale).length;
+  return `<details class="checklist-section" data-checklist-section="${esc(section)}" ${open?'open':''}><summary>${esc(section)} · ${yes}/${items.length} 项已核</summary><div class="checklist-section-bar"><span class="small muted checklist-section-saved">${savedAt?`上次保存 ${esc(fmtStamp(savedAt))}`:'尚未单独保存'}</span><button type="button" class="checklist-section-save" data-checklist-save-section="${esc(section)}">保存本组</button></div><div class="checklist-section-feedback" hidden></div>${items.map(item=>checklistItemHtml(item)).join('')}</details>`;
+ }
  function renderChecklist(detail){
   const list=detail.investment_checklist;if(!list)return '';
   const sections=[...new Set(list.items.map(item=>item.section))],s=list.summary||{};
+  const saved=list.saved_sections||{};
   const stateName=s.ready?'核心问题已人工核查':s.stale?'有资料更新待复核':s.no?'有未解决疑点':'研究清单未完成';
-  return `<form id="investment-checklist-form" class="panel investment-checklist"><div class="section-head"><div><h3>投资核查清单 <span class="pill ${s.ready?'':'warning'}">${stateName}</span></h3><p class="small muted">核心项已核对 ${s.required_yes||0}/${s.required_total||0} · 待复核 ${s.stale||0} · 未通过 ${s.no||0} · 未知 ${s.unknown||0}。勾选只表示你完成了核查，不会自动决定买入。</p></div><button type="submit" class="primary">保存逐项核查</button></div><div id="checklist-feedback" class="checklist-feedback" hidden></div><p class="notice small">每项明确结论须填写至少八字理由和来源。请将“实际控制人品行”落实到可查的履历、处罚、诉讼、关联交易与利益冲突，避免给人贴无法证实的标签。来源可以写公开网址，或 data: 内部证据指针（写法 data:<数据文件>#<定位>，例如 data:financial-archive/600690.json#2025）；系统只保存这个指针，不替你打开原文。</p>${sections.map(section=>`<details class="checklist-section" ${section==='生意与能力圈'?'open':''}><summary>${esc(section)} · ${list.items.filter(x=>x.section===section&&x.status==='yes'&&!x.stale).length}/${list.items.filter(x=>x.section===section).length} 项已核</summary>${list.items.filter(x=>x.section===section).map(item=>`<div class="checklist-item" data-checklist-item="${esc(item.id)}" ${item.custom?'data-custom="true"':''}><div class="checklist-question"><strong>${esc(item.prompt)}</strong>${item.hard_gate?'<span class="pill">核心项</span>':''}${item.stale?'<span class="pill warning">资料更新，待复核</span>':''}</div><div class="checklist-fields"><label class="field">核查结果<select name="status"><option value="unknown" ${item.status==='unknown'?'selected':''}>待核实</option><option value="yes" ${item.status==='yes'?'selected':''}>已核实且通过</option><option value="no" ${item.status==='no'?'selected':''}>未通过 / 存在疑点</option></select></label><label class="field">依据<textarea name="note" placeholder="核对了什么，结论为何成立（明确结论至少八字）">${esc(item.note||'')}</textarea></label><label class="field">来源链接或 data: 内部证据引用，每行一条<textarea name="sources" placeholder="https://… 或 data:financial-archive/600690.json#2025">${esc((item.sources||[]).join('\n'))}</textarea></label>${item.stale?'<label class="checkline"><input type="checkbox" name="reconfirm">我已按更新后的资料重新核对本项</label>':''}</div><div class="checklist-item-why" hidden></div>${item.custom?`<input type="hidden" name="custom_section" value="${esc(item.section)}"><input type="hidden" name="custom_prompt" value="${esc(item.prompt)}"><input type="hidden" name="custom_hard_gate" value="${item.hard_gate?'true':'false'}">`:''}</div>`).join('')}</details>`).join('')}<div id="custom-checklist-items"></div><div class="checklist-add"><h4>添加自己的核查问题</h4><div class="form-row"><label class="field">分类<input id="custom-checklist-section" placeholder="例如：产品与客户"></label><label class="field">问题<input id="custom-checklist-prompt" placeholder="写成能够核对证据的具体问题"></label></div><label class="checkline"><input id="custom-checklist-hard-gate" type="checkbox">列为核心项</label><button type="button" id="add-checklist-item">增加问题</button></div><div id="checklist-feedback-bottom" class="checklist-feedback" hidden></div><button type="submit" class="primary">保存逐项核查</button><p class="small muted">${esc(s.meaning||'清单只帮助你完整核查，不构成投资建议。')}</p></form>`;
+  const body=sections.map(section=>checklistSectionHtml(section,list.items.filter(x=>x.section===section),saved[section],section==='生意与能力圈')).join('');
+  return `<form id="investment-checklist-form" class="panel investment-checklist"><div class="section-head"><div><h3>投资核查清单 <span class="pill ${s.ready?'':'warning'}">${stateName}</span></h3><p class="small muted">核心项已核对 ${s.required_yes||0}/${s.required_total||0} · 待复核 ${s.stale||0} · 未通过 ${s.no||0} · 未知 ${s.unknown||0}。勾选只表示你完成了核查，不会自动决定买入。</p></div><button type="submit" class="primary">保存全部清单</button></div><div id="checklist-feedback" class="checklist-feedback" hidden></div><p class="notice small">每项明确结论须填写至少八字理由。来源可留空，写法自由：年报章节、公告编号、公开网址或 data: 内部指针都算，写下来日后更好复核。请将“实际控制人品行”落实到可查的履历、处罚、诉讼、关联交易与利益冲突，避免给人贴无法证实的标签。每一组都能单独保存：核完一组点该组的「保存本组」，不必等所有分组填完；系统只写这一组，其他分组保持原样。</p>${body}<div id="custom-checklist-items"></div><div class="checklist-add"><h4>添加自己的核查问题</h4><div class="form-row"><label class="field">分类<input id="custom-checklist-section" placeholder="例如：产品与客户"></label><label class="field">问题<input id="custom-checklist-prompt" placeholder="写成能够核对证据的具体问题"></label></div><label class="checkline"><input id="custom-checklist-hard-gate" type="checkbox">列为核心项</label><button type="button" id="add-checklist-item">增加问题</button></div><div id="checklist-feedback-bottom" class="checklist-feedback" hidden></div><button type="submit" class="primary">保存全部清单</button><p class="small muted">${esc(s.meaning||'清单只帮助你完整核查，不构成投资建议。')}</p></form>`;
  }
- function collectChecklist(form){
+ // 收集答案。给了 section 就只收这一组（分组独立保存）；不给就收全部。
+ // 自定义问题始终整份提交：后端按整份清单保存 custom_items，只交本组会把别组的自定义问题丢掉。
+ function collectChecklist(form,section){
   const answers={},custom_items=[];
-  for(const node of form.querySelectorAll('[data-checklist-item]')){
+  for(const node of checklistSectionNodes(form,section)){
    const id=node.dataset.checklistItem;
    answers[id]={status:node.querySelector('[name=status]').value,note:node.querySelector('[name=note]').value,
     sources:node.querySelector('[name=sources]').value.split('\n').map(x=>x.trim()).filter(Boolean),
     reconfirm:!!node.querySelector('[name=reconfirm]')?.checked};
-   if(node.dataset.custom==='true')custom_items.push({id,section:node.querySelector('[name=custom_section]').value,
+  }
+  for(const node of form.querySelectorAll('[data-checklist-item][data-custom="true"]')){
+   custom_items.push({id:node.dataset.checklistItem,section:node.querySelector('[name=custom_section]').value,
     prompt:node.querySelector('[name=custom_prompt]').value,hard_gate:node.querySelector('[name=custom_hard_gate]').value==='true'});
   }
-  return {answers,custom_items};
+  const payload={answers,custom_items};
+  payload.sections=section?[section]:touchedChecklistSections(form);
+  return payload;
  }
- // 与后端同一套规则：来源格式与条数对每一项都查；下了明确结论（已核实且通过 / 未通过）
- // 的项，还必须至少八字依据 + 一条可追溯来源。
- // 放在提交前检查，是为了当场说清缺什么，而不是让服务端退回一句笼统的错误。
- const SOURCE_PATTERN=/^(?:https?:\/\/\S+|data:[^\s]+)$/i;
- function checklistProblems(form){
-  const problems=[];
+ // 整份保存时，只给「这一轮真的动过的组」记保存时间；没碰过的组保留上一次的记录。
+ function touchedChecklistSections(form){
+  const touched=new Set();
   for(const node of form.querySelectorAll('[data-checklist-item]')){
+   const status=node.querySelector('[name=status]')?.value||'unknown';
+   const note=(node.querySelector('[name=note]')?.value||'').trim();
+   const sources=(node.querySelector('[name=sources]')?.value||'').trim();
+   if(status!=='unknown'||note||sources)touched.add(checklistItemSection(node));
+  }
+  return [...touched];
+ }
+ // 与后端同一套规则（value_research/investment_checklist.py 的 _validate_answer）：
+ // 来源写法自由、可留空，只查条数与长度；明确结论（已核实且通过 / 未通过）仍须至少八字依据。
+ // 放在提交前检查，是为了当场说清缺什么，而不是让服务端退回一句笼统的错误。
+ function checklistProblems(form,section){
+  const problems=[];
+  for(const node of checklistSectionNodes(form,section)){
    const status=(node.querySelector('[name=status]')?.value||'unknown');
    const note=(node.querySelector('[name=note]')?.value||'').trim();
    const sources=(node.querySelector('[name=sources]')?.value||'').split('\n').map(x=>x.trim()).filter(Boolean);
-   const reasons=[];
-   const bad=sources.filter(source=>!SOURCE_PATTERN.test(source));
-   if(bad.length)reasons.push(`来源格式不对：${bad.join('、')}（要用 https:// 开头的网址，或 data: 内部证据引用）`);
-   if(sources.length>8)reasons.push(`来源 ${sources.length} 条，超过八条`);
-   if(note.length>4000)reasons.push('依据超过四千字');
-   if(status!=='unknown'){
-    if(note.length<8)reasons.push(`依据只有 ${note.length} 字，未满八字`);
-    if(!sources.length)reasons.push('没有填来源');
-   }
+   const reasons=[],rules=[];
+   if(sources.length>SOURCE_MAX){reasons.push(`来源 ${sources.length} 条，超过 ${SOURCE_MAX} 条`);rules.push('sources_count');}
+   const tooLong=sources.filter(source=>source.length>SOURCE_MAX_LEN);
+   if(tooLong.length){reasons.push(`来源有 ${tooLong.length} 条超过 ${SOURCE_MAX_LEN} 字符`);rules.push('sources_length');}
+   if(note.length>4000){reasons.push('依据超过四千字');rules.push('note_too_long');}
+   if(status!=='unknown'&&note.length<8){reasons.push(`依据只有 ${note.length} 字，未满八字`);rules.push('note_too_short');}
    if(reasons.length)problems.push({id:node.dataset.checklistItem,
-    prompt:(node.querySelector('.checklist-question strong')?.textContent||'').trim(),reasons});
+    prompt:(node.querySelector('.checklist-question strong')?.textContent||'').trim(),reasons,rules});
   }
   return problems;
  }
- // 提示就地显示：不合格的条目自己写明缺什么并高亮，汇总提示在表单上下两处各写一份，
- // 保证无论点的是上面还是下面的保存按钮，都能在眼前看到。
- function showChecklistProblems(form,problems){
+ // 提示就地显示：不合格的条目自己写明缺什么并高亮，汇总提示写在问题所在的那一组里，
+ // 保证点哪一组的「保存本组」，就在那一组里看到缺什么。
+ function showChecklistProblems(form,problems,section){
   for(const node of form.querySelectorAll('.checklist-item-invalid'))node.classList.remove('checklist-item-invalid');
   for(const node of form.querySelectorAll('.checklist-item-why')){node.textContent='';node.hidden=true;}
   const first=[];
@@ -628,25 +676,81 @@ function capitalReturnOption(model){
    }
   }
   const html='<strong>还保存不了：</strong><ul>'+problems.map(problem=>`<li>${esc(problem.prompt)} —— ${esc(problem.reasons.join('；'))}</li>`).join('')+'</ul>';
-  for(const box of form.querySelectorAll('#checklist-feedback,#checklist-feedback-bottom')){box.innerHTML=html;box.hidden=false;}
+  const box=section?checklistSectionBox(form,section):null;
+  if(box){box.innerHTML=html;box.hidden=false;}
+  else for(const target of form.querySelectorAll('#checklist-feedback,#checklist-feedback-bottom')){target.innerHTML=html;target.hidden=false;}
   if(first.length){
-   const section=first[0].closest('details');
-   if(section)section.open=true;
+   const holder=first[0].closest('details');
+   if(holder)holder.open=true;
    first[0].scrollIntoView({behavior:'smooth',block:'center'});
   }
  }
- // 后端退回的错误：没有具体到哪一项，就写进上下两个提示框，并滚到离视线最近的那个。
- function showChecklistError(form,message){
-  for(const box of form.querySelectorAll('#checklist-feedback,#checklist-feedback-bottom')){
-   box.textContent=message;box.hidden=false;
-  }
+ // 后端退回的错误：没有具体到哪一项，就写进提示框，并滚到离视线最近的那个。
+ function showChecklistError(form,message,section){
+  const box=section?checklistSectionBox(form,section):null;
+  const targets=box?[box]:[...form.querySelectorAll('#checklist-feedback,#checklist-feedback-bottom')];
+  for(const target of targets){target.textContent=message;target.hidden=false;}
+  if(box){box.scrollIntoView({behavior:'smooth',block:'center'});return;}
   let best=null,bestDistance=Infinity;
-  for(const box of form.querySelectorAll('#checklist-feedback,#checklist-feedback-bottom')){
-   const rect=box.getBoundingClientRect();
+  for(const target of targets){
+   const rect=target.getBoundingClientRect();
    const distance=Math.abs(rect.top+rect.height/2-window.innerHeight/2);
-   if(distance<bestDistance){bestDistance=distance;best=box;}
+   if(distance<bestDistance){bestDistance=distance;best=target;}
   }
   if(best)best.scrollIntoView({behavior:'smooth',block:'center'});
+ }
+ // 分组保存成功后，按服务端返回的清单更新这一组的显示：计数、待复核标记、上次保存时间。
+ // 不整页重绘——重绘会抹掉其他分组里还没保存的填写。
+ function applyChecklistSaved(form,section,result){
+  const holder=checklistSectionHolder(form,section);
+  if(!holder)return;
+  const items=(result?.items||[]).filter(item=>item.section===section);
+  const byId=new Map(items.map(item=>[item.id,item]));
+  const yes=items.filter(item=>item.status==='yes'&&!item.stale).length;
+  const summary=holder.querySelector('summary');
+  if(summary)summary.textContent=`${section} · ${yes}/${items.length} 项已核`;
+  const saved=result?.saved_sections?.[section];
+  const label=holder.querySelector('.checklist-section-saved');
+  if(label)label.textContent=saved?`上次保存 ${fmtStamp(saved)}`:'尚未单独保存';
+  for(const node of holder.querySelectorAll('[data-checklist-item]')){
+   const item=byId.get(node.dataset.checklistItem);
+   if(!item)continue;
+   node.dataset.stale=item.stale?'true':'false';
+   const question=node.querySelector('.checklist-question');
+   const pill=question?.querySelector('.pill.warning');
+   if(item.stale){
+    if(question&&!pill){
+     const badge=document.createElement('span');
+     badge.className='pill warning';
+     badge.textContent='资料更新，待复核';
+     question.appendChild(badge);
+    }
+   }else if(pill)pill.remove();
+   const reconfirm=node.querySelector('[name=reconfirm]');
+   if(reconfirm&&!item.stale)reconfirm.closest('label')?.remove();
+  }
+  const box=holder.querySelector('.checklist-section-feedback');
+  if(box){box.innerHTML=`<strong>本组已保存。</strong> ${esc(section)} · ${yes}/${items.length} 项已核；其他分组保持原样，未改动。`;box.hidden=false;}
+ }
+ // 分组计数跟着页面上的填写走（新加的问题还没保存，先让计数对得上）。
+ function updateChecklistSectionCount(holder){
+  const nodes=[...holder.querySelectorAll('[data-checklist-item]')];
+  const yes=nodes.filter(node=>node.querySelector('[name=status]')?.value==='yes'&&node.dataset.stale!=='true').length;
+  const summary=holder.querySelector('summary');
+  if(summary)summary.textContent=`${holder.dataset.checklistSection} · ${yes}/${nodes.length} 项已核`;
+  return {yes,total:nodes.length};
+ }
+ // 自定义问题放进它自己的分组（分组不存在就新建），这样「保存本组」就能覆盖到它。
+ function ensureChecklistSection(form,section){
+  if(!form)return null;
+  const existing=checklistSectionHolder(form,section);
+  if(existing)return existing;
+  const anchor=form.querySelector('#custom-checklist-items');
+  const holder=document.createElement('div');
+  holder.innerHTML=checklistSectionHtml(section,[],null,true);
+  const node=holder.firstElementChild;
+  if(anchor)form.insertBefore(node,anchor);else form.appendChild(node);
+  return node;
  }
  function addCustomItem(){
   const section=document.getElementById('custom-checklist-section').value.trim();
@@ -654,10 +758,12 @@ function capitalReturnOption(model){
   if(!section||prompt.length<6){feedback('请填写分类和至少六字的具体问题。');return;}
   const hard=document.getElementById('custom-checklist-hard-gate').checked;
   const id='custom_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-  const item=`<div class="checklist-item" data-checklist-item="${id}" data-custom="true"><div class="checklist-question"><strong>${esc(prompt)}</strong>${hard?'<span class="pill">核心项</span>':''}</div><div class="checklist-fields"><label class="field">核查结果<select name="status"><option value="unknown">待核实</option><option value="yes">已核实且通过</option><option value="no">未通过 / 存在疑点</option></select></label><label class="field">依据<textarea name="note"></textarea></label><label class="field">来源链接，每行一条<textarea name="sources"></textarea></label></div><input type="hidden" name="custom_section" value="${esc(section)}"><input type="hidden" name="custom_prompt" value="${esc(prompt)}"><input type="hidden" name="custom_hard_gate" value="${hard?'true':'false'}"></div>`;
-  document.getElementById('custom-checklist-items').insertAdjacentHTML('beforeend',item);
+  const holder=ensureChecklistSection(document.getElementById('investment-checklist-form'),section);
+  if(!holder){feedback('没有找到清单表单。');return;}
+  holder.insertAdjacentHTML('beforeend',checklistItemHtml({id,section,prompt,hard_gate:hard,status:'unknown',note:'',sources:[],stale:false,custom:true}));
+  updateChecklistSectionCount(holder);
   document.getElementById('custom-checklist-prompt').value='';
-  feedback('问题已加入页面；填写后点击“保存逐项核查”。');
+  feedback(`问题已加入「${section}」分组，填写后点该组的「保存本组」即可。`);
  }
  function disposeCharts(){for(const chart of chartInstances)try{chart.dispose();}catch{}chartInstances.length=0;}
  function addChart(id,option,onClick){const target=document.getElementById(id);if(!target||!window.echarts)return;const chart=echarts.init(target);chart.setOption(option);if(onClick)chart.on('click',onClick);chartInstances.push(chart);}
@@ -712,5 +818,5 @@ function renderCurrentWaccLine(){
   requestAnimationFrame(()=>chartInstances.forEach(chart=>chart.resize()));
  }
  function resizeCharts(){for(const chart of chartInstances)chart.resize();}
- return {renderFinancial,explainFinancialMetric,renderIndustry,renderChecklist,collectChecklist,checklistProblems,showChecklistProblems,showChecklistError,addCustomItem,disposeCharts,renderCharts,resizeCharts,renderCurrentWaccLine,capitalReturnModel,capitalReturnCaption,capitalReturnOption,renderBalanceAudit,fmtCnDate,fmtStamp};
+ return {renderFinancial,explainFinancialMetric,renderIndustry,renderChecklist,collectChecklist,checklistProblems,showChecklistProblems,showChecklistError,applyChecklistSaved,addCustomItem,disposeCharts,renderCharts,resizeCharts,renderCurrentWaccLine,capitalReturnModel,capitalReturnCaption,capitalReturnOption,renderBalanceAudit,fmtCnDate,fmtStamp};
 })();
