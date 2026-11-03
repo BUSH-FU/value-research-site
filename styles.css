@@ -286,6 +286,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:250px;
 .vs-axis{fill:#829087;font-size:11px;font-family:inherit}
 .vs-safe-zone{fill:#eaf3ea;opacity:.8}
 .vs-name{fill:#20372f;font-size:12px;font-family:inherit}
+.vs-code{fill:#8a938b;font-size:11px;font-family:inherit;font-variant-numeric:tabular-nums}
 .vs-value{fill:#738078;font-size:12px;font-family:inherit;font-variant-numeric:tabular-nums}
 .vs-value.positive{fill:#245e49;font-weight:600}
 .vs-value.unverified{fill:#8a7548;font-weight:600}
@@ -307,6 +308,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:250px;
 .vs-key-stress{height:14px;border-left:2px dotted #b7beb6}
 .vs-clipped{fill:#7d857c;font-size:11px;font-family:inherit}
 .vs-row:hover .vs-name{fill:#245e49}
+.vs-row:hover .vs-code{fill:#245e49}
 @media(max-width:680px){.vs-chart{min-width:760px}.vs-chart-titlerow{display:block}.vs-legend{margin-top:10px}}
 #company-workspace [aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff}
 

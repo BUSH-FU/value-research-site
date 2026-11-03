@@ -190,12 +190,159 @@ window.ValuationScenarios = (() => {
   return {lo, hi: hi > lo ? hi : lo + 10};
  }
 
+ // ── 带宽的成因：全部由图上同一批数据实算，不写死任何数字 ───────────────────
+ // 2026-11-03 在保守口径 16 家上实测确认：
+ //   带宽(百分点) = 100 × (价格 ÷ 内在价值下限) × (1 − 内在价值下限 ÷ 内在价值上限)
+ // 原说明第③条把方向写反了（写成「落点接近 0 时条更宽」）——
+ // 实际是落点越负（价格越高于内在价值下限）条越宽，落点越正（价格越便宜）条越窄。
+ function bandStats(rows){
+  const pts = rows.map(row => {
+   const vals = marginPcts(row);
+   if(vals.length < 2) return null;
+   const mid = scenarioOf(row, MID);
+   const wacc = ((row.scenario||{}).wacc||{}).wacc_pct;
+   const p1 = scenarioOf(row, 'g1%').per_share;
+   const p3 = scenarioOf(row, 'g3%').per_share;
+   if(!isNum(wacc)) return null;
+   const lo = Math.min(...vals), hi = Math.max(...vals);
+   const perLo = isNum(p1) ? Number(p1) : null;
+   const perHi = isNum(p3) ? Number(p3) : null;
+   const kappa = (perLo && perHi && perLo > 0) ? perHi / perLo : null;
+   return {
+    name: row.name || row.code, code: row.code,
+    width: hi - lo, lo, hi,
+    rLow: 1 - lo / 100,                          // 价格 ÷ 内在价值下限
+    kappa,                                        // 内在价值上限 ÷ 下限
+    identity: kappa ? 100 * (1 - lo / 100) * (1 - 1 / kappa) : null,
+    term: isNum(mid.terminal_share) ? Number(mid.terminal_share) : null,
+    wacc: Number(wacc),
+    amp: 1 / (Number(wacc) - 1),                  // 1÷(WACC−g)，g 取已定的 1% 档
+    growth: (perLo && perHi && perLo > 0) ? (perHi - perLo) / perLo * 100 : null,
+   };
+  }).filter(Boolean);
+  const usable = pts.filter(p => p.term !== null && p.kappa !== null);
+  const terms = pts.filter(p => p.term !== null).map(p => p.term);
+  const withGrowth = pts.filter(p => p.growth !== null);
+  return {
+   n: pts.length, nUsed: usable.length,
+   identityErr: usable.length ? Math.max(...usable.map(p => Math.abs(p.identity - p.width))) : null,
+   termLo: terms.length ? Math.min(...terms) : null,
+   termHi: terms.length ? Math.max(...terms) : null,
+   minGap: withGrowth.length ? withGrowth.reduce((a, b) => a.wacc < b.wacc ? a : b) : null,
+   maxGap: withGrowth.length ? withGrowth.reduce((a, b) => a.wacc > b.wacc ? a : b) : null,
+   r2: olsR2(usable),
+  };
+ }
+
+ // 最小二乘 + 留一交叉验证：解释力必须来自这批数据，不能写死在文案里。
+ // 法方程 (X'X)b = X'y，高斯消元解 4×4；样本太小就不给数，写「样本不足」。
+ function olsR2(pts){
+  const n = pts.length;
+  if(n < 8) return null;
+  const y = pts.map(p => p.width);
+  // 常数列与截距共线，会让法方程奇异——先剔掉这批没有变化的因子，
+  // 否则整段解释力会静默消失（真实数据里终值占比是有变化的，但夹具可能没有）。
+  const cands = [p => p.rLow, p => p.term, p => p.amp];
+  const cols = cands.filter(f => {
+   const v = pts.map(f);
+   return Math.max(...v) - Math.min(...v) > 1e-12;
+  });
+  if(!cols.length) return null;
+  const k = cols.length + 1;
+  const solve = (A, target) => {
+   const m = A.map((row, i) => row.concat([target[i]]));
+   for(let c = 0; c < k; c++){
+    let piv = c;
+    for(let r = c + 1; r < m.length; r++) if(Math.abs(m[r][c]) > Math.abs(m[piv][c])) piv = r;
+    if(Math.abs(m[piv][c]) < 1e-12) return null;
+    const tmp = m[c]; m[c] = m[piv]; m[piv] = tmp;
+    for(let r = 0; r < m.length; r++){
+     if(r === c) continue;
+     const f = m[r][c] / m[c][c];
+     for(let cc = c; cc <= k; cc++) m[r][cc] -= f * m[c][cc];
+    }
+   }
+   return m.map((row, i) => row[k] / row[i]);
+  };
+  const fit = idx => {
+   const X = idx.map(i => [1, ...cols.map(f => f(pts[i]))]);
+   const XtX = [];
+   for(let a = 0; a < k; a++){
+    XtX[a] = [];
+    for(let b = 0; b < k; b++) XtX[a][b] = X.reduce((s, row) => s + row[a] * row[b], 0);
+   }
+   const Xty = [];
+   for(let a = 0; a < k; a++) Xty[a] = X.reduce((s, row, i) => s + row[a] * y[idx[i]], 0);
+   const beta = solve(XtX, Xty);
+   if(!beta) return null;
+   const err = idx.map(i => {
+    const Xa = [1, ...cols.map(f => f(pts[i]))];
+    const pred = beta.reduce((s, b, a) => s + b * Xa[a], 0);
+    return (y[i] - pred) ** 2;
+   });
+   const mean = idx.reduce((s, i) => s + y[i], 0) / idx.length;
+   const sst = idx.reduce((s, i) => s + (y[i] - mean) ** 2, 0);
+   return {beta, sse: err.reduce((a, b) => a + b, 0), sst};
+  };
+  const all = pts.map((_, i) => i);
+  const full = fit(all);
+  if(!full) return null;
+  let loo = 0, ok = 0;
+  for(let i = 0; i < n; i++){
+   const sub = fit(all.filter(j => j !== i));
+   if(!sub) continue;
+   const Xa = [1, ...cols.map(f => f(pts[i]))];
+   const pred = sub.beta.reduce((s, b, a) => s + b * Xa[a], 0);
+   loo += (y[i] - pred) ** 2; ok++;
+  }
+  const mean = y.reduce((a, b) => a + b, 0) / n;
+  const sst = y.reduce((s, v) => s + (v - mean) ** 2, 0);
+  return {
+   r2: full.sst > 0 ? 1 - full.sse / full.sst : null,
+   looR2: (ok === n && sst > 0) ? 1 - loo / sst : null,
+   n,
+  };
+ }
+
+ // 图例与读法：两张区间图（严格候选 / 自动估值明细）符号含义完全相同，说明也共用；
+ // 只有「这张图代表什么结论」不同，各自单独说一句。
+ // 2026-11-03：b9f6459 把前一张图改成只画严格候选后，说明文字留在了原位，
+ // 结果自动估值那张真正有内容的图反而没有任何说明——说明必须跟着它讲的那张图走。
+ function chartLegend(threshold){
+  return `<div class="vs-legend"><span><i class="vs-key vs-key-band"></i>三档区间</span><span><i class="vs-key vs-key-dot"></i>${MID_LABEL} 档落点</span><span><i class="vs-key vs-key-threshold"></i>${threshold}% 价格条件线</span><span><i class="vs-key vs-key-safe"></i>仅价格条件区（非研究达标）</span><span><i class="vs-key vs-key-stress"></i>压力校验下限</span></div>`;
+ }
+
+ function chartNotes(threshold, scope, stats){
+  const f = stats || {};
+  const lead = scope === 'auto'
+   ? '<strong>这是自动估值口径</strong>：现金流用自动草案、没有任何人工判断，用来排查模型哪里过度乐观，<strong>不是研究结论</strong>。严格候选那张图在上面，两张图的符号含义完全相同。'
+   : '<strong>这是严格候选口径</strong>：同时通过价格条件与预测/估值门禁的公司，可以进下一步人工核查。自动估值那张图在下面，两张图的符号含义完全相同。';
+  const termRange = (f.termLo !== null && f.termLo !== undefined)
+   ? num(f.termLo * 100, 1) + '%～' + num(f.termHi * 100, 1) + '%' : '—';
+  const exLo = (f.minGap && f.minGap.growth !== null)
+   ? f.minGap.name + '（WACC ' + num(f.minGap.wacc, 2) + '%）1%→3% 档每股涨 ' + num(f.minGap.growth, 1) + '%' : '—';
+  const exHi = (f.maxGap && f.maxGap.growth !== null)
+   ? f.maxGap.name + '（WACC ' + num(f.maxGap.wacc, 2) + '%）只涨 ' + num(f.maxGap.growth, 1) + '%' : '—';
+  const err = (f.identityErr !== null && f.identityErr !== undefined && f.nUsed)
+   ? '这一页 ' + f.nUsed + ' 家实测的最大误差 ' + num(f.identityErr, 3) + ' 个百分点' : '本页样本不足，未做误差核对';
+  const r2 = (f.r2 && f.r2.r2 !== null)
+   ? '这三件事合起来对带宽的解释力 R²＝' + num(f.r2.r2, 3)
+     + (f.r2.looR2 !== null ? '（留一交叉验证 ' + num(f.r2.looR2, 3) + '，样本 ' + f.r2.n + ' 家）' : '（样本 ' + f.r2.n + ' 家）')
+   : '';
+  return `
+  <p class="small muted">${lead}横轴是安全边际（现价比内在价值便宜了多少，折价口径）。每条横带的<strong>左端是永续增长率 1% 档、右端是 3% 档</strong>，圆点是 ${MID_LABEL} 档落点（画在带的左端，因为它就是最保守的那一档）；数值下面那行<strong>带宽</strong>＝三档之间安全边际的摆动幅度，越宽说明这个结论越依赖永续增长率这一个假设。竖虚线是 ${threshold}% 价格条件线，竖实线是 0 轴：<strong>区间跨过 0 轴的，说明换个假设「贵」就变成「便宜」，这类最需要警惕</strong>。带的颜色按 ${MID_LABEL} 档落点分：绿＝价格条件与预测/估值门禁同时通过，黄灰＝价格达线但门禁未通过，橙＝在 0 与门槛之间，灰＝落点为负。<strong>右侧浅绿底只是价格条件区，不等于研究达标。</strong>细竖线是压力校验下限折算后的位置，淡虚线把它连到三档带左端——那一段就是主情景离灾难情景还有多远；只作辅助观察，不控制价格条件。</p>
+  <p class="small muted"><strong>带宽由什么决定</strong>：带宽（百分点）＝ 100 ×（价格 ÷ 内在价值下限）×（1 − 内在价值下限 ÷ 内在价值上限）——${err}。①<strong>落点位置</strong>：落点越负（价格越高于内在价值下限）条越宽，越正（价格越便宜）条越窄；②<strong>终值占企业价值的比重</strong>：永续增长率只影响终值，比重越高越敏感（实测 ${termRange}）；③<strong>WACC 与永续增长率的间距</strong>：终值 ∝ 1÷(WACC−g)，WACC 越低、g 越靠近它，同样挪 2 个百分点估值变动越大——${exLo}，${exHi}。${r2}。</p>
+  <p class="small muted"><strong>带宽怎么用</strong>：条窄、且整条都在门槛右侧，说明三档假设下都达标，结论稳；条宽、并跨过 0 轴，说明「贵还是便宜」取决于永续增长率取 1% 还是 3%，这类不该按单一落点下判断。</p>`;
+ }
+
  function bandChart(data){
   const rows = rowsOf(data, SLOT_MAIN, true);
   if(!rows.length) return '<p class="small muted">目前没有能测算的公司。</p>';
   const threshold = Number(data?.margin_min_pct) || 0;
   const {lo, hi} = axisDomain(data);
-  const W = 1080, NAME_W = 158, VAL_W = 132, TOP = 34, ROW_H = 32, BOTTOM = 48;
+  // 名字栏同时放公司名与股票代码：同一个池子里光看名字容易张冠李戴，
+  // 代码是唯一标识。代码单独一列右对齐，名字右对齐在它左边。
+  const W = 1080, NAME_W = 176, VAL_W = 132, TOP = 34, ROW_H = 32, BOTTOM = 48;
   const plotLeft = NAME_W, plotRight = W - VAL_W;
   const height = TOP + rows.length * ROW_H + BOTTOM;
   const x = v => plotLeft + (plotRight - plotLeft) * (Math.min(hi, Math.max(lo, v)) - lo) / (hi - lo);
@@ -254,7 +401,8 @@ window.ValuationScenarios = (() => {
    const widthText = hasBand
     ? `<text x="${plotRight + 12}" y="${y(index) + 15}" class="vs-width">带宽 ${num(high - low, 1)}pp</text>` : '';
    return `<g class="vs-row">
-    <text x="${NAME_W - 14}" y="${y(index) + 4}" text-anchor="end" class="vs-name">${esc(row.name || row.code)}</text>
+    <text x="${NAME_W - 56}" y="${y(index) + 4}" text-anchor="end" class="vs-name">${esc(row.name || row.code)}</text>
+    <text x="${NAME_W - 12}" y="${y(index) + 4}" text-anchor="end" class="vs-code">${esc(row.code)}</text>
     ${band}
     ${stressLink}
     ${dot}${stressMark}${mark}
@@ -486,7 +634,7 @@ window.ValuationScenarios = (() => {
     ? '<span class="muted">—</span><br><span class="small muted">' + (complete ? '压力下限非正，不适用' : '情景不完整') + '</span>'
     : pct1(stressMargin);
    return `<tr data-tt-key="${esc(row.code)}">
-    <td><button type="button" data-company="${esc(row.code)}">${esc(row.name||row.code)}</button><br><span class="small muted">自动估值 · 未复核</span>${jumpTag(row)}</td>
+    <td><button type="button" data-company="${esc(row.code)}">${esc(row.name||row.code)}</button> <span class="code">${esc(row.code)}</span><br><span class="small muted">自动估值 · 未复核</span>${jumpTag(row)}</td>
     <td>${isNum(neu.price)?'¥'+num(neu.price):'不可比较'}<br><span class="small muted">${esc(neu.priceDate)}</span></td>
     <td>${bandCell}<br><span class="small muted">主情景 ${MID_LABEL} 档 ${neu.per===null?'—':'¥'+num(neu.per)}</span></td>
     <td>${targetCell}</td>
@@ -606,21 +754,29 @@ window.ValuationScenarios = (() => {
    <div class="vs-chart-head">
     <div class="vs-chart-titlerow">
      <h3>严格候选的三档安全边际</h3>
-     <div class="vs-legend"><span><i class="vs-key vs-key-band"></i>三档区间</span><span><i class="vs-key vs-key-dot"></i>${MID_LABEL} 档落点</span><span><i class="vs-key vs-key-threshold"></i>${threshold}% 价格条件线</span><span><i class="vs-key vs-key-safe"></i>仅价格条件区（非研究达标）</span><span><i class="vs-key vs-key-stress"></i>压力校验下限</span></div>
+     ${researchPassed?chartLegend(threshold):''}
     </div>
-    <p class="small muted">横轴是安全边际（现价比内在价值便宜了多少，折价口径）。每条横带的<strong>左端是永续增长率 1% 档、右端是 3% 档</strong>，圆点是 ${MID_LABEL} 档落点；数值下面那行<strong>带宽</strong>＝三档之间安全边际的摆动幅度，越宽说明这个结论越依赖永续增长率这一个假设。竖虚线是 ${threshold}% 价格条件线，竖实线是 0 轴：<strong>区间跨过 0 轴的，说明换个假设「贵」就变成「便宜」，这类最需要警惕</strong>。带的颜色按 ${MID_LABEL} 档落点分：绿＝价格条件与预测/估值门禁同时通过，黄灰＝价格达线但门禁未通过，橙＝在 0 与门槛之间，灰＝落点为负。<strong>右侧浅绿底只是价格条件区，不等于研究达标。</strong>细竖线是压力校验下限折算后的位置，淡虚线把它连到三档带左端——那一段就是主情景离灾难情景还有多远；只作辅助观察，不控制价格条件。</p>
+    ${researchPassed?chartNotes(threshold, 'research', bandStats(researchRows)):''}
    </div>
    <div class="vs-chart-wrap">${bandChart(researchData)}</div>
-   ${researchPassed?`<p class="small muted">横轴范围 ${axisDomain(researchData).lo}% ～ ${axisDomain(researchData).hi}%；低于左端的区间折叠到边缘并标 ◀。</p>`:''}
-   <p class="small muted"><strong>带宽为什么有的宽有的窄</strong>——由三件事共同决定（实测三因素合起来对带宽的解释力约 0.76）：①<strong>终值占企业价值的比重</strong>，永续增长率只影响终值，比重越高越敏感（本页 70%～88%）；②<strong>WACC 与永续增长率的间距</strong>，终值 ∝ 1÷(WACC−g)，WACC 越低、g 越靠近它，同样挪 2 个百分点，估值变动越大（法拉电子 WACC 9.13% 时终值只涨 35%，华润江中 WACC 4.56% 时涨 109%）；③<strong>落点离 0 的距离</strong>，安全边际 ＝ 1 − 现价 ÷ 内在价值，落点接近 0 时，企业价值的相对变化几乎 1:1 映射到安全边际，条自然更宽。</p>
-   <p class="small muted"><strong>带宽怎么用</strong>：条窄、且整条都在门槛右侧，说明三档假设下都达标，结论稳；条宽、并跨过 0 轴，说明「贵还是便宜」取决于永续增长率取 1% 还是 3%，这类不该按单一落点下判断。</p>
+   ${researchPassed
+    ? `<p class="small muted">横轴范围 ${axisDomain(researchData).lo}% ～ ${axisDomain(researchData).hi}%；低于左端的区间折叠到边缘并标 ◀。</p>`
+    : '<p class="small muted">当前没有公司同时通过价格条件与预测/估值门禁，这张图暂时没有内容。图例与读法在下面「自动估值明细」的同一张图上。</p>'}
   </div>
   ${researchPassed?`<div class="panel"><h3>严格候选逐家结果</h3>${tableOf(researchData, SLOT_MAIN)}</div>`:''}
   <div class="panel vs-diagnostics">
    <h3>自动估值明细（${rows.length} 家，未通过门禁，不是候选股）</h3>
    <p class="small muted"><strong>自动估值</strong>＝按固定公式算出来的数：现金流用自动草案，WACC 取当前口径，全程没有人工判断。它用来排查估值模型哪里过度乐观，<strong>不是研究结论</strong>；未通过门禁的公司不进主榜，价格条件也不等于企业内在价值已被可靠验证。</p>
    ${decisionTable(data, SLOT_MAIN)}
+   <div class="vs-chart-head">
+    <div class="vs-chart-titlerow">
+     <h3>自动估值 · 三档安全边际区间</h3>
+     ${chartLegend(threshold)}
+    </div>
+    ${chartNotes(threshold, 'auto', bandStats(rows))}
+   </div>
    <div class="vs-chart-wrap">${bandChart(data)}</div>
+   <p class="small muted">横轴范围 ${axisDomain(data).lo}% ～ ${axisDomain(data).hi}%；低于左端的区间折叠到边缘并标 ◀。</p>
    <p class="small muted">每股情景估值来自自动草案 + 当前口径 WACC；报价每个交易日 23:30 后自动更新；测算时间 ${esc(generated)}。</p>
    ${tableOf(data, SLOT_MAIN)}
   </div>
