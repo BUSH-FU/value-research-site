@@ -114,9 +114,6 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:250px;
 .chart-selection strong{font-size:13px}
 .fcff-chart [data-fcff-point]{cursor:pointer;outline:none}
 .fcff-chart [data-fcff-point]:hover,.fcff-chart [data-fcff-point]:focus-visible,.fcff-chart [data-fcff-point].selected{stroke:#c8a365;stroke-width:4}
-.bar-column[data-roe-bar]{border:0;background:transparent;padding:0;border-radius:0;cursor:pointer;min-width:0}
-.bar-column[data-roe-bar]:hover .bar,.bar-column[data-roe-bar]:focus-visible .bar,.bar-column[data-roe-bar].selected .bar{fill:#286c51}
-.bar-column[data-roe-bar]:focus-visible{outline:2px solid var(--green);outline-offset:3px}
 .structure-row[data-structure-field]{width:100%;border:1px solid transparent;background:transparent;border-radius:5px;padding:5px 3px;text-align:left}
 .structure-row[data-structure-field]:hover,.structure-row[data-structure-field]:focus-visible,.structure-row[data-structure-field].selected{background:#edf5ed;border-color:#c8d9cb}
 .capital-return-note p{flex-basis:100%;margin:0}
@@ -234,9 +231,25 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:250px;
 .wacc-pending p{margin:8px 0 0}
 @media(max-width:1050px){.wacc-latest{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:680px){.wacc-latest{grid-template-columns:1fr}.wacc-history-chart{height:280px}}
-/* ROE 年度序列：上市以来全部年度，柱子固定宽度并可横向滚动，不挤压年份标签。 */
-.chart.scroll{overflow-x:auto;padding-bottom:26px}
-.chart.scroll .bar-column{flex:0 0 42px}
+/* ROE 年度序列：竖排逐年。
+   上市以来可以有三四十个年度，横排必然要横向滚动、右侧空一大片；
+   改成竖排后每行＝年份 + 条 + 数值，宽窄自适应，不再有横向滚动。
+   全期均值线与 0 轴贯穿整列，一眼看出哪几年高于、低于全期均值。 */
+.roe-head{position:relative;height:17px;margin:16px 64px 0 54px}
+.roe-mean-label{position:absolute;top:0;transform:translateX(-50%);font-size:10px;color:var(--green);white-space:nowrap}
+.roe-list{position:relative}
+.roe-row{display:grid;grid-template-columns:44px 1fr 54px;align-items:center;gap:10px;height:20px;border:0;background:transparent;padding:0;margin:0;border-radius:0;text-align:left;width:100%}
+.roe-row .year{font-size:11px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.roe-row .bar-label{font-size:11px;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
+.roe-track{position:relative;display:block;height:12px;background:#f2f5f1;border-radius:2px}
+.roe-bar{position:absolute;top:0;height:12px;min-width:1px;background:#98b9a0;border-radius:2px}
+.roe-bar.negative{background:#d7b39f}
+.roe-row:hover .roe-bar,.roe-row:focus-visible .roe-bar,.roe-row.selected .roe-bar{background:#286c51}
+.roe-row:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.roe-axis{position:absolute;left:54px;right:64px;top:0;bottom:0;pointer-events:none}
+.roe-axis i{position:absolute;top:0;bottom:0;width:1px}
+.roe-zero{background:#c9d0c8}
+.roe-mean{background:var(--green);opacity:.5}
 /* 早年被公开财报源补齐的年份标记。 */
 .supp-mark{margin-left:5px;padding:1px 5px;border-radius:4px;background:#f0f1ef;color:#7d857c;font-size:10px}
 /* 年度顺序开关：最新在前 / 最早在前。 */

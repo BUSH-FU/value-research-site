@@ -301,12 +301,52 @@ async function loadCyclicality(code){
 function safeLink(url){try{const u=new URL(url);return ['http:','https:'].includes(u.protocol)?esc(u.href):'#';}catch{return '#';}}
 // 年度顺序开关：最新在前 / 最早在前。历史现金流表与 ROE 年度序列共用一个顺序。
 function yearOrderToggle(){return `<button type="button" class="year-order-toggle" data-year-order-toggle aria-label="切换年度排序">年度：${yearOrder==='desc'?'最新在前':'最早在前'} ⇅</button>`;}
+/**
+ * ROE 年度序列改成竖排后，条长必须按真实数值算：
+ * 宽度按 [最负值, 最大值] 这把尺子换算，0 轴与全期均值线画在同一把尺子上，
+ * 读一行就知道这年高于还是低于全期均值。
+ * 宽度与位置走 CSSOM 设（行内 style 会被 CSP 挡掉）。
+ */
+function sizeRoeBars(){
+ const list=$('roe-list');
+ if(!list) return;
+ const rows=[...list.querySelectorAll('[data-roe-bar]')];
+ const values=rows.map(row=>Number(row.dataset.roeValue)).filter(v=>Number.isFinite(v));
+ if(!values.length) return;
+ const mean=Number.isFinite(roeFullMean)?roeFullMean:null;
+ const lo=Math.min(0,...values), hi=Math.max(0,...values,mean==null?0:mean);
+ const total=hi-lo||1;
+ const zero=(0-lo)/total*100;
+ rows.forEach(row=>{
+  const bar=row.querySelector('.roe-bar');
+  if(!bar) return;
+  const raw=row.dataset.roeValue;
+  if(raw===''){ bar.style.width='0%'; bar.style.left='0%'; return; }
+  const value=Number(raw), width=Math.abs(value)/total*100;
+  bar.style.width=width+'%';
+  bar.style.left=(value>=0?zero:zero-width)+'%';
+ });
+ const zeroLine=list.querySelector('.roe-zero');
+ if(zeroLine) zeroLine.style.left=zero+'%';
+ const meanLine=list.querySelector('.roe-mean'), meanLabel=document.querySelector('.roe-mean-label');
+ if(meanLine&&meanLabel){
+  if(mean==null){ meanLine.hidden=true; meanLabel.hidden=true; }
+  else{
+   const position=(mean-lo)/total*100;
+   meanLine.style.left=position+'%';
+   meanLine.hidden=false;
+   meanLabel.textContent='全期均值 '+num(mean)+'%';
+   meanLabel.style.left=Math.min(88,Math.max(12,position))+'%';
+   meanLabel.hidden=false;
+  }
+ }
+}
+
 function renderCompany(){
  const {stock,company,summary,review,quote,disclosures,quality,ai,watching}=detail;
  const hist=company?.history||[];
  // 按开关排序后的年度序列；表与图共用，避免两处方向相反。
  const rows=yearOrder==='desc'?[...hist].reverse():[...hist];
- const max=Math.max(20,...hist.map(r=>Math.abs(r.roe||0)));
  // 展示层：上市以来全部年度；筛选层：仍是近十年（screener.roe_summary / quality.evaluate）。
  const win=company?.window||null;
  const coverageText=win&&win.first_year?`${win.first_year}–${win.last_year}（${win.years} 年）`:(hist.length?`${hist[0].year}–${hist[hist.length-1].year}（${hist.length} 年）`:'尚未拉取');
@@ -319,7 +359,7 @@ function renderCompany(){
  const previousGraph=$('management-graph');if(graphObserver){graphObserver.disconnect();graphObserver=null;}if(previousGraph&&window.echarts)echarts.getInstanceByDom(previousGraph)?.dispose();ValueReport.disposeCharts();window.Cyclicality?.disposeCharts();window.WaccHistory?.disposeCharts();
  $('research-content').className='';
  $('research-content').innerHTML=`<div class="panel company-head"><div><h2>${esc(stock.name)} <span class="code">${esc(selected)}</span></h2><span class="muted">${esc(stock.industry||'')} · 上市 ${esc(cnDate(stock.list_date))}</span></div><div class="actions"><button class="primary" id="fetch-company">拉取上市以来财报与收盘价</button><button id="fetch-disclosures">获取公告入口</button><button id="update-news" class="primary">更新资讯并 AI 研读</button><button id="watch-company">${watching?'取消每日关注':'关注并每日更新'}</button><a class="button" href="api/company/${esc(selected)}" download="${esc(selected)}-研究底稿.json">导出底稿</a></div></div>
- ${renderPricePanel()}${ValueReport.renderFinancial(detail)}${ValueReport.renderIndustry(detail)}${window.Cyclicality?.panel(cycleRecord)||''}${window.WaccHistory?.panel(detail.wacc_history)||''}${renderAI(detail)}${renderCompanyHistory(detail)}${renderManagement(detail)}${ValueReport.renderChecklist(detail)}${quality?`<div class="panel"><h3>严格财务预筛 · ${esc(({passed:'通过，仍需定性研究',excluded:'未通过',pending:'数据待补',separate:'单独研究'})[quality.evaluation.state]||quality.evaluation.state)}</h3><p class="small muted">${esc([...(quality.evaluation.reasons||[]),...(quality.evaluation.missing||[])].join('；'))}</p>${(quality.evaluation.reasons||[]).length?'<p class="small muted">未通过原因自带门槛：每条都写明实测值与要求，完整规则见上方筛选规则清单。</p>':''}<div class="scroll"><table><thead><tr><th>检查项</th><th>数值</th><th>要求</th><th>结果</th></tr></thead><tbody>${(quality.evaluation.checks||[]).map(c=>`<tr><td>${esc(c.label)}</td><td>${num(c.value, c.unit==='年'?0:2)}${unitText(c.unit)}</td><td>${esc([c.requirement,c.note].filter(Boolean).join('；')||'—')}</td><td>${c.passed?'通过':'未通过'}</td></tr>`).join('')}</tbody></table></div></div>`:''}${dividendPanel(quality?.evaluation?.dividend,detail.financial_archive)}<div class="grid2"><div class="panel"><div class="section-head"><div><h3>盈利质量 · ROE 年度序列</h3><p class="small muted">柱状图覆盖上市以来全部年度（${coverageText}）；均值与标准差仍是筛选口径的近十年（${screeningText}），不随档案长度改变。</p></div>${yearOrderToggle()}</div>${summary?`<div class="metric-line"><div><span class="small muted">近十年均值 · 筛选口径</span><strong>${num(summary.mean)}%</strong></div><div><span class="small muted">标准差 / 百分点</span><strong>${num(summary.std)}</strong></div><div><span class="small muted">近十年完整度</span><strong>${summary.count}<span class="small muted"> / 10</span></strong></div></div><div class="chart scroll">${rows.map(r=>`<button type="button" class="bar-column" data-roe-bar data-roe-year="${esc(r.year)}" data-roe-value="${r.roe==null?'':esc(r.roe)}" aria-label="查看 ${esc(r.year)} 年 ROE ${r.roe==null?'缺失':num(r.roe,1)+'%'}"><span class="bar-label">${num(r.roe,1)}</span><svg width="32" height="${Math.round(Math.abs(r.roe||0)/max*75)+2}" aria-hidden="true"><rect class="bar ${r.roe<0?'negative':''}" width="32" height="100%" rx="3"/></svg><span class="year">${r.year}</span></button>`).join('')}</div><div id="roe-chart-detail" class="chart-selection" aria-live="polite">点击柱子查看该年的 ROE，并与上市以来全期均值比较。</div><p class="small muted">${summary.passes_mean?'近十年均值达到 15%，波动稳定性仍需判断。':'尚未满足完整十年均值 ≥15% 的要求。'}上市以来全期均值 ${roeFullMean==null?'—':num(roeFullMean)+'%'}（${roeValues.length} 个有 ROE 的年度）。${summary.missing_years.length?' 近十年缺失：'+summary.missing_years.join('、'):''}</p>`:'<p class="muted">尚未拉取财务指标。</p>'}</div><div class="panel"><h3>公开披露与来源</h3><p class="small muted">${esc(disclosures?.coverage||'公告读取暂不等于完成定性审核。请核对年报、风险提示、关联交易和审计意见。')}</p><div class="actions"><a href="https://www.cninfo.com.cn/" target="_blank" rel="noopener">巨潮资讯</a><a href="https://www.sse.com.cn/" target="_blank" rel="noopener">上交所</a><a href="https://www.szse.cn/" target="_blank" rel="noopener">深交所</a></div><div class="disclosures">${(disclosures?.rows||[]).map(r=>`<a class="disclosure" href="${safeLink(r['公告链接'])}" target="_blank" rel="noopener">${esc(r['公告标题'])}<span class="muted">　${esc(r['公告时间'])}</span></a>`).join('')}</div><p class="small muted">${quote?'未复权收盘价 ¥'+num(quote.close)+' · '+esc(quote.trade_date):'尚无收盘价'}<br>${company?'财报抓取：'+esc(company.fetched_at):''}</p>${(company?.errors||[]).map(e=>`<p class="small">${esc(e)}</p>`).join('')}</div></div>
+ ${renderPricePanel()}${ValueReport.renderFinancial(detail)}${ValueReport.renderIndustry(detail)}${window.Cyclicality?.panel(cycleRecord)||''}${window.WaccHistory?.panel(detail.wacc_history)||''}${renderAI(detail)}${renderCompanyHistory(detail)}${renderManagement(detail)}${ValueReport.renderChecklist(detail)}${quality?`<div class="panel"><h3>严格财务预筛 · ${esc(({passed:'通过，仍需定性研究',excluded:'未通过',pending:'数据待补',separate:'单独研究'})[quality.evaluation.state]||quality.evaluation.state)}</h3><p class="small muted">${esc([...(quality.evaluation.reasons||[]),...(quality.evaluation.missing||[])].join('；'))}</p>${(quality.evaluation.reasons||[]).length?'<p class="small muted">未通过原因自带门槛：每条都写明实测值与要求，完整规则见上方筛选规则清单。</p>':''}<div class="scroll"><table><thead><tr><th>检查项</th><th>数值</th><th>要求</th><th>结果</th></tr></thead><tbody>${(quality.evaluation.checks||[]).map(c=>`<tr><td>${esc(c.label)}</td><td>${num(c.value, c.unit==='年'?0:2)}${unitText(c.unit)}</td><td>${esc([c.requirement,c.note].filter(Boolean).join('；')||'—')}</td><td>${c.passed?'通过':'未通过'}</td></tr>`).join('')}</tbody></table></div></div>`:''}${dividendPanel(quality?.evaluation?.dividend,detail.financial_archive)}<div class="grid2"><div class="panel"><div class="section-head"><div><h3>盈利质量 · ROE 年度序列</h3><p class="small muted">逐年序列覆盖上市以来全部年度（${coverageText}）；均值与标准差仍是筛选口径的近十年（${screeningText}），不随档案长度改变。</p></div>${yearOrderToggle()}</div>${summary?`<div class="metric-line"><div><span class="small muted">近十年均值 · 筛选口径</span><strong>${num(summary.mean)}%</strong></div><div><span class="small muted">标准差 / 百分点</span><strong>${num(summary.std)}</strong></div><div><span class="small muted">近十年完整度</span><strong>${summary.count}<span class="small muted"> / 10</span></strong></div></div><div class="roe-head"><span class="roe-mean-label"></span></div><div class="roe-list" id="roe-list"><div class="roe-axis" aria-hidden="true"><i class="roe-zero"></i><i class="roe-mean"></i></div>${rows.map(r=>`<button type="button" class="roe-row" data-roe-bar data-roe-year="${esc(r.year)}" data-roe-value="${r.roe==null?'':esc(r.roe)}" aria-label="查看 ${esc(r.year)} 年 ROE ${r.roe==null?'缺失':num(r.roe,1)+'%'}"><span class="year">${r.year}</span><span class="roe-track"><i class="roe-bar ${r.roe<0?'negative':''}"></i></span><span class="bar-label">${r.roe==null?'—':num(r.roe,1)}</span></button>`).join('')}</div><div id="roe-chart-detail" class="chart-selection" aria-live="polite">点击柱子查看该年的 ROE，并与上市以来全期均值比较。</div><p class="small muted">${summary.passes_mean?'近十年均值达到 15%，波动稳定性仍需判断。':'尚未满足完整十年均值 ≥15% 的要求。'}上市以来全期均值 ${roeFullMean==null?'—':num(roeFullMean)+'%'}（${roeValues.length} 个有 ROE 的年度）。${summary.missing_years.length?' 近十年缺失：'+summary.missing_years.join('、'):''}</p>`:'<p class="muted">尚未拉取财务指标。</p>'}</div><div class="panel"><h3>公开披露与来源</h3><p class="small muted">${esc(disclosures?.coverage||'公告读取暂不等于完成定性审核。请核对年报、风险提示、关联交易和审计意见。')}</p><div class="actions"><a href="https://www.cninfo.com.cn/" target="_blank" rel="noopener">巨潮资讯</a><a href="https://www.sse.com.cn/" target="_blank" rel="noopener">上交所</a><a href="https://www.szse.cn/" target="_blank" rel="noopener">深交所</a></div><div class="disclosures">${(disclosures?.rows||[]).map(r=>`<a class="disclosure" href="${safeLink(r['公告链接'])}" target="_blank" rel="noopener">${esc(r['公告标题'])}<span class="muted">　${esc(r['公告时间'])}</span></a>`).join('')}</div><p class="small muted">${quote?'未复权收盘价 ¥'+num(quote.close)+' · '+esc(quote.trade_date):'尚无收盘价'}<br>${company?'财报抓取：'+esc(company.fetched_at):''}</p>${(company?.errors||[]).map(e=>`<p class="small">${esc(e)}</p>`).join('')}</div></div>
  ${company?`<div class="panel"><div class="section-head"><div><h3>历史现金流 <span class="small muted">金额：亿元；ROE：%</span></h3></div>${yearOrderToggle()}</div><p class="small muted">覆盖 ${coverageText}${win&&win.mode?`（${win.mode}）`:''}；严格财务筛选仍只用近十年 ${screeningText}。首年缺上一年度营运流动资本时，计算 FCFF 留空，不按零算。${supplementText}</p><div class="scroll"><table><thead><tr><th>年度</th><th>ROE</th><th>收入</th><th>经营现金流</th><th>资本开支</th><th>CFO−CapEx 参考</th><th>计算 FCFF</th><th>供应商 FCFF</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.year}${r.supplemented_fields?.length?'<span class="supp-mark" title="该年部分数据由公开财报源补齐">补</span>':''}</td><td>${num(r.roe)}</td><td>${yi(r.revenue)}</td><td>${yi(r.cfo)}</td><td>${yi(r.capex)}</td><td>${yi(r.cfo_less_capex)}</td><td>${yi(r.fcff)}</td><td>${yi(r.vendor_fcff)}</td></tr>`).join('')}</tbody></table></div><p class="small muted">${esc(company.fcff_method)}。历史 FCFF 尚未做一次性项目、资本化政策和周期规范化；DCF 预测需说明依据。CFO−CapEx 仅作现金质量参考。</p><details><summary class="small">查看数据接口和抓取记录</summary><pre>${esc(JSON.stringify(company.sources,null,2))}</pre></details></div>
  <form id="review-form" class="panel"><h3>逐家公司审核 <span class="small muted">${review?'已保存：'+esc(stamp(review.saved_at)):'尚未审核'}</span></h3><p class="small muted">记录证据与判断。勾选表示你已核对该项；AI 意见需如实标注身份。</p><p class="small muted">结论选「明确保留，进入估值」时，六项都要勾选并各写至少八字依据，还要填审核者、证据链接与当天的核验日期；选「待补证」或「排除」不受这些限制，可以先记下来。</p><div class="review-grid">${reviewFields.map(([key,label])=>`<div class="review-item"><label><input type="checkbox" name="${key}_passed" ${review?.[key]?.passed?'checked':''}>${label}</label><textarea name="${key}_reason" placeholder="具体依据，至少 8 个字">${esc(review?.[key]?.reason||'')}</textarea><div class="review-why" hidden></div></div>`).join('')}</div><div class="form-row"><label class="field">审核者<input name="reviewer" value="${esc(review?.reviewer||'')}"></label><label class="field">审核身份<select name="reviewer_type"><option value="human" ${review?.reviewer_type==='human'?'selected':''}>本人审核</option><option value="ai" ${review?.reviewer_type==='ai'?'selected':''}>AI 研究意见</option></select></label></div><label class="field">证据链接，每行一条<textarea name="sources" placeholder="年报、公告或其他原始证据的链接">${esc((review?.sources||[]).join('\n'))}</textarea></label><div class="form-row"><label class="field">风险公告核验日期<input name="risk_checked_date" type="date" value="${esc(review?.risk_checked_date||'')}"></label><label class="field">审核结论<select name="decision"><option value="pending" ${review?.decision==='pending'?'selected':''}>待补证</option><option value="approved" ${review?.decision==='approved'?'selected':''}>明确保留，进入估值</option><option value="rejected" ${review?.decision==='rejected'?'selected':''}>排除</option></select></label></div><button class="primary" type="submit">保存审核结论</button></form>`:''}`;
  if(quality?.free_source_preview){const preview=quality.free_source_preview;$('research-content').insertAdjacentHTML('afterbegin',`<div class="panel notice"><strong>免费数据待核</strong><p class="small">${esc(preview.note)} 旧筛选记录日期：${esc(quality.evaluation?.as_of||'未知')}；免费数据检查：${esc(preview.checked_at||'未知')}。缺项：${esc((preview.evaluation?.missing||[]).join('；')||'无')}。</p></div>`);}
@@ -328,6 +368,7 @@ function renderCompany(){
  requestAnimationFrame(()=>window.WaccHistory?.renderCharts(detail.wacc_history));
  renderPriceChart(klineDays,klinePeriod);
  renderQuoteFacts();
+ sizeRoeBars();
 }
 
 function renderManagement(d){
