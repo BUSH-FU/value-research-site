@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>登录 · 价值投资</title>
+  <link rel="icon" href="{{PREFIX}}/favicon.png">
+  <link rel="stylesheet" href="{{PREFIX}}/login.css">
+</head>
+<body>
+  <main class="login-shell">
+    <section class="identity" aria-label="价值投资">
+      <img class="brand-mark" src="{{PREFIX}}/brand-buffett.jpg" alt="巴菲特">
+      <p class="eyebrow">VALUE RESEARCH</p>
+      <h1>价值投资</h1>
+      <p class="tagline">慢即是快</p>
+    </section>
+    <section class="login-card">
+      <div>
+        <p class="card-kicker">PRIVATE WORKSPACE</p>
+        <h2>登录研究工作台</h2>
+        <p class="description">请输入你的专属账号与密码。</p>
+      </div>
+      <p class="error" role="alert">{{ERROR}}</p>
+      <form method="post" action="{{PREFIX}}/login">
+        <label for="username">用户名</label>
+        <input id="username" name="username" type="text" autocomplete="username" required autofocus>
+        <label for="password">密码</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+        <button type="submit">登 录</button>
+      </form>
+      <p class="privacy">HTTPS 加密 · 仅限授权访问</p>
+    </section>
+  </main>
+</body>
+</html>
