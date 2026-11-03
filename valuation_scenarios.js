@@ -7,7 +7,7 @@
 // 结果不写入估值存档，也不进最终候选。
 //
 // 口径分两步（巴菲特式）：
-// 1. 先做「保守机械估值」 = 主情景：现金流用自动草案原值
+// 1. 先做「自动估值」= 主情景：现金流用自动草案原值
 //    （不预先假设未来变差 20%），WACC 取当前口径，只对永续增长率取三档。
 //    主情景就是永续增长率 1% 档（2026-10-31 已定），另两档是上行参照。
 // 2. 再在主情景内在价值上打安全边际折扣（20%）。折扣的作用是抵消我自己
@@ -524,7 +524,7 @@ window.ValuationScenarios = (() => {
   }).length;
   return `<div class="notice vs-notice">
    <p><strong>这是自动估值情景，尚未研究复核。</strong>本页采用${data.forecast_basis==='operating'?'经营驱动预测：收入、EBIT、NOPAT、折旧、资本开支和营运资本逐年可追溯':(data.forecast_basis==='latest'?'最近一年 FCFF 平推五年（诊断对照），假设单年现金流水平持续':(data.forecast_basis==='mean'?'最近五年 FCFF 均值平推（诊断对照）':'最近五年 FCFF 中位数平推（诊断对照）'))}；永续增长率取 1%/2%/3% 三档。测算结果不写入估值存档，也不进最终候选。</p>
-   <p><strong>判断顺序：先筛生意，再谈折扣。</strong>定性筛选（ROIC 持续高于 WACC、有护城河、现金流稳定、杠杆可控）在「严格财务预筛」和「投资核查清单」里；本页的保守机械估值只负责排出研究先后，必须经人工修改现金流和核对股权桥后才能存为基准情景。</p>
+   <p><strong>判断顺序：先筛生意，再谈折扣。</strong>定性筛选（ROIC 持续高于 WACC、有护城河、现金流稳定、杠杆可控）在「严格财务预筛」和「投资核查清单」里；本页的自动估值只负责排出研究先后，必须经人工修改现金流和核对股权桥后才能存为基准情景。</p>
    <p><strong>股权桥按报表可追溯。</strong>${data.forecast_basis==='operating'?'货币资金与交易性金融资产加回，有息负债、少数股东权益和优先索取权扣除，不再用「现金一律为零」的非对称口径':'本历史对照视图仍保留旧口径，不用作主判断'}。</p>
    <p><strong>DCF 股权价值为负的直接剔除。</strong>企业价值连有息债务与少数股东权益都覆盖不了，就谈不上持续创造超额收益——这类标的不进主表、不参与排序、不参与价格判断。${dropped?`本轮剔除了 ${dropped} 家，剔的是谁、剔的理由、以及未计入多少现金，都列在下面的清单里，可以自己复核。`:'本轮没有出现股权价值为负的标的。'}</p>
    <p>${high} / ${rows.length} 家的终值占企业价值 60% 以上，${swings} 家在三档之间安全边际摆动超过 20 个百分点：这两个数说明结果对假设的依赖程度，请把它当排序参考，不是买入结论。</p>
@@ -616,14 +616,14 @@ window.ValuationScenarios = (() => {
    <p class="small muted"><strong>带宽怎么用</strong>：条窄、且整条都在门槛右侧，说明三档假设下都达标，结论稳；条宽、并跨过 0 轴，说明「贵还是便宜」取决于永续增长率取 1% 还是 3%，这类不该按单一落点下判断。</p>
   </div>
   ${researchPassed?`<div class="panel"><h3>严格候选逐家结果</h3>${tableOf(researchData, SLOT_MAIN)}</div>`:''}
-  <details class="panel vs-diagnostics">
-   <summary><strong>机械估值诊断（${rows.length} 家，不是候选股）</strong></summary>
-   <p class="small muted">这些数字用于查找估值模型哪里过度乐观；未通过门禁的公司不进主榜。价格条件不等于企业内在价值已被可靠验证。</p>
+  <div class="panel vs-diagnostics">
+   <h3>自动估值明细（${rows.length} 家，未通过门禁，不是候选股）</h3>
+   <p class="small muted"><strong>自动估值</strong>＝按固定公式算出来的数：现金流用自动草案，WACC 取当前口径，全程没有人工判断。它用来排查估值模型哪里过度乐观，<strong>不是研究结论</strong>；未通过门禁的公司不进主榜，价格条件也不等于企业内在价值已被可靠验证。</p>
    ${decisionTable(data, SLOT_MAIN)}
    <div class="vs-chart-wrap">${bandChart(data)}</div>
    <p class="small muted">每股情景估值来自自动草案 + 当前口径 WACC；报价每个交易日 23:30 后自动更新；测算时间 ${esc(generated)}。</p>
    ${tableOf(data, SLOT_MAIN)}
-  </details>
+  </div>
   ${supplementary.length?`<div class="panel"><h3>补充测算 · ${supplementary.length} 家</h3><p class="small muted">以下公司五年中位数不满足条件，采用表内注明的替代口径。五年均值会受并购、扩产和营运资本波动影响；单年情景假设近期现金流水平持续，尚未证明进入稳定期。补充结果不混入上方排名，也不自动进入最终候选。</p>${supplementary.map(row=>`<p class="small muted"><strong>${esc(row.name)}</strong>：${esc((row.primary_missing||[]).join('；'))}；补充采用 ${esc(row.scenario.forecast.method)}。</p>`).join('')}${decisionTable({...data,rows:supplementary}, SLOT_SUPP)}${tableOf({...data,rows:supplementary}, SLOT_SUPP)}</div>`:''}
   ${skippedOf(data)}`;
  }
