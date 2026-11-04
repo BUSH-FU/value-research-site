@@ -474,7 +474,7 @@ window.ValuationScenarios = (() => {
    const label = forecast.basis === 'latest' ? `${esc(forecast.source_year)} 年` :
     (forecast.basis === 'mean' ? '五年均值' : '五年中位数');
    const medianNote = isNum(forecast.five_year_median_yi) ? `；五年中位数 ${num(forecast.five_year_median_yi)} 亿` : '';
-   return `${num(forecast.fcff_yi)} 亿<br><span class="small muted">${label}${medianNote}；${esc(forecast.method||'历史 FCFF 诊断对照')}</span>`;
+   return `${num(forecast.fcff_yi)} 亿<br><span class="small muted">${label}${medianNote}；${esc(forecast.method||'历史 FCFF 平推（方法未标注）')}</span>`;
   }
   const body = rows.map(r => `<tr><td>${esc(r.year)}</td><td>${num(r.revenue/1e8)}</td><td>${num(r.revenue_growth_pct,1)}%</td><td>${num(r.ebit/1e8)}</td><td>${num(r.nopat/1e8)}</td><td>${num(r.depreciation/1e8)}</td><td>${num(r.capex/1e8)}</td><td>${num(r.change_nwc/1e8)}</td><td><strong>${num(r.fcff/1e8)}</strong></td></tr>`).join('');
   const lineage = forecast.data_lineage || {};
@@ -645,9 +645,9 @@ window.ValuationScenarios = (() => {
     <td>${saveCell(row)}</td>
    </tr>`;
   }).join('');
-  const operating = data?.forecast_basis === 'operating';
-  const intro = `<p class="small muted"><strong>${operating?'经营驱动估值（主口径）':'历史现金流诊断对照'}</strong>：${operating?'收入增长逐年收敛，利润率、税率、折旧、资本开支和营运资本按历史报表正常化，再逐年重建 FCFF':'本视图仅用于与旧的 FCFF 平推结果对照，不是主预测'}。WACC 取当前口径，永续增长率展示 1% / 2% / 3% 三档；主情景取 1%。</p>
-  <p class="small muted"><strong>股权桥</strong>：${operating?'加回年报货币资金与交易性金融资产，减去有息负债、少数股东权益和优先股/永续债；来源年份在表内披露':'旧诊断口径：账上货币资金与交易性金融资产不进股权桥，这是「宁缺毋滥」——宁可漏掉好公司，也不多放进一家的旧从严取舍；判断层不因此放宽，判断仍按严格口径，披露不放宽'}。</p>
+  const profile = basisProfile(data);
+  const intro = `<p class="small muted"><strong>${profile.autoLabel}</strong>：${profile.autoMethod}。WACC 取当前口径，永续增长率展示 1% / 2% / 3% 三档；主情景取 1%。</p>
+  <p class="small muted"><strong>股权桥</strong>：${profile.autoBridge}。</p>
   <p class="small muted"><strong>价格条件只看主情景</strong>：安全边际 ＝ 1 − 收盘价 ÷ 主情景内在价值（折价口径）；${thrHead} ＝ 主情景内在价值 ×（1 − ${thrText}）。安全边际的作用是抵消我自己预测的误差，不是提前假设「未来一定变差」。</p>
   <p class="small muted"><strong>压力校验区间</strong>（原 24 组机械情景：现金流原值 / 全部低 20%，WACC 当前 / +1 / +2 个百分点，永续增长 0% / 1% / 2% / 3%）保留为辅助观察，不控制价格条件。那是灾难情景，拿它当门槛会把所有公司都判成不合格。</p>
   <p class="small muted"><strong>顺序别弄反</strong>：先做定性筛选——ROIC 持续高于 WACC、有护城河、现金流稳定、杠杆可控（在「严格财务预筛」和「投资核查清单」里），确认是好生意，再谈估值折扣。本页只管价格这一段。</p>`;
@@ -661,6 +661,75 @@ window.ValuationScenarios = (() => {
   return `<div class="panel"><h3>当前口径暂不能自动测算的 ${skipped.length} 家</h3><p class="small muted">逐家列出数据缺项或模型条件；可切换另一种现金流口径对照。</p><div class="scroll"><table><thead><tr><th>代码</th><th>公司</th><th>原因</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
  }
 
+ // 每个口径怎么介绍自己：口径不同，股权桥不同，每股内在价值也就不是同一个数。
+ //
+ // 三处要用同一套说法——顶部说明、自动估值明细的引言、价格条件旁边的股权桥标注。
+ // 各写各的就会出现「同一个口径两种讲法」（2026-11-04 实测：保守正式排名页
+ // 挂着「诊断对照 / 不用作主判断」这套对照视图的措辞；「全部结果」页宣称
+ // 用的是经营桥，主表用的却是保守桥）。
+ //
+ // 标签写什么算法就得算什么：保守正式排名恰恰是主判断，中位数/均值/最近年
+ // 那几套才是对照，不该抢主判断。
+ function basisProfile(data){
+  const basis = data?.forecast_basis;
+  const profiles = {
+   operating: {
+    label: '经营驱动预测',
+    method: '收入、EBIT、NOPAT、折旧、资本开支和营运资本逐年可追溯',
+    bridge: '货币资金与交易性金融资产加回，有息负债、少数股东权益和优先索取权扣除，不再用「现金一律为零」的非对称口径',
+    bridgeShort: '现金计入股权桥',
+    autoLabel: '经营驱动估值（主口径）',
+    autoMethod: '收入增长逐年收敛，利润率、税率、折旧、资本开支和营运资本按历史报表正常化，再逐年重建 FCFF',
+    autoBridge: '加回年报货币资金与交易性金融资产，减去有息负债、少数股东权益和优先股/永续债；来源年份在表内披露',
+   },
+   conservative: {
+    label: '保守正式排名',
+    method: '经营预测未通过门禁时用最近五年 FCFF 中位数平推；通过后取中位数估值与经营估值中的较低值',
+    bridge: '这一套有意从严：账上现金不计入股权桥（有息负债、少数股东权益照扣），每股内在价值因此偏低、安全边际因此偏严。正式排名用的就是这一套',
+    bridgeShort: '现金不计入股权桥',
+    autoLabel: '保守正式排名（主判断）',
+    autoMethod: '经营预测未通过门禁时用最近五年 FCFF 中位数平推，通过后取中位数估值与经营估值中的较低值',
+    autoBridge: '账上货币资金与交易性金融资产不进股权桥——这是「宁缺毋滥」：宁可漏掉好公司，也不多放进一家。判断层不因此放宽，判断仍按严格口径，披露不放宽',
+   },
+   coverage: {
+    label: '按口径分列',
+    method: '主表是保守正式排名；五年中位数不满足条件的公司另列在下方「补充测算」，用的是经营驱动口径',
+    bridge: '主表用保守口径（账上现金不计入股权桥），补充测算用经营驱动口径（现金与交易性金融资产加回）。两套口径的每股内在价值不是同一个数，不要混着比',
+    bridgeShort: '主表现金不计入股权桥',
+    autoLabel: '按口径分列（主表保守 + 补充经营驱动）',
+    autoMethod: '主表是保守正式排名，补充测算是经营驱动口径的替代结果',
+    autoBridge: '主表按保守口径（现金不进股权桥），补充测算按经营驱动口径（现金加回）；两套口径的每股内在价值不是同一个数',
+   },
+   latest: {
+    label: '最近年 FCFF 对照',
+    method: '最近一年 FCFF 平推五年（诊断对照），假设单年现金流水平持续',
+    bridge: '本历史对照视图仍保留旧口径，不用作主判断',
+    bridgeShort: '现金不计入股权桥',
+    autoLabel: '历史现金流诊断对照',
+    autoMethod: '本视图仅用于与旧的 FCFF 平推结果对照，不是主预测',
+    autoBridge: '旧诊断口径：账上货币资金与交易性金融资产不进股权桥，这是「宁缺毋滥」——宁可漏掉好公司，也不多放进一家的旧从严取舍；判断层不因此放宽，判断仍按严格口径，披露不放宽',
+   },
+   mean: {
+    label: 'FCFF 均值对照',
+    method: '最近五年 FCFF 均值平推（诊断对照）',
+    bridge: '本历史对照视图仍保留旧口径，不用作主判断',
+    bridgeShort: '现金不计入股权桥',
+    autoLabel: '历史现金流诊断对照',
+    autoMethod: '本视图仅用于与旧的 FCFF 平推结果对照，不是主预测',
+    autoBridge: '旧诊断口径：账上货币资金与交易性金融资产不进股权桥，这是「宁缺毋滥」——宁可漏掉好公司，也不多放进一家的旧从严取舍；判断层不因此放宽，判断仍按严格口径，披露不放宽',
+   },
+  };
+  return profiles[basis] || {
+   label: 'FCFF 中位数对照',
+   method: '最近五年 FCFF 中位数平推（诊断对照）',
+   bridge: '本历史对照视图仍保留旧口径，不用作主判断',
+   bridgeShort: '现金不计入股权桥',
+   autoLabel: '历史现金流诊断对照',
+   autoMethod: '本视图仅用于与旧的 FCFF 平推结果对照，不是主预测',
+   autoBridge: '旧诊断口径：账上货币资金与交易性金融资产不进股权桥，这是「宁缺毋滥」——宁可漏掉好公司，也不多放进一家的旧从严取舍；判断层不因此放宽，判断仍按严格口径，披露不放宽',
+  };
+ }
+
  function warnings(data){
   const rows = rowsOf(data, SLOT_MAIN, true);
   const dropped = rowsOf(data, SLOT_MAIN).filter(isNegativeEquity).length;
@@ -671,9 +740,9 @@ window.ValuationScenarios = (() => {
    return values.length > 1 && Math.max(...values) - Math.min(...values) > 20;
   }).length;
   return `<div class="notice vs-notice">
-   <p><strong>这是自动估值情景，尚未研究复核。</strong>本页采用${data.forecast_basis==='operating'?'经营驱动预测：收入、EBIT、NOPAT、折旧、资本开支和营运资本逐年可追溯':(data.forecast_basis==='latest'?'最近一年 FCFF 平推五年（诊断对照），假设单年现金流水平持续':(data.forecast_basis==='mean'?'最近五年 FCFF 均值平推（诊断对照）':'最近五年 FCFF 中位数平推（诊断对照）'))}；永续增长率取 1%/2%/3% 三档。测算结果不写入估值存档，也不进最终候选。</p>
+   <p><strong>这是自动估值情景，尚未研究复核。</strong>本页采用${basisProfile(data).method}；永续增长率取 1%/2%/3% 三档。测算结果不写入估值存档，也不进最终候选。</p>
    <p><strong>判断顺序：先筛生意，再谈折扣。</strong>定性筛选（ROIC 持续高于 WACC、有护城河、现金流稳定、杠杆可控）在「严格财务预筛」和「投资核查清单」里；本页的自动估值只负责排出研究先后，必须经人工修改现金流和核对股权桥后才能存为基准情景。</p>
-   <p><strong>股权桥按报表可追溯。</strong>${data.forecast_basis==='operating'?'货币资金与交易性金融资产加回，有息负债、少数股东权益和优先索取权扣除，不再用「现金一律为零」的非对称口径':'本历史对照视图仍保留旧口径，不用作主判断'}。</p>
+   <p><strong>股权桥按报表可追溯。</strong>${basisProfile(data).bridge}</p>
    <p><strong>DCF 股权价值为负的直接剔除。</strong>企业价值连有息债务与少数股东权益都覆盖不了，就谈不上持续创造超额收益——这类标的不进主表、不参与排序、不参与价格判断。${dropped?`本轮剔除了 ${dropped} 家，剔的是谁、剔的理由、以及未计入多少现金，都列在下面的清单里，可以自己复核。`:'本轮没有出现股权价值为负的标的。'}</p>
    <p>${high} / ${rows.length} 家的终值占企业价值 60% 以上，${swings} 家在三档之间安全边际摆动超过 20 个百分点：这两个数说明结果对假设的依赖程度，请把它当排序参考，不是买入结论。</p>
    <p>债务用账面值代替市值，非经营性现金以外的资产也未加回。报价过期时不比安全边际，宁可不比也不拿旧价凑数。</p>
@@ -722,7 +791,7 @@ window.ValuationScenarios = (() => {
   const supplementary=coverage?data.supplementary_rows:[];
   const count=(views?.operating?.rows?.length||0)+(data?.supplementary_rows?.length||0);
   const switches=views?`<div class="panel"><h3>估值测算口径</h3><div class="actions">${[['conservative','保守正式排名',views.conservative?.rows?.length||0],['operating','经营驱动预测（待验证）',views.operating?.rows?.length||0],['coverage','全部结果 · 分口径',count],['median','FCFF 中位数对照',views.median?.rows?.length||0],['mean','FCFF 均值对照',views.mean?.rows?.length||0],['latest','最近年 FCFF 对照',views.latest?.rows?.length||0]].map(([key,label,n])=>`<button type="button" data-scenario-basis="${key}" aria-pressed="${basis===key}">${label}（${n} 家）</button>`).join('')}</div><p class="small muted"><strong>正式排名规则</strong>：经营预测未通过门禁时采用历史 FCFF 中位数；通过后，中位数估值与经营估值取较低值。均值、最近年和未验证经营预测只作对照，不抢占正式排名。</p></div>`:'';
-  data=coverage?{...data,skipped:data.coverage_skipped||[],forecast_basis:'operating'}:(views?.[basis]?{...data,...views[basis],forecast_basis:basis}:data);
+  data=coverage?{...data,skipped:data.coverage_skipped||[],forecast_basis:'coverage'}:(views?.[basis]?{...data,...views[basis],forecast_basis:basis}:data);
   const rows = rowsOf(data, SLOT_MAIN, true);
   const dropped = rowsOf(data, SLOT_MAIN).filter(isNegativeEquity);
   const supplementaryKept = supplementary.filter(row => !isNegativeEquity(row));
@@ -746,7 +815,7 @@ window.ValuationScenarios = (() => {
   ${droppedPanel(allDropped)}
   <div class="stats">
    <div class="stat"><span class="muted">已生成测算</span><strong>${rows.length+supplementaryKept.length}</strong><span class="small">家${coverage?' · 经营驱动 '+rows.length+' 家，历史对照补充 '+supplementaryKept.length+' 家':'（当前统一口径）'}${allDropped.length?' · 已剔除 '+allDropped.length+' 家':''}</span></div>
-   <div class="stat"><span class="muted">${coverage?'五年中位数 · ':''}价格条件 / 研究达标</span><strong>${pricePassed} / ${researchPassed}</strong><span class="small">价格条件 ${pricePassed} 家；研究达标 ${researchPassed} 家 · 不可用门槛代替模型可信度</span></div>
+   <div class="stat"><span class="muted">价格条件 / 研究达标</span><strong>${pricePassed} / ${researchPassed}</strong><span class="small">价格条件 ${pricePassed} 家；研究达标 ${researchPassed} 家 · ${basisProfile(data).bridgeShort} · 不可用门槛代替模型可信度</span></div>
    <div class="stat"><span class="muted">需补资料或单独建模</span><strong>${(data?.skipped || []).length}</strong><span class="small">家 · 原因已列明</span></div>
    <div class="stat"><span class="muted">DCF 股权价值为负</span><strong>${allDropped.length}</strong><span class="small">家 · 已剔除，不参与排序与价格判断</span></div>
   </div>
