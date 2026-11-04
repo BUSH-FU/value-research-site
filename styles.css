@@ -309,6 +309,38 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:250px;
 .vs-clipped{fill:#7d857c;font-size:11px;font-family:inherit}
 .vs-row:hover .vs-name{fill:#245e49}
 .vs-row:hover .vs-code{fill:#245e49}
+/* 压力校验情景图：24 组机械情景 + 主情景落点（横轴＝相对主情景的倍数） */
+.vs-st-band{fill:#f2f4f0;stroke:#e4e8e1;stroke-width:1}
+.vs-st-line{stroke-linejoin:round;stroke-linecap:round}
+.vs-st-line.cash{stroke-dasharray:4 2}
+.vs-st-dot{stroke:none}
+.vs-st-dot.cash{fill-opacity:.5}
+.vs-st-main{fill:#245e49;stroke:#fff;stroke-width:2.5}
+.vs-st-price{stroke:#b8863a;stroke-width:1.6}
+.vs-st-price.off{stroke-dasharray:3 2}
+.vs-st-baseline{stroke:#245e49;stroke-width:1.6;stroke-dasharray:5 3;opacity:.75}
+.vs-st-baseline-label{fill:#245e49;font-size:11px;font-family:inherit}
+.vs-st-dist{fill:#245e49;font-size:12px;font-family:inherit;font-variant-numeric:tabular-nums}
+.vs-st-price-label{fill:#b8863a;font-size:11px;font-family:inherit;font-variant-numeric:tabular-nums}
+.vs-key-st{height:10px;border-radius:50%;background:#245e49}
+.vs-key-st-0{background:#245e49}
+.vs-key-st-1{background:#6d9b7d}
+.vs-key-st-2{background:#8a7548}
+.vs-key-st-3{background:#b79a5f}
+.vs-key-st-4{background:#7d857c}
+.vs-key-st-5{background:#a8b0a7}
+.vs-key-st-main{width:11px;height:11px;border-radius:50%;background:#245e49;border:2px solid #fff;box-sizing:content-box}
+.vs-key-st-price{height:12px;border-left:2px solid #b8863a}
+.vs-key-st-band{height:10px;border-radius:3px;background:#f2f4f0;border:1px solid #e4e8e1}
+/* 决策表里的压力校验小带：和压力图同一套数据，只是缩到一格宽。
+   颜色一律走类，不写行内 style（服务器 CSP 是 style-src 'self'，行内样式会被静默忽略）。 */
+.vs-sb{display:block;margin:2px 0 3px}
+.vs-sb-band{fill:#e9ede6;stroke:#dbe0d8;stroke-width:1}
+.vs-sb-band.neg{fill:#f3e3e0;stroke:#d7b3ab}
+.vs-sb-main{fill:#245e49;stroke:#fff;stroke-width:2}
+.vs-sb-price{stroke:#b8863a;stroke-width:1.6}
+.vs-sb-price.out{stroke:#b3543f;stroke-width:1.8}
+.vs-sb-price.under{stroke:#3f7d52;stroke-width:1.8}
 @media(max-width:680px){.vs-chart{min-width:760px}.vs-chart-titlerow{display:block}.vs-legend{margin-top:10px}}
 #company-workspace [aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff}
 
@@ -353,3 +385,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:250px;
 .review-item-invalid textarea,.review-item-invalid input,.review-item-invalid select{border-color:#e0b4ae}
 .review-why{margin-top:8px;padding:8px 11px;border:1px solid #e3b3ac;border-left:3px solid #d4463f;background:#fdf5f3;border-radius:5px;color:#8c3b33;font-size:12px}
 .form-row>.review-why{grid-column:1/-1;margin-top:-4px}
+/* 决策表：「价格条件」那一列原来一格吃掉 793px（阻断理由是整段长句），
+   把整张表撑到 2329px，右侧几列默认都在屏幕外。收窄这一列并让它换行，
+   表格整体瘦下来，右边几列（含压力校验小带）不用横滚就能看到。 */
+.vs-decision td.vs-cond{width:300px;min-width:260px;max-width:320px;white-space:normal;line-height:1.5;vertical-align:top}

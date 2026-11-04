@@ -304,7 +304,187 @@ window.ValuationScenarios = (() => {
   };
  }
 
- // 图例与读法：两张区间图（严格候选 / 自动估值明细）符号含义完全相同，说明也共用；
+ // ── 压力校验：24 组机械情景 ────────────────────────────────────────────────
+//
+// 后端 valuation_stress 算的是 24 个点：现金流原值/全部低 20% × WACC 当前/+1/+2pp
+// × 永续增长 0%/1%/2%/3%。主情景（现金流原值、当前 WACC、永续增长 1%）正好是
+// 其中一个点，与 scenarios['g1%'].per_share 逐位相等——所以「落点」能精确标在
+// 网格里，不是估出来的位置。
+//
+// 画在什么轴上：安全边际跨度太大（线上实测 -619%～+6512%），同轴没法比；
+// 改成「每股内在价值 ÷ 主情景每股价值」的倍数，1.0 恒等于主情景，
+// 17 家可以直接横向比「最坏角落只剩主情景的几成」。
+//
+// 这 24 组是机械情景，不是置信区间，也不是审过的内在价值：只作辅助观察，
+// 不控制价格条件（价格条件只看主情景）。
+ const STRESS_COLORS = [
+  {add: 0, cash: 1.0, color: '#245e49'},   // 当前 WACC · 现金流原值
+  {add: 0, cash: 0.8, color: '#6d9b7d'},   // 当前 WACC · 现金流全部低 20%
+  {add: 1, cash: 1.0, color: '#8a7548'},   // WACC +1pp
+  {add: 1, cash: 0.8, color: '#b79a5f'},
+  {add: 2, cash: 1.0, color: '#7d857c'},   // WACC +2pp
+  {add: 2, cash: 0.8, color: '#a8b0a7'},
+ ];
+ const stressColor = (add, cash) => {
+  const hit = STRESS_COLORS.find(c => c.add === add && Math.abs(c.cash - cash) < 1e-9);
+  return hit ? hit.color : '#7d857c';
+ };
+ const stressCashLabel = cash => Math.abs(cash - 1) < 1e-9 ? '现金流原值' : '现金流低 20%';
+
+ // 一家公司的压力网格：24 点换算成「相对主情景的倍数」。
+ function stressGrid(row){
+  const stress = ((row||{}).scenario||{}).stress || {};
+  const mid = scenarioOf(row, MID);
+  const base = (mid.valid !== false && isNum(mid.per_share) && Number(mid.per_share) > 0) ? Number(mid.per_share) : null;
+  if(stress.complete !== true || base === null) return null;
+  const points = (stress.points||[]).map(p => {
+   const per = isNum(p.per_share) ? Number(p.per_share) : null;
+   const add = Number(p.wacc_add_pp), cash = Number(p.cash_flow_factor), growth = Number(p.terminal_growth);
+   return {
+    add, cash, growth, per,
+    ratio: (per !== null && per > 0) ? per / base : null,   // 相对主情景每股价值的倍数
+    negative: per !== null && per <= 0,                      // 该角落股权价值为负
+    main: cash === 1 && add === 0 && Math.abs(growth - 0.01) < 1e-9,
+   };
+  });
+  const usable = points.filter(p => p.ratio !== null);
+  if(usable.length < 2) return null;
+  const price = isNum(mid.price) ? Number(mid.price) : null;
+  return {
+   points, base,
+   low: Math.min(...usable.map(p => p.ratio)),
+   high: Math.max(...usable.map(p => p.ratio)),
+   lowPer: Math.min(...usable.map(p => p.per)),
+   highPer: Math.max(...usable.map(p => p.per)),
+   price: price,
+   priceRatio: (price !== null && price > 0) ? price / base : null,
+   negative: points.some(p => p.negative),
+  };
+ }
+
+ function stressAxisDomain(data){
+  const rows = rowsOf(data, SLOT_MAIN, true);
+  let min = 1, max = 1;
+  for(const row of rows){
+   const grid = stressGrid(row);
+   if(!grid) continue;
+   min = Math.min(min, grid.low);
+   max = Math.max(max, grid.high);
+  }
+  const lo = Math.max(0, Math.floor(min * 10) / 10);
+  const hi = Math.min(3, Math.max(1.2, Math.ceil(max * 10) / 10));
+  return {lo, hi: hi > lo ? hi : lo + 0.5};
+ }
+
+ // 压力校验情景图：每行一家公司，24 个点全画，主情景落点精确标出。
+ function stressChart(data){
+  const rows = rowsOf(data, SLOT_MAIN, true);
+  const items = rows.map(row => ({row, grid: stressGrid(row)})).filter(item => item.grid);
+  if(!items.length) return '<p class="small muted">当前没有能做压力校验的公司。</p>';
+  const {lo, hi} = stressAxisDomain(data);
+  const W = 1080, NAME_W = 176, VAL_W = 186, TOP = 42, ROW_H = 52, BOTTOM = 54;
+  const plotLeft = NAME_W, plotRight = W - VAL_W;
+  const height = TOP + items.length * ROW_H + BOTTOM;
+  const x = v => plotLeft + (plotRight - plotLeft) * (Math.min(hi, Math.max(lo, v)) - lo) / (hi - lo);
+  const y = i => TOP + i * ROW_H + ROW_H / 2;
+
+  const ticks = [];
+  for(let v = Math.ceil(lo * 5) / 5; v < hi + 1e-9; v += 0.2){
+   ticks.push(`<g><line x1="${x(v).toFixed(1)}" y1="${TOP - 6}" x2="${x(v).toFixed(1)}" y2="${height - BOTTOM + 4}" class="vs-grid"/><text x="${x(v).toFixed(1)}" y="${height - BOTTOM + 22}" text-anchor="middle" class="vs-axis">${num(v, 1)}×</text></g>`);
+  }
+  // 1.0 竖线：主情景基准。所有公司的主情景都落在这条线上，横向可比。
+  const baseLine = `<line x1="${x(1).toFixed(1)}" y1="${TOP - 14}" x2="${x(1).toFixed(1)}" y2="${height - BOTTOM + 4}" class="vs-st-baseline"/><text x="${x(1).toFixed(1)}" y="${TOP - 20}" text-anchor="middle" class="vs-st-baseline-label">1.0× 主情景</text>`;
+
+  const body = items.map((item, index) => {
+   const {row, grid} = item;
+   const rowY = y(index);
+   // 每行三条子线：WACC 当前 / +1pp / +2pp；每条子线上下两支：
+   // 上支现金流原值、下支现金流全部低 20%。
+   const subY = add => rowY + (add - 1) * 14;
+   const lines = [], dots = [];
+   let mainDot = '';
+   for(const spec of STRESS_COLORS){
+    const group = grid.points
+     .filter(p => p.add === spec.add && Math.abs(p.cash - spec.cash) < 1e-9)
+     .sort((a, b) => a.growth - b.growth);
+    const usable = group.filter(p => p.ratio !== null);
+    if(usable.length < 2) continue;
+    const baseY = subY(spec.add) + (spec.cash === 1 ? -4.5 : 4.5);
+    const path = usable.map((p, i) => `${i ? 'L' : 'M'}${x(p.ratio).toFixed(1)} ${baseY.toFixed(1)}`).join(' ');
+    lines.push(`<path d="${path}" fill="none" stroke="${spec.color}" stroke-width="1.4" class="vs-st-line${spec.cash === 1 ? '' : ' cash'}"/>`);
+    for(const p of usable){
+     // 主情景点单独画大圆点，但必须落在它自己代表的那条线上
+     // （现金流原值 × 当前 WACC 那一支），不能浮在两条子线中间。
+     if(p.main){
+      mainDot = `<circle cx="${x(p.ratio).toFixed(1)}" cy="${baseY.toFixed(1)}" r="6" class="vs-st-main"/>`;
+      continue;
+     }
+     dots.push(`<circle cx="${x(p.ratio).toFixed(1)}" cy="${baseY.toFixed(1)}" r="2.8" fill="${spec.color}" class="vs-st-dot${spec.cash === 1 ? '' : ' cash'}"/>`);
+    }
+   }
+   // 主情景落点已在上面的循环里画好（必须落在它代表的那条线上）。
+   // 压力机械带：24 点覆盖的全距，画在最底层。
+   const band = `<rect x="${x(grid.low).toFixed(1)}" y="${(rowY - 22).toFixed(1)}" width="${Math.max(2, x(grid.high) - x(grid.low)).toFixed(1)}" height="44" rx="4" class="vs-st-band"/>`;
+   // 现价位置：现价是主情景每股的几成。超出轴外折到边缘并标箭头。
+   let priceLine = '', priceText = '';
+   if(grid.priceRatio !== null){
+    const outside = grid.priceRatio > hi;
+    const px = x(grid.priceRatio);
+    priceLine = `<line x1="${px.toFixed(1)}" y1="${(rowY - 22).toFixed(1)}" x2="${px.toFixed(1)}" y2="${(rowY + 22).toFixed(1)}" class="vs-st-price${outside ? ' off' : ''}"/>`;
+    priceText = outside ? '现价 ' + num(grid.priceRatio, 2) + '× ▶' : '现价 ' + num(grid.priceRatio, 2) + '×';
+   }
+   // 右侧两行：最坏角落只剩主情景的几成、现价是几成。
+   const distText = `<text x="${plotRight + 12}" y="${(rowY - 2).toFixed(1)}" class="vs-st-dist">最坏角落只剩 ${num(grid.low, 2)} 成</text>`
+    + `<text x="${plotRight + 12}" y="${(rowY + 13).toFixed(1)}" class="vs-st-price-label">${priceText || '现价不可比较'}</text>`;
+   // 悬停说明：24 组的每股值全列出来，不让读者去猜。
+   const detail = STRESS_COLORS.map(spec => {
+    const group = grid.points
+     .filter(p => p.add === spec.add && Math.abs(p.cash - spec.cash) < 1e-9)
+     .sort((a, b) => a.growth - b.growth);
+    if(!group.length) return '';
+    const values = group.map(p => p.per === null ? '无法测算' : (p.negative ? '股权为负' : '¥' + num(p.per))).join(' / ');
+    return `WACC+${spec.add}pp·${stressCashLabel(spec.cash)}：g0%→g3% ${values}`;
+   }).join('；');
+   const title = `${row.name || row.code}（${row.code}）：主情景 ${MID_LABEL} 档 ¥${num(grid.base)}`
+    + (grid.price !== null ? `，现价 ¥${num(grid.price)}（主情景的 ${num(grid.priceRatio, 2)} 成）` : '，现价不可比较')
+    + `；最坏角落 ¥${num(grid.lowPer)}（${num(grid.low, 2)} 成），最好角落 ¥${num(grid.highPer)}（${num(grid.high, 2)} 成）；`
+    + `压力校验 24 组机械情景（每股）：${detail}`;
+   return `<g class="vs-st-row">
+    ${band}
+    ${lines.join('')}
+    ${dots.join('')}
+    ${mainDot}
+    ${priceLine}
+    <text x="${NAME_W - 56}" y="${(rowY + 4).toFixed(1)}" text-anchor="end" class="vs-name">${esc(row.name || row.code)}</text>
+    <text x="${NAME_W - 12}" y="${(rowY + 4).toFixed(1)}" text-anchor="end" class="vs-code">${esc(row.code)}</text>
+    ${distText}
+    <title>${esc(title)}</title>
+   </g>`;
+  }).join('');
+
+  return `<svg class="vs-chart vs-st-chart" viewBox="0 0 ${W} ${height}" role="img" aria-label="各公司压力校验 24 组机械情景与主情景落点">${ticks.join('')}${baseLine}${body}</svg>`;
+ }
+
+ function stressLegend(){
+  const keys = STRESS_COLORS.map((spec, index) => `<span><i class="vs-key vs-key-st vs-key-st-${index}"></i>WACC+${spec.add}pp·${stressCashLabel(spec.cash)}</span>`).join('');
+  return `<div class="vs-legend"><span><i class="vs-key vs-key-st-main"></i>主情景落点</span><span><i class="vs-key vs-key-st-price"></i>现价位置</span><span><i class="vs-key vs-key-st-band"></i>24 组覆盖的全距</span>${keys}</div>`;
+ }
+
+ function stressNotes(data){
+  const rows = rowsOf(data, SLOT_MAIN, true);
+  const items = rows.map(row => ({row, grid: stressGrid(row)})).filter(item => item.grid);
+  if(!items.length) return '';
+  const lows = items.map(item => item.grid.low);
+  const minLow = Math.min(...lows), maxLow = Math.max(...lows);
+  const worst = items.reduce((a, b) => (b.grid.low < a.grid.low ? b : a));
+  const priceAbove = items.filter(item => item.grid.priceRatio !== null && item.grid.priceRatio > item.grid.high);
+  return `<p class="small muted"><strong>这张图画什么</strong>：24 组机械情景（现金流原值/全部低 20% × WACC 当前/+1/+2 个百分点 × 永续增长 0%/1%/2%/3%）全部摊开。横轴是<strong>每股内在价值 ÷ 主情景每股价值</strong>的倍数，<strong>1.0× 就是主情景</strong>，所以每家的落点都落在同一条基准线上，可以直接横向比。</p>
+  <p class="small muted"><strong>怎么读</strong>：每行三条子线分别是 WACC 当前 / +1pp / +2pp，每条子线上下两支：上支现金流原值、下支现金流全部低 20%；一条线上从左到右四个点是永续增长 0% / 1% / 2% / 3%。深色大圆点就是主情景落点——它在网格里是确定的一个点（现金流原值、当前 WACC、永续增长 1%），与表格里的主情景每股逐位相同，不是估出来的位置。竖线是现价：<strong>竖线右边有几个点，就说明有几组机械情景认为现价已经偏贵</strong>；竖线在所有点左边，说明连最坏的机械角落都还留有余量。</p>
+  <p class="small muted"><strong>离灾难情景有多远</strong>：看每行右侧「最坏角落只剩几成」。本批 ${items.length} 家的最坏角落落在主情景的 ${num(minLow, 2)}～${num(maxLow, 2)} 成之间，最极端的是 ${esc(worst.row.name || worst.row.code)} 的 ${num(worst.grid.low, 2)} 成。${priceAbove.length ? `另有 ${priceAbove.length} 家（${priceAbove.map(item => esc(item.row.name || item.row.code)).join('、')}）的现价已经高过它自己压力区间的上端——最乐观的机械角落都认为贵。` : ''}</p>
+  <p class="small muted"><strong>这组数不控制价格条件</strong>：它是机械情景（现金流打折 + WACC 加点），不是置信区间，也不是审过的内在价值。价格条件仍然只看主情景——安全边际的作用是抵消我自己预测的误差，不是提前假设未来一定变差。</p>`;
+ }
+
+// 图例与读法：两张区间图（严格候选 / 自动估值明细）符号含义完全相同，说明也共用；
  // 只有「这张图代表什么结论」不同，各自单独说一句。
  // 2026-11-03：b9f6459 把前一张图改成只画严格候选后，说明文字留在了原位，
  // 结果自动估值那张真正有内容的图反而没有任何说明——说明必须跟着它讲的那张图走。
@@ -610,6 +790,60 @@ window.ValuationScenarios = (() => {
   return `<br><span class="pill warning" title="${esc(title)}">含并表跳变年（${jumps.map(j=>j.year).join('、')}）</span>`;
  }
 
+ // 决策表「压力校验区间」列：把「低～高」这条文字区间画成一条带落点的带子，
+ // 并标出当前收盘价落在区间的哪一段（2026-10-25 用户规则：能用图表达就用图，
+ // 而且要标明我们看的这个标的是落在哪个区间内）。
+ //
+ // 数一律取后端给的 stress.low / stress.high —— 就是 24 组机械情景的每股全距，
+ // 负的下限照实保留并单独标色（后端那条锁：low/high 必须正好是 24 个点的极值）。
+ // 主情景落点用主情景每股，现价线用收盘价，和压力图上的两个点是同一个数。
+ // 这里不另写一套算法：只把同一批数画到一格宽。
+ function stressBandCell(row, neu){
+  const stress = ((row||{}).scenario||{}).stress || {};
+  if(stress.complete !== true || !isNum(stress.low) || !isNum(stress.high))
+   return '<span class="muted">情景不完整</span>';
+  const low = Number(stress.low), high = Number(stress.high);
+  const price = isNum(neu?.price) ? Number(neu.price) : null;
+  const main = isNum(neu?.per) ? Number(neu.per) : null;
+  const W = 172, H = 24, PAD = 6;
+  // 轴：压力区间，现价和主情景都要放得下。现价落在区间外时把轴延出去——
+  // 这样「现价离压力上端还有多远」在图上是可量的距离，而不是被折到边缘看不出差距。
+  let lo = low, hi = high;
+  if(price !== null){ lo = Math.min(lo, price); hi = Math.max(hi, price); }
+  if(main !== null){ lo = Math.min(lo, main); hi = Math.max(hi, main); }
+  if(!(hi > lo)) hi = lo + 0.01;
+  const x = v => PAD + (W - 2*PAD) * (v - lo) / (hi - lo);
+  const bandW = Math.max(2, x(high) - x(low));
+  const band = `<rect x="${x(low).toFixed(1)}" y="6" width="${bandW.toFixed(1)}" height="12" rx="3" class="vs-sb-band"/>`;
+  // 下限为负：那一段是「股权为负」的角落，另标一色，别混在正常区间里。
+  const negBand = low < 0
+   ? `<rect x="${x(low).toFixed(1)}" y="6" width="${Math.max(1, x(0) - x(low)).toFixed(1)}" height="12" rx="3" class="vs-sb-band neg"/>` : '';
+  // 主情景落点：灰带里那个确定的点，和压力图上的大圆点是同一个数。
+  const mainMark = main === null ? '' :
+   `<circle cx="${x(main).toFixed(1)}" cy="12" r="4.2" class="vs-sb-main"/>`;
+  // 现价位置：橙线。落在灰带右侧 = 现价已经高于全部 24 组机械情景的最好角落；
+  // 落在灰带左侧 = 现价已经低于最坏角落（这是机会，不是警告，颜色要分开）。
+  const priceClass = price === null ? '' : (price > high ? ' out' : (price < low ? ' under' : ''));
+  const priceMark = price === null ? '' :
+   `<line x1="${x(price).toFixed(1)}" y1="2" x2="${x(price).toFixed(1)}" y2="22" class="vs-sb-price${priceClass}"/>`;
+  const stateText = price === null ? '现价不可比较'
+   : (price > high ? '现价已高于全部 24 组机械情景的最好角落'
+    : (price < low ? '现价已低于最坏角落' : '现价落在压力区间内'));
+  const ratioText = (main !== null && main > 0)
+   ? `（主情景的 ${num(price === null ? null : price / main, 2)} 成）` : '';
+  const title = `压力校验 24 组机械情景：每股 ¥${num(low)} ～ ¥${num(high)}；`
+   + (main !== null ? `主情景 ¥${num(main)}；` : '')
+   + (price !== null ? `现价 ¥${num(price)}${ratioText}；` : '现价不可比较；')
+   + stateText + '。'
+   + (low < 0 ? '下限为负：那个角落股权为负，不参与每股比较。' : '');
+  const svg = `<svg class="vs-sb" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(title)}"><title>${esc(title)}</title>${band}${negBand}${mainMark}${priceMark}</svg>`;
+  const state = price === null
+   ? '<span class="pill gray">现价不可比较</span>'
+   : (price > high ? '<span class="pill warning">现价高于压力上端</span>'
+    : (price < low ? '<span class="pill">现价低于最坏角落</span>' : '<span class="pill gray">现价落在区间内</span>'));
+  return `${svg}<br><span class="small muted">¥${num(low)} ～ ¥${num(high)}</span><br>${state}`;
+ }
+
  function decisionTable(data, slot){
   const threshold = isNum(data?.margin_min_pct) ? Number(data.margin_min_pct) : NaN;
   const validThreshold = Number.isFinite(threshold) && threshold >= 0 && threshold < 100;
@@ -629,7 +863,7 @@ window.ValuationScenarios = (() => {
     : '¥' + num(neu.low) + ' ～ ¥' + num(neu.high);
    const targetCell = target === null ? '<span class="muted">—</span>' : '≤ ¥' + num(target);
    const marginCell = marginDisplay(neu.margin, true);
-   const stressCell = complete ? '¥' + num(stress.low) + ' ～ ¥' + num(stress.high) : '<span class="muted">情景不完整</span>';
+   const stressCell = stressBandCell(row, neu);
    const stressMarginCell = stressMargin === null
     ? '<span class="muted">—</span><br><span class="small muted">' + (complete ? '压力下限非正，不适用' : '情景不完整') + '</span>'
     : pct1(stressMargin);
@@ -639,7 +873,7 @@ window.ValuationScenarios = (() => {
     <td>${bandCell}<br><span class="small muted">主情景 ${MID_LABEL} 档 ${neu.per===null?'—':'¥'+num(neu.per)}</span></td>
     <td>${targetCell}</td>
     <td>${marginCell}</td>
-    <td>${condition}</td>
+    <td class="vs-cond">${condition}</td>
     <td>${stressCell}</td>
     <td>${stressMarginCell}</td>
     <td>${saveCell(row)}</td>
@@ -650,8 +884,9 @@ window.ValuationScenarios = (() => {
   <p class="small muted"><strong>股权桥</strong>：${profile.autoBridge}。</p>
   <p class="small muted"><strong>价格条件只看主情景</strong>：安全边际 ＝ 1 − 收盘价 ÷ 主情景内在价值（折价口径）；${thrHead} ＝ 主情景内在价值 ×（1 − ${thrText}）。安全边际的作用是抵消我自己预测的误差，不是提前假设「未来一定变差」。</p>
   <p class="small muted"><strong>压力校验区间</strong>（原 24 组机械情景：现金流原值 / 全部低 20%，WACC 当前 / +1 / +2 个百分点，永续增长 0% / 1% / 2% / 3%）保留为辅助观察，不控制价格条件。那是灾难情景，拿它当门槛会把所有公司都判成不合格。</p>
+  <p class="small muted"><strong>压力校验区间列怎么读</strong>：灰带 = 24 组机械情景覆盖的每股区间，深绿点 = 主情景（${MID_LABEL} 档），橙线 = 当前收盘价。橙线落在灰带右侧 = 现价已经高于全部 24 组机械情景，连最好的那个角落都撑不住现价；橙线在灰带之内 = 现价还在机械情景的覆盖范围里。</p>
   <p class="small muted"><strong>顺序别弄反</strong>：先做定性筛选——ROIC 持续高于 WACC、有护城河、现金流稳定、杠杆可控（在「严格财务预筛」和「投资核查清单」里），确认是好生意，再谈估值折扣。本页只管价格这一段。</p>`;
-  return `<div class="panel"><h3>股价、自动估值与价格门槛</h3>${intro}<div class="scroll"><table data-tt-sync="${esc(slot||SLOT_MAIN)}"><thead><tr><th>公司 / 状态</th><th>当前收盘价 / 日期</th><th>三档每股范围 / 元每股</th><th>${thrHead}</th><th>主情景安全边际（主判断）</th><th>价格条件</th><th>压力校验区间（辅助观察）</th><th>相对压力下限的安全边际（辅助）</th><th>存为我的基准情景</th></tr></thead><tbody>${body}</tbody></table></div><p class="small muted">门槛随模型假设变化，达到价格条件仍不等于可以买入。待复核：生意是否可预测、一次性项目、维持经营所需资本支出与营运资本、可分配现金、负债与少数股东权益，以及长期增长能否由再投资支持。历史 FCFF 不等于已经核实的股东盈余。</p></div>`;
+  return `<div class="panel"><h3>股价、自动估值与价格门槛</h3>${intro}<div class="scroll"><table class="vs-decision" data-tt-sync="${esc(slot||SLOT_MAIN)}"><thead><tr><th>公司 / 状态</th><th>当前收盘价 / 日期</th><th>三档每股范围 / 元每股</th><th>${thrHead}</th><th>主情景安全边际（主判断）</th><th>价格条件</th><th>压力校验区间（辅助观察）</th><th>相对压力下限的安全边际（辅助）</th><th>存为我的基准情景</th></tr></thead><tbody>${body}</tbody></table></div><p class="small muted">门槛随模型假设变化，达到价格条件仍不等于可以买入。待复核：生意是否可预测、一次性项目、维持经营所需资本支出与营运资本、可分配现金、负债与少数股东权益，以及长期增长能否由再投资支持。历史 FCFF 不等于已经核实的股东盈余。</p></div>`;
  }
 
  function skippedOf(data){
@@ -831,6 +1066,16 @@ window.ValuationScenarios = (() => {
    ${researchPassed
     ? `<p class="small muted">横轴范围 ${axisDomain(researchData).lo}% ～ ${axisDomain(researchData).hi}%；低于左端的区间折叠到边缘并标 ◀。</p>`
     : '<p class="small muted">当前没有公司同时通过价格条件与预测/估值门禁，这张图暂时没有内容。图例与读法在下面「自动估值明细」的同一张图上。</p>'}
+   <div class="vs-chart-head">
+    <div class="vs-chart-titlerow">
+     <h3>严格候选 · 压力校验情景（24 组机械情景）</h3>
+     ${researchPassed?stressLegend():''}
+    </div>
+    ${researchPassed?stressNotes(researchData):''}
+   </div>
+   ${researchPassed
+    ? `<div class="vs-chart-wrap">${stressChart(researchData)}</div>`
+    : '<p class="small muted">当前没有公司同时通过价格条件与预测/估值门禁，这张图暂时没有内容。图例与读法在下面「自动估值明细」的同一张图上。</p>'}
   </div>
   ${researchPassed?`<div class="panel"><h3>严格候选逐家结果</h3>${tableOf(researchData, SLOT_MAIN)}</div>`:''}
   <div class="panel vs-diagnostics">
@@ -846,6 +1091,15 @@ window.ValuationScenarios = (() => {
    </div>
    <div class="vs-chart-wrap">${bandChart(data)}</div>
    <p class="small muted">横轴范围 ${axisDomain(data).lo}% ～ ${axisDomain(data).hi}%；低于左端的区间折叠到边缘并标 ◀。</p>
+   <div class="vs-chart-head">
+    <div class="vs-chart-titlerow">
+     <h3>自动估值 · 压力校验情景（24 组机械情景）</h3>
+     ${stressLegend()}
+    </div>
+    ${stressNotes(data)}
+   </div>
+   <div class="vs-chart-wrap">${stressChart(data)}</div>
+   <p class="small muted">横轴是「每股内在价值 ÷ 主情景每股价值」的倍数，1.0× 即主情景；落在轴外的部分折叠到边缘。</p>
    <p class="small muted">每股情景估值来自自动草案 + 当前口径 WACC；报价每个交易日 23:30 后自动更新；测算时间 ${esc(generated)}。</p>
    ${tableOf(data, SLOT_MAIN)}
   </div>
