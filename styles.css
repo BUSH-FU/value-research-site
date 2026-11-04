@@ -389,3 +389,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:250px;
    把整张表撑到 2329px，右侧几列默认都在屏幕外。收窄这一列并让它换行，
    表格整体瘦下来，右边几列（含压力校验小带）不用横滚就能看到。 */
 .vs-decision td.vs-cond{width:300px;min-width:260px;max-width:320px;white-space:normal;line-height:1.5;vertical-align:top}
+/* 门禁差距：每条阻断一行短形式，自带实测值；完整原因句在悬停里。
+   表格里不再塞一长串分号串——读者要能一眼看出差在哪、差多少。 */
+.vs-gaps{display:block;margin-top:5px}
+.vs-gap{display:block;font-size:11px;line-height:1.55;color:#8a5a3c;border-left:2px solid #e0c9a8;padding-left:6px;margin-top:2px}

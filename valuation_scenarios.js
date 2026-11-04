@@ -105,18 +105,33 @@ window.ValuationScenarios = (() => {
  // 所以这里写「无法测算」，不能再写「股权价值为负」——那是另一种情况。
  function priceConditionText(row, neu, threshold, validThreshold){
   if(neu.per === null){
-   return neu.low === null
+   return {text: neu.low === null
     ? '三档均无法测算，不参与价格判断'
-    : `主情景档（${MID_LABEL}）无法测算，不参与价格判断（另两档仍有正估值）`;
+    : `主情景档（${MID_LABEL}）无法测算，不参与价格判断（另两档仍有正估值）`, gateBlocked: false};
   }
-  if(!validThreshold) return '请配置安全边际门槛';
-  if(!neu.comparable) return '报价不可比较' + (neu.reason ? '：' + neu.reason : '');
+  if(!validThreshold) return {text: '请配置安全边际门槛', gateBlocked: false};
+  if(!neu.comparable) return {text: '报价不可比较' + (neu.reason ? '：' + neu.reason : ''), gateBlocked: false};
   const target = priceCondition(neu.per, threshold);
-  if(neu.price > target) return '尚未达到价格条件（未达 ' + num(threshold, 0) + '% 安全边际）';
-  if(researchReady(row)) return '达到价格条件，且预测/估值门禁已通过';
+  if(neu.price > target) return {text: '尚未达到价格条件（未达 ' + num(threshold, 0) + '% 安全边际）', gateBlocked: false};
+  if(researchReady(row)) return {text: '达到价格条件，且预测/估值门禁已通过', gateBlocked: false};
   const blockers = gateBlockers(row);
-  return '达到价格条件，但预测/估值门禁未通过'
-   + (blockers.length ? '：' + blockers.join('；') : '');
+  return {text: '达到价格条件，但预测/估值门禁未通过'
+             + (blockers.length ? '（' + blockers.length + ' 项）' : ''), gateBlocked: true};
+ }
+
+ // 门禁差距：每条阻断给一行短形式（自带实测值），完整原因句放悬停里。
+ // 表格里不再塞一长串分号串——读者要能一眼看出差在哪、差多少，
+ // 而不是读完一串逐字相同的套话（2026-11-04 实测：保守口径的门禁曾经
+ // 对 17 家逐字追加同一句占位话，看起来像逐家结论，其实是没算）。
+ function gateGapCell(row){
+  const gate = valuationGate(row);
+  const gaps = (gate.gaps || []).filter(gap => gap && gap.text);
+  // 后端没给短形式时退回完整原因句，绝不能因为「没有 gaps」就把原因丢了。
+  const items = gaps.length ? gaps : (gate.blockers || []).filter(Boolean).map(text => ({text, short: text}));
+  if(!items.length) return '';
+  const full = items.map(item => item.text).join('；');
+  const lines = items.map(item => `<span class="vs-gap">${esc(item.short || item.text)}</span>`).join('<br>');
+  return `<br><span class="vs-gaps" title="${esc(full)}">${lines}</span>`;
  }
  // 严格口径：账上现金不进股权桥。「股权价值为负」必须带上这个假设，
  // 否则会被读成公司资不抵债——实际可能只是没给账上的现金估值。
@@ -858,6 +873,8 @@ window.ValuationScenarios = (() => {
    const target = priceCondition(neu.per, threshold);
    const stressMargin = stressPositive && neu.comparable ? 1 - neu.price / stressLow : null;
    const condition = priceConditionText(row, neu, threshold, validThreshold);
+   const conditionCell = `<span class="vs-cond-text">${esc(condition.text)}</span>`
+     + (condition.gateBlocked ? gateGapCell(row) : '');
    const bandCell = neu.low === null
     ? '<span class="pill warning">三档均无法测算</span>'
     : '¥' + num(neu.low) + ' ～ ¥' + num(neu.high);
@@ -873,7 +890,7 @@ window.ValuationScenarios = (() => {
     <td>${bandCell}<br><span class="small muted">主情景 ${MID_LABEL} 档 ${neu.per===null?'—':'¥'+num(neu.per)}</span></td>
     <td>${targetCell}</td>
     <td>${marginCell}</td>
-    <td class="vs-cond">${condition}</td>
+    <td class="vs-cond">${conditionCell}</td>
     <td>${stressCell}</td>
     <td>${stressMarginCell}</td>
     <td>${saveCell(row)}</td>
@@ -885,6 +902,7 @@ window.ValuationScenarios = (() => {
   <p class="small muted"><strong>价格条件只看主情景</strong>：安全边际 ＝ 1 − 收盘价 ÷ 主情景内在价值（折价口径）；${thrHead} ＝ 主情景内在价值 ×（1 − ${thrText}）。安全边际的作用是抵消我自己预测的误差，不是提前假设「未来一定变差」。</p>
   <p class="small muted"><strong>压力校验区间</strong>（原 24 组机械情景：现金流原值 / 全部低 20%，WACC 当前 / +1 / +2 个百分点，永续增长 0% / 1% / 2% / 3%）保留为辅助观察，不控制价格条件。那是灾难情景，拿它当门槛会把所有公司都判成不合格。</p>
   <p class="small muted"><strong>压力校验区间列怎么读</strong>：灰带 = 24 组机械情景覆盖的每股区间，深绿点 = 主情景（${MID_LABEL} 档），橙线 = 当前收盘价。橙线落在灰带右侧 = 现价已经高于全部 24 组机械情景，连最好的那个角落都撑不住现价；橙线在灰带之内 = 现价还在机械情景的覆盖范围里。</p>
+  <p class="small muted"><strong>门禁差距怎么读</strong>：价格条件达线但研究门禁没放行的公司，会在「价格条件」列下面逐条列出差距（每条自带实测值，悬停看完整原因句）。其中「终值占比」这一条要特别说明：在本页的五年平推口径下，终值占比只是 (WACC, 永续增长率) 的函数，不含任何公司特有信息——实测终值占比 75% 等价于 WACC 与永续增长率的间距约 5.87 个百分点，而规则文本写的是 3.0 个百分点，也就是实际执行的更严。它挡掉的主要是低 WACC 的公司，而低 WACC 往往正是安全边际最大的一批。这条门禁保留不改，但差距要写清楚。</p>
   <p class="small muted"><strong>顺序别弄反</strong>：先做定性筛选——ROIC 持续高于 WACC、有护城河、现金流稳定、杠杆可控（在「严格财务预筛」和「投资核查清单」里），确认是好生意，再谈估值折扣。本页只管价格这一段。</p>`;
   return `<div class="panel"><h3>股价、自动估值与价格门槛</h3>${intro}<div class="scroll"><table class="vs-decision" data-tt-sync="${esc(slot||SLOT_MAIN)}"><thead><tr><th>公司 / 状态</th><th>当前收盘价 / 日期</th><th>三档每股范围 / 元每股</th><th>${thrHead}</th><th>主情景安全边际（主判断）</th><th>价格条件</th><th>压力校验区间（辅助观察）</th><th>相对压力下限的安全边际（辅助）</th><th>存为我的基准情景</th></tr></thead><tbody>${body}</tbody></table></div><p class="small muted">门槛随模型假设变化，达到价格条件仍不等于可以买入。待复核：生意是否可预测、一次性项目、维持经营所需资本支出与营运资本、可分配现金、负债与少数股东权益，以及长期增长能否由再投资支持。历史 FCFF 不等于已经核实的股东盈余。</p></div>`;
  }
