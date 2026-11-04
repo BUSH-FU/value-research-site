@@ -393,3 +393,12 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:250px;
    表格里不再塞一长串分号串——读者要能一眼看出差在哪、差多少。 */
 .vs-gaps{display:block;margin-top:5px}
 .vs-gap{display:block;font-size:11px;line-height:1.55;color:#8a5a3c;border-left:2px solid #e0c9a8;padding-left:6px;margin-top:2px}
+/* 系统级与采集覆盖缺口：对全部公司相同，不是这家公司自己的毛病——
+   用另一种颜色跟阻断项区分开，读者一眼能看出「这条不是它的问题」。 */
+.vs-sysgaps{display:block;margin-top:4px}
+.vs-sysgap{display:block;font-size:11px;line-height:1.55;color:#5c6b7a;border-left:2px dashed #b9c4cf;padding-left:6px;margin-top:2px}
+/* 披露项：只作参考，不参与放行判断。 */
+.vs-disclosures{display:block;margin-top:4px}
+.vs-disclosure{display:block;font-size:11px;line-height:1.55;color:#6b6b6b;border-left:2px solid #d8d8d8;padding-left:6px;margin-top:2px}
+.vs-flat-evidence{margin-top:8px}
+.vs-flat-evidence h5{margin:10px 0 4px}

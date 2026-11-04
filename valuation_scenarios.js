@@ -123,15 +123,34 @@ window.ValuationScenarios = (() => {
  // 表格里不再塞一长串分号串——读者要能一眼看出差在哪、差多少，
  // 而不是读完一串逐字相同的套话（2026-11-04 实测：保守口径的门禁曾经
  // 对 17 家逐字追加同一句占位话，看起来像逐家结论，其实是没算）。
+ //
+ // 系统级与采集覆盖缺口（逐截止日原始版本、分部数据）单列一行：
+ // 它们对全部公司一视同仁，不是这家公司自己的毛病，
+ // 混进阻断项会让整池公司一起沉底，门禁就再也分不出谁好谁坏。
  function gateGapCell(row){
   const gate = valuationGate(row);
   const gaps = (gate.gaps || []).filter(gap => gap && gap.text);
   // 后端没给短形式时退回完整原因句，绝不能因为「没有 gaps」就把原因丢了。
   const items = gaps.length ? gaps : (gate.blockers || []).filter(Boolean).map(text => ({text, short: text}));
-  if(!items.length) return '';
-  const full = items.map(item => item.text).join('；');
-  const lines = items.map(item => `<span class="vs-gap">${esc(item.short || item.text)}</span>`).join('<br>');
-  return `<br><span class="vs-gaps" title="${esc(full)}">${lines}</span>`;
+  const systemGaps = (gate.system_gaps || []).filter(gap => gap && gap.text);
+  const disclosures = (gate.disclosures || []).filter(item => item && item.text);
+  let out = '';
+  if(items.length){
+   const full = items.map(item => item.text).join('；');
+   const lines = items.map(item => `<span class="vs-gap">${esc(item.short || item.text)}</span>`).join('<br>');
+   out += `<br><span class="vs-gaps" title="${esc(full)}">${lines}</span>`;
+  }
+  if(systemGaps.length){
+   const full = systemGaps.map(item => item.text).join('；');
+   const lines = systemGaps.map(item => `<span class="vs-sysgap">${esc(item.short || item.text)}</span>`).join('<br>');
+   out += `<br><span class="vs-sysgaps" title="${esc(full)}">${lines}</span>`;
+  }
+  if(disclosures.length){
+   const full = disclosures.map(item => item.text).join('；');
+   const lines = disclosures.map(item => `<span class="vs-disclosure">${esc(item.text)}</span>`).join('<br>');
+   out += `<br><span class="vs-disclosures" title="${esc(full)}">${lines}</span>`;
+  }
+  return out;
  }
  // 严格口径：账上现金不进股权桥。「股权价值为负」必须带上这个假设，
  // 否则会被读成公司资不抵债——实际可能只是没给账上的现金估值。
@@ -662,6 +681,44 @@ window.ValuationScenarios = (() => {
   return `<div class="scroll"><table data-tt-sync="${esc(slot||SLOT_MAIN)}"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
  }
 
+ // 平推口径的证据：证据要对得上产生这个数的方法。
+ // 保守口径的数来自「最近五年 FCFF 中位数平推」，它的可信度只能由它自己的
+ // 滚动回测说话——拿经营模型的回测来顶，等于用另一把尺子量这把尺子
+ // （2026-11-04 实测：承德露露平推法中位偏差 −7.5%，美的 −45.7%，
+ //  新和成 +104.4%、华润江中 +47.0%；用经营模型的回测，四家拿到的是同一句套话）。
+ function flatEvidencePanel(forecast){
+  const evidence = forecast.flat_evidence || {};
+  const gate = forecast.decision_gate || {};
+  const blockers = (gate.blockers||[]).filter(Boolean);
+  const systemGaps = (gate.system_gaps||[]).filter(item => item && item.text);
+  if(!evidence.windows && !blockers.length && !systemGaps.length) return '';
+  const bandRows = (evidence.bands||[]).map(band =>
+   `<tr><td>${esc(band.label)}</td><td>${isNum(band.signed_error_pct)?num(band.signed_error_pct,1)+'%':'—'}</td>`
+   + `<td>${isNum(band.actual_to_predicted)?num(band.actual_to_predicted,3):'—'}</td></tr>`).join('');
+  const bias = evidence.bias_pct;
+  const biasText = isNum(bias)
+   ? (bias > 0
+     ? `中位偏差 ${num(bias,1)}%：这个方法历史上把 FCFF 说大了，估值基数偏乐观。`
+     : `中位偏差 ${num(bias,1)}%：这个方法历史上把 FCFF 说小了，估值基数偏保守。`)
+   : '偏差未能计算。';
+  return `<div class="vs-flat-evidence"><h5>平推法自己的回测 · 证据来源</h5>`
+   + `<p><strong>${esc(gate.evidence_source==='flat_backtest'?'平推法自己的滚动回测':'经营模型')}</strong>：`
+   + `${esc(evidence.method||'每个截止日用「最近五年 FCFF 中位数平推」预测未来 1~3 年，与实际 FCFF 对照')}。</p>`
+   + (evidence.windows
+     ? `<p class="small muted">${esc(evidence.windows)} 个回测窗口、${esc(evidence.cutoffs)} 个独立截止年；`
+       + `平均绝对误差 ${isNum(evidence.mape_pct)?num(evidence.mape_pct,1)+'%':'—'}；`
+       + `${esc(biasText)}${isNum(evidence.optimistic_share_pct)?` 历史上 ${num(evidence.optimistic_share_pct,1)}% 的窗口把 FCFF 说大了`:''}`
+       + `${evidence.negative_actual_windows?`；其中 ${esc(evidence.negative_actual_windows)} 个窗口实际 FCFF 为负（最不利的窗口，没有被剔除）`:''}。</p>`
+     : '')
+   + (bandRows ? `<div class="scroll"><table><thead><tr><th>误差区间</th><th>中位有符号误差</th><th>实际 ÷ 预测</th></tr></thead><tbody>${bandRows}</tbody></table></div>`
+               + `<p class="small muted">有符号误差 ＝（预测 − 实际）÷ |实际|，正数表示这个方法当时把 FCFF 说大了。P90 是对估值不利的一端（实际低于预测），P10 是有利的一端。</p>` : '')
+   + (blockers.length ? `<p><strong>门禁未通过：</strong></p><ul>${blockers.map(text=>`<li>${esc(text)}</li>`).join('')}</ul>` : '')
+   + (systemGaps.length ? `<p><strong>系统级与采集覆盖缺口</strong>（对全部公司相同，不算这家公司的毛病）：</p>`
+     + `<ul>${systemGaps.map(item=>`<li>${esc(item.text)}${item.note?`　<span class="small muted">${esc(item.note)}</span>`:''}</li>`).join('')}</ul>` : '')
+   + (evidence.rule ? `<p class="small muted">判据：${esc(evidence.rule)}</p>` : '')
+   + `</div>`;
+ }
+
  function operatingForecastTable(scenario){
   const forecast = scenario.forecast || scenario;
   const rows = forecast.rows || [];
@@ -669,7 +726,8 @@ window.ValuationScenarios = (() => {
    const label = forecast.basis === 'latest' ? `${esc(forecast.source_year)} 年` :
     (forecast.basis === 'mean' ? '五年均值' : '五年中位数');
    const medianNote = isNum(forecast.five_year_median_yi) ? `；五年中位数 ${num(forecast.five_year_median_yi)} 亿` : '';
-   return `${num(forecast.fcff_yi)} 亿<br><span class="small muted">${label}${medianNote}；${esc(forecast.method||'历史 FCFF 平推（方法未标注）')}</span>`;
+   return `${num(forecast.fcff_yi)} 亿<br><span class="small muted">${label}${medianNote}；${esc(forecast.method||'历史 FCFF 平推（方法未标注）')}</span>`
+    + flatEvidencePanel(forecast);
   }
   const body = rows.map(r => `<tr><td>${esc(r.year)}</td><td>${num(r.revenue/1e8)}</td><td>${num(r.revenue_growth_pct,1)}%</td><td>${num(r.ebit/1e8)}</td><td>${num(r.nopat/1e8)}</td><td>${num(r.depreciation/1e8)}</td><td>${num(r.capex/1e8)}</td><td>${num(r.change_nwc/1e8)}</td><td><strong>${num(r.fcff/1e8)}</strong></td></tr>`).join('');
   const lineage = forecast.data_lineage || {};
@@ -713,7 +771,12 @@ window.ValuationScenarios = (() => {
   const riskLinkText = (riskLinks.links||[]).length
    ? `<ul>${riskLinks.links.map(item=>`<li><strong>${esc(item.title)}</strong> → ${esc((item.drivers||[]).join('、'))}；${esc(item.meaning)}；${item.can_change_forecast?'已核实重大事项，需人工设置情景':'仅核证或线索，不改变预测'}</li>`).join('')}</ul><p class="small muted">${esc(riskLinks.rule||'')}</p>`
    : '<p class="small muted">暂无可映射的已收集风险证据；这不代表不存在风险。</p>';
-  return `<details><summary>查看 5 年经营预测与验证 · 可信度 ${esc(reliability.grade||'—')} / ${num(reliability.score,1)}</summary><p><strong>${esc(reliability.decision||'尚未评级')}</strong></p><p><strong>投资判断门禁：${decisionGate.ready?'已通过':'未通过'}</strong>${decisionGate.ready?'':`；${esc((decisionGate.blockers||[]).join('；'))}`}</p>${(reliability.reasons||[]).length?`<ul>${reliability.reasons.map(reason=>`<li>${esc(reason)}</li>`).join('')}</ul>`:''}<div class="scroll"><table><thead><tr><th>年</th><th>收入</th><th>增长</th><th>EBIT</th><th>NOPAT</th><th>折旧</th><th>资本开支</th><th>营运资本增量</th><th>FCFF</th></tr></thead><tbody>${body}</tbody></table></div><p class="small muted">金额单位：亿元。${esc(forecast.method||'')}</p>
+  const systemGapList = (decisionGate.system_gaps||[]).filter(item => item && item.text);
+  const systemGapText = systemGapList.length
+   ? `<p><strong>系统级与采集覆盖缺口</strong>（对全部公司相同，不算这家公司的毛病，补齐后需复评）：<br>`
+     + systemGapList.map(item => `· ${esc(item.text)}${item.note?`　<span class="small muted">${esc(item.note)}</span>`:''}`).join('<br>') + `</p>`
+   : '';
+  return `<details><summary>查看 5 年经营预测与验证 · 可信度 ${esc(reliability.grade||'—')} / ${num(reliability.score,1)}</summary><p><strong>${esc(reliability.decision||'尚未评级')}</strong></p><p><strong>投资判断门禁：${decisionGate.ready?'已通过':'未通过'}</strong>${decisionGate.ready?'':`；${esc((decisionGate.blockers||[]).join('；'))}`}</p>${systemGapText}${(reliability.reasons||[]).length?`<ul>${reliability.reasons.map(reason=>`<li>${esc(reason)}</li>`).join('')}</ul>`:''}<div class="scroll"><table><thead><tr><th>年</th><th>收入</th><th>增长</th><th>EBIT</th><th>NOPAT</th><th>折旧</th><th>资本开支</th><th>营运资本增量</th><th>FCFF</th></tr></thead><tbody>${body}</tbody></table></div><p class="small muted">金额单位：亿元。${esc(forecast.method||'')}</p>
    <h5>反向 DCF · 当前价格要求什么</h5><p>${reverseText}</p>
    <h5>历史滚动回测</h5><p>${backtestText}</p>
    <h5>历史误差概率带 · P10 / P50 / P90</h5>${empiricalText}
@@ -902,7 +965,9 @@ window.ValuationScenarios = (() => {
   <p class="small muted"><strong>价格条件只看主情景</strong>：安全边际 ＝ 1 − 收盘价 ÷ 主情景内在价值（折价口径）；${thrHead} ＝ 主情景内在价值 ×（1 − ${thrText}）。安全边际的作用是抵消我自己预测的误差，不是提前假设「未来一定变差」。</p>
   <p class="small muted"><strong>压力校验区间</strong>（原 24 组机械情景：现金流原值 / 全部低 20%，WACC 当前 / +1 / +2 个百分点，永续增长 0% / 1% / 2% / 3%）保留为辅助观察，不控制价格条件。那是灾难情景，拿它当门槛会把所有公司都判成不合格。</p>
   <p class="small muted"><strong>压力校验区间列怎么读</strong>：灰带 = 24 组机械情景覆盖的每股区间，深绿点 = 主情景（${MID_LABEL} 档），橙线 = 当前收盘价。橙线落在灰带右侧 = 现价已经高于全部 24 组机械情景，连最好的那个角落都撑不住现价；橙线在灰带之内 = 现价还在机械情景的覆盖范围里。</p>
-  <p class="small muted"><strong>门禁差距怎么读</strong>：价格条件达线但研究门禁没放行的公司，会在「价格条件」列下面逐条列出差距（每条自带实测值，悬停看完整原因句）。其中「终值占比」这一条要特别说明：在本页的五年平推口径下，终值占比只是 (WACC, 永续增长率) 的函数，不含任何公司特有信息——实测终值占比 75% 等价于 WACC 与永续增长率的间距约 5.87 个百分点，而规则文本写的是 3.0 个百分点，也就是实际执行的更严。它挡掉的主要是低 WACC 的公司，而低 WACC 往往正是安全边际最大的一批。这条门禁保留不改，但差距要写清楚。</p>
+  <p class="small muted"><strong>门禁差距怎么读</strong>：价格条件达线但研究门禁没放行的公司，会在「价格条件」列下面逐条列出差距（每条自带实测值，悬停看完整原因句）。差距分三类，颜色不同：<strong>阻断项</strong>是这家公司自己的问题；<strong>系统级与采集覆盖缺口</strong>（逐截止日原始版本、分部数据）对全部公司相同，不是某家公司的毛病；<strong>披露项</strong>只作参考，不参与放行判断。</p>
+  <p class="small muted"><strong>放行要过哪几道门</strong>（2026-11-04 改判据，阈值一个没新造，全部沿用现有数字）：① 预测证据——保守口径用平推法<strong>自己</strong>的滚动回测（至少 12 个窗口、4 个独立截止年，且不得系统性高估 FCFF）；② 终值压力敏感度——WACC +1 个百分点（现金流与永续增长率不变，用的是与主情景完全同一份输入），主情景安全边际还成不成立；③ 交叉口径检验——换「最近一年」口径重算，价格条件是否仍成立（门槛沿用同一个安全边际门槛）；④ WACC 与永续增长率间距 ≥ 3.0 个百分点；⑤ 重大已核实风险未暂停。</p>
+  <p class="small muted"><strong>终值占比为什么不再是门</strong>：在本页的五年平推口径下，终值占比只是 (WACC, 永续增长率) 的函数，不含任何公司特有信息——实测终值占比 75% 等价于 WACC 与永续增长率的间距约 5.87 个百分点，而规则文本写的是 3.0 个百分点，也就是实际执行的更严。它挡掉的主要是低 WACC 的公司，而低 WACC 往往正是安全边际最大的一批。它现在降为披露项，真正要量的是「假设本身有多脆」，所以由终值压力敏感度承担。</p>
   <p class="small muted"><strong>顺序别弄反</strong>：先做定性筛选——ROIC 持续高于 WACC、有护城河、现金流稳定、杠杆可控（在「严格财务预筛」和「投资核查清单」里），确认是好生意，再谈估值折扣。本页只管价格这一段。</p>`;
   return `<div class="panel"><h3>股价、自动估值与价格门槛</h3>${intro}<div class="scroll"><table class="vs-decision" data-tt-sync="${esc(slot||SLOT_MAIN)}"><thead><tr><th>公司 / 状态</th><th>当前收盘价 / 日期</th><th>三档每股范围 / 元每股</th><th>${thrHead}</th><th>主情景安全边际（主判断）</th><th>价格条件</th><th>压力校验区间（辅助观察）</th><th>相对压力下限的安全边际（辅助）</th><th>存为我的基准情景</th></tr></thead><tbody>${body}</tbody></table></div><p class="small muted">门槛随模型假设变化，达到价格条件仍不等于可以买入。待复核：生意是否可预测、一次性项目、维持经营所需资本支出与营运资本、可分配现金、负债与少数股东权益，以及长期增长能否由再投资支持。历史 FCFF 不等于已经核实的股东盈余。</p></div>`;
  }
