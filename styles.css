@@ -341,6 +341,29 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:250px;
 .vs-sb-price{stroke:#b8863a;stroke-width:1.6}
 .vs-sb-price.out{stroke:#b3543f;stroke-width:1.8}
 .vs-sb-price.under{stroke:#3f7d52;stroke-width:1.8}
+/* 决策表里的「各口径边际对照」小图：四个现金流口径的主情景安全边际并排画在同一条轴上。
+   深色大点＝当前判断口径（当前观察对象）；蓝点＝经营驱动口径（股权桥不同，现金计入）；
+   灰点＝历史平推三口径（现金不计入）。颜色一律走类，不写行内 style。 */
+.vs-bc{display:block;margin:6px 0 3px}
+.vs-bc-rail{stroke:#e4e8e1;stroke-width:1}
+.vs-bc-rail.current{stroke:#c8d3c6;stroke-width:1.6}
+.vs-bc-rail.bridged{stroke:#b8c6da;stroke-dasharray:3 3}
+.vs-bc-dot{fill:#8d968c;stroke:#fff;stroke-width:1.4}
+.vs-bc-dot.current{fill:#245e49;stroke:#fff;stroke-width:2}
+.vs-bc-dot.bridged{fill:#4a6fa5}
+.vs-bc-dot.current.bridged{fill:#2f5580}
+.vs-bc-label{fill:#7d857c;font-size:9px;font-family:inherit}
+.vs-bc-label.current{fill:#245e49;font-weight:600}
+.vs-bc-label.bridged{fill:#4a6fa5}
+.vs-bc-value{fill:#6b6b6b;font-size:9px;font-family:inherit;font-variant-numeric:tabular-nums}
+.vs-bc-value.current{fill:#245e49;font-weight:600}
+.vs-bc-value.distorted{fill:#a8663f}
+.vs-bc-zero{stroke:#b6c3b7;stroke-width:1.4}
+.vs-bc-threshold{stroke:#b79a5f;stroke-width:1.4;stroke-dasharray:4 3}
+.vs-bc-clip{fill:#8c6331;font-size:9px;font-family:inherit}
+.vs-bc-status{font-size:11px;color:#6b6b6b}
+.vs-bc-status.ok{color:#245e49}
+.vs-bc-status.bad{color:#a8663f}
 @media(max-width:680px){.vs-chart{min-width:760px}.vs-chart-titlerow{display:block}.vs-legend{margin-top:10px}}
 #company-workspace [aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff}
 

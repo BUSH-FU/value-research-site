@@ -922,12 +922,111 @@ window.ValuationScenarios = (() => {
   return `${svg}<br><span class="small muted">¥${num(low)} ～ ¥${num(high)}</span><br>${state}`;
  }
 
+ // 各口径边际对照：四个现金流口径的主情景安全边际并排画在同一条轴上。
+ //
+ // 为什么要有这张图：「便宜」如果只在一种口径下成立，它是口径的产物，
+ // 不是这家公司的事实。2026-11-04 实测海尔智家中位数口径 +25.3%、
+ // 最近一年口径 −21.5%——同一只股票、同一份财报，只因为现金流取哪一段，
+ // 就一个达线一个不达线。这种事光看主情景那一列看不出来。
+ //
+ // 三条规矩：
+ // 1. 数值只用服务端给的 basis_comparison，不在这里重算——重算就会和别的页面差一个数。
+ // 2. 经营驱动口径把账上现金计入了股权桥，历史平推三个口径不计入，所以它的边际天然偏高。
+ //    图上必须把它单独标出来，否则读者会把「桥不同」读成「模型更准」。
+ // 3. 当前判断口径那一条用深色大点标出——它是「当前观察对象」，其余三条是对照。
+ const BASIS_LANES = [
+  {key: 'operating', label: '经营驱动', short: '经营'},
+  {key: 'median', label: '五年中位数', short: '中位'},
+  {key: 'mean', label: '五年均值', short: '均值'},
+  {key: 'latest', label: '最近一年', short: '最近年'},
+ ];
+
+ // 坐标域：整张表共用一个，跨公司才能横向比。越界折叠到边缘并标 ◀（与区间图同一规矩）。
+ // 内在价值接近零时安全边际是失真的（分母趋零），那种数不进坐标域，也不进达标统计——
+ // 把失真的百分比画到轴上等于给出一个假的极端值。
+ function basisComparisonDomain(rows, threshold){
+  let min = 0, max = 0;
+  for(const row of rows){
+   for(const item of (row.basis_comparison || [])){
+    if(!item || item.ready !== true || !isNum(item.margin)) continue;
+    if(marginIsDistorted(item.margin)) continue;
+    const value = Number(item.margin) * 100;
+    if(value < min) min = value;
+    if(value > max) max = value;
+   }
+  }
+  const thr = Number(threshold) || 0;
+  const lo = Math.max(AXIS_MIN, Math.min(0, Math.floor(min / 10) * 10));
+  const hi = Math.max(thr + 10, Math.min(AXIS_MAX, Math.ceil(max / 10) * 10));
+  return {lo, hi: hi > lo ? hi : lo + 10};
+ }
+
+ function basisComparisonCell(row, threshold, domain){
+  const items = row.basis_comparison || [];
+  // 没有对照数据就什么都不渲染：往单元格里塞一个「—」只会让人以为对照结果是「没有差异」。
+  if(!items.length) return '';
+  const current = row.current_basis || '';
+  const thr = Number(threshold) || 0;
+  const W = 236, H = 58, LABEL_W = 42, VALUE_W = 50;
+  const plotLeft = LABEL_W + 4, plotRight = W - VALUE_W;
+  const span = (domain.hi - domain.lo) || 1;
+  const x = value => plotLeft + (plotRight - plotLeft)
+   * (Math.min(domain.hi, Math.max(domain.lo, value)) - domain.lo) / span;
+  const lanes = [], details = [];
+  let meets = 0, computable = 0;
+  BASIS_LANES.forEach((spec, index) => {
+   const item = items.find(entry => entry && entry.key === spec.key) || {};
+   const y = 11 + index * 13;
+   const isCurrent = item.key === current;
+   const usable = item.ready === true && isNum(item.margin);
+   const distorted = usable && marginIsDistorted(item.margin);
+   // 股权桥差异标在泳道本身上，不只标在点上：经营口径算不出来时没有点，
+   // 泳道仍要报出自己的家门，否则读者分不出这条是另一座桥。
+   const bridged = item.cash_counted === true;
+   let dot = '', clipped = '';
+   if(usable && !distorted){
+    computable += 1;
+    const pct = Number(item.margin) * 100;
+    if(pct >= thr) meets += 1;
+    const cx = x(pct);
+    dot = `<circle cx="${cx.toFixed(1)}" cy="${y}" r="${isCurrent ? 4.2 : 3}" class="vs-bc-dot${isCurrent ? ' current' : ''}${bridged ? ' bridged' : ''}"/>`;
+    if(pct < domain.lo) clipped = `<text x="${(plotLeft + 5).toFixed(1)}" y="${(y + 3).toFixed(1)}" class="vs-bc-clip">◀</text>`;
+   }
+   const valueText = usable ? (distorted ? '失真' : pct1(item.margin)) : '—';
+   lanes.push(`<line x1="${plotLeft}" y1="${y}" x2="${plotRight}" y2="${y}" class="vs-bc-rail${isCurrent ? ' current' : ''}${bridged ? ' bridged' : ''}"/>`
+    + `<text x="${LABEL_W - 4}" y="${(y + 3).toFixed(1)}" text-anchor="end" class="vs-bc-label${isCurrent ? ' current' : ''}${bridged ? ' bridged' : ''}">${esc(spec.short)}</text>`
+    + dot + clipped
+    + `<text x="${W - 4}" y="${(y + 3).toFixed(1)}" text-anchor="end" class="vs-bc-value${isCurrent ? ' current' : ''}${distorted ? ' distorted' : ''}">${esc(valueText)}</text>`);
+   details.push(`${spec.label}（${item.bridge || '—'}）${isCurrent ? '［当前判断口径］' : ''}：`
+    + (usable ? (distorted
+        ? `内在价值接近零，安全边际失真（比例不可靠），不参与达标统计`
+        : `安全边际 ${pct1(item.margin)}，每股 ${isNum(item.per_share) ? '¥' + num(item.per_share) : '—'}`)
+              : `算不出（${(item.missing || []).join('；') || '该口径不可用'}）`));
+  });
+  // 0 轴与门槛线贯穿四条泳道：点落在门槛线右边＝这一口径达线。
+  const zeroLine = `<line x1="${x(0).toFixed(1)}" y1="3" x2="${x(0).toFixed(1)}" y2="${H - 6}" class="vs-bc-zero"/>`;
+  const thresholdLine = `<line x1="${x(thr).toFixed(1)}" y1="3" x2="${x(thr).toFixed(1)}" y2="${H - 6}" class="vs-bc-threshold"/>`;
+  const title = `${row.name || row.code}（${row.code}）各口径主情景安全边际：${details.join('；')}。`
+   + `门槛 ${thr}%，坐标 ${domain.lo}% ～ ${domain.hi}%。`;
+  const svg = `<svg class="vs-bc" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(title)}"><title>${esc(title)}</title>${zeroLine}${thresholdLine}${lanes.join('')}</svg>`;
+  const status = computable === 0
+   ? '<span class="muted">四个口径都算不出</span>'
+   : (meets === computable
+    ? `<span class="vs-bc-status ok">${computable} 个可算口径全部达线</span>`
+    : (meets === 0
+     ? `<span class="vs-bc-status bad">${computable === 1 ? '唯一可算口径不达线' : computable + ' 个可算口径均不达线'}</span>`
+     : `<span class="vs-bc-status">${meets}/${computable} 个可算口径达线</span>`));
+  return `${svg}<br>${status}`;
+ }
+
  function decisionTable(data, slot){
   const threshold = isNum(data?.margin_min_pct) ? Number(data.margin_min_pct) : NaN;
   const validThreshold = Number.isFinite(threshold) && threshold >= 0 && threshold < 100;
   const thrText = validThreshold ? num(threshold, 0) + '%' : '未配置';
   const thrHead = validThreshold ? '价格条件线 ' + num(threshold, 0) + '%' : '价格条件线（未配置）';
-  const body = rowsOf(data, slot, true).map(row => {
+  const basisRows = rowsOf(data, slot, true);
+  const basisDomain = basisComparisonDomain(basisRows, threshold);
+  const body = basisRows.map(row => {
    const neu = mainOf(row);
    const stress = row.scenario.stress || {};
    const complete = stress.complete === true && isNum(stress.low) && isNum(stress.high);
@@ -937,7 +1036,8 @@ window.ValuationScenarios = (() => {
    const stressMargin = stressPositive && neu.comparable ? 1 - neu.price / stressLow : null;
    const condition = priceConditionText(row, neu, threshold, validThreshold);
    const conditionCell = `<span class="vs-cond-text">${esc(condition.text)}</span>`
-     + (condition.gateBlocked ? gateGapCell(row) : '');
+     + (condition.gateBlocked ? gateGapCell(row) : '')
+     + basisComparisonCell(row, validThreshold ? threshold : 0, basisDomain);
    const bandCell = neu.low === null
     ? '<span class="pill warning">三档均无法测算</span>'
     : '¥' + num(neu.low) + ' ～ ¥' + num(neu.high);
@@ -960,6 +1060,10 @@ window.ValuationScenarios = (() => {
    </tr>`;
   }).join('');
   const profile = basisProfile(data);
+  const bcStats = basisComparisonStats(basisRows, validThreshold ? threshold : 0);
+  const bcReadout = `<p class="small muted"><strong>价格条件列里那张小图怎么读</strong>：同一家公司的四种现金流口径并排画在同一条轴上——竖虚线是 ${thrText} 价格条件线，竖实线是 0 轴，四条泳道依次是经营驱动 / 五年中位数 / 五年均值 / 最近一年，<strong>深色大点是当前判断口径</strong>（本页用哪个口径下判断，那一条就是深色大点，其余三条是对照）。点落在虚线右边＝这一口径达线；超出坐标轴的折叠到边缘并标 ◀；内在价值接近零时百分比失真，标「失真」，不参与达标统计。<strong>这张图是披露层，不参与放行判断</strong>——放行仍只看主情景那一条。</p>
+  <p class="small muted"><strong>为什么要把四个口径摆在一起</strong>：便宜如果只在一种口径下成立，它是口径的产物，不是这家公司的事实。本页 ${bcStats.computable} 家里，${bcStats.all} 家全部口径都达线、${bcStats.none} 家全部口径都不达线、${bcStats.partial} 家只有部分口径达线${bcStats.robust.length ? `（全部达线的是 ${bcStats.robust.map(row => esc(row.name || row.code)).join('、')}）` : ''}。</p>
+  <p class="small muted"><strong>经营驱动那条为什么天然最高</strong>：它把账上货币资金计入了股权桥，其余三个口径不计入，所以它的边际天然偏高${bcStats.gapN ? `（实测与五年中位数口径相差 ${num(bcStats.gapMin, 1)} ～ ${num(bcStats.gapMax, 1)} 个百分点，可比 ${bcStats.gapN} 家）` : ''}——这是<strong>股权桥的差异</strong>，不是模型更准，别把这一条当成「换个口径更便宜」的证据。</p>`;
   const intro = `<p class="small muted"><strong>${profile.autoLabel}</strong>：${profile.autoMethod}。WACC 取当前口径，永续增长率展示 1% / 2% / 3% 三档；主情景取 1%。</p>
   <p class="small muted"><strong>股权桥</strong>：${profile.autoBridge}。</p>
   <p class="small muted"><strong>价格条件只看主情景</strong>：安全边际 ＝ 1 − 收盘价 ÷ 主情景内在价值（折价口径）；${thrHead} ＝ 主情景内在价值 ×（1 − ${thrText}）。安全边际的作用是抵消我自己预测的误差，不是提前假设「未来一定变差」。</p>
@@ -968,8 +1072,31 @@ window.ValuationScenarios = (() => {
   <p class="small muted"><strong>门禁差距怎么读</strong>：价格条件达线但研究门禁没放行的公司，会在「价格条件」列下面逐条列出差距（每条自带实测值，悬停看完整原因句）。差距分三类，颜色不同：<strong>阻断项</strong>是这家公司自己的问题；<strong>系统级与采集覆盖缺口</strong>（逐截止日原始版本、分部数据）对全部公司相同，不是某家公司的毛病；<strong>披露项</strong>只作参考，不参与放行判断。</p>
   <p class="small muted"><strong>放行要过哪几道门</strong>（2026-11-04 改判据，阈值一个没新造，全部沿用现有数字）：① 预测证据——保守口径用平推法<strong>自己</strong>的滚动回测（至少 12 个窗口、4 个独立截止年，且不得系统性高估 FCFF）；② 终值压力敏感度——WACC +1 个百分点（现金流与永续增长率不变，用的是与主情景完全同一份输入），主情景安全边际还成不成立；③ 交叉口径检验——换「最近一年」口径重算，价格条件是否仍成立（门槛沿用同一个安全边际门槛）；④ WACC 与永续增长率间距 ≥ 3.0 个百分点；⑤ 重大已核实风险未暂停。</p>
   <p class="small muted"><strong>终值占比为什么不再是门</strong>：在本页的五年平推口径下，终值占比只是 (WACC, 永续增长率) 的函数，不含任何公司特有信息——实测终值占比 75% 等价于 WACC 与永续增长率的间距约 5.87 个百分点，而规则文本写的是 3.0 个百分点，也就是实际执行的更严。它挡掉的主要是低 WACC 的公司，而低 WACC 往往正是安全边际最大的一批。它现在降为披露项，真正要量的是「假设本身有多脆」，所以由终值压力敏感度承担。</p>
-  <p class="small muted"><strong>顺序别弄反</strong>：先做定性筛选——ROIC 持续高于 WACC、有护城河、现金流稳定、杠杆可控（在「严格财务预筛」和「投资核查清单」里），确认是好生意，再谈估值折扣。本页只管价格这一段。</p>`;
-  return `<div class="panel"><h3>股价、自动估值与价格门槛</h3>${intro}<div class="scroll"><table class="vs-decision" data-tt-sync="${esc(slot||SLOT_MAIN)}"><thead><tr><th>公司 / 状态</th><th>当前收盘价 / 日期</th><th>三档每股范围 / 元每股</th><th>${thrHead}</th><th>主情景安全边际（主判断）</th><th>价格条件</th><th>压力校验区间（辅助观察）</th><th>相对压力下限的安全边际（辅助）</th><th>存为我的基准情景</th></tr></thead><tbody>${body}</tbody></table></div><p class="small muted">门槛随模型假设变化，达到价格条件仍不等于可以买入。待复核：生意是否可预测、一次性项目、维持经营所需资本支出与营运资本、可分配现金、负债与少数股东权益，以及长期增长能否由再投资支持。历史 FCFF 不等于已经核实的股东盈余。</p></div>`;
+  <p class="small muted"><strong>顺序别弄反</strong>：先做定性筛选——ROIC 持续高于 WACC、有护城河、现金流稳定、杠杆可控（在「严格财务预筛」和「投资核查清单」里），确认是好生意，再谈估值折扣。本页只管价格这一段。</p>${bcReadout}`;
+  return `<div class="panel"><h3>股价、自动估值与价格门槛</h3>${intro}<div class="scroll"><table class="vs-decision" data-tt-sync="${esc(slot||SLOT_MAIN)}"><thead><tr><th>公司 / 状态</th><th>当前收盘价 / 日期</th><th>三档每股范围 / 元每股</th><th>${thrHead}</th><th>主情景安全边际（主判断）</th><th>价格条件 · 跨口径边际</th><th>压力校验区间（辅助观察）</th><th>相对压力下限的安全边际（辅助）</th><th>存为我的基准情景</th></tr></thead><tbody>${body}</tbody></table></div><p class="small muted">门槛随模型假设变化，达到价格条件仍不等于可以买入。待复核：生意是否可预测、一次性项目、维持经营所需资本支出与营运资本、可分配现金、负债与少数股东权益，以及长期增长能否由再投资支持。历史 FCFF 不等于已经核实的股东盈余。</p></div>`;
+ }
+
+ // 这一列的统计口径：失真的百分比（内在价值接近零）不参与任何统计，也不参与「达线」计数——
+ // 把失真当成极端值会得出假结论。所有数字都由本页这批行现算，不写死。
+ function basisComparisonStats(rows, threshold){
+  const thr = Number(threshold) || 0;
+  const out = {computable: 0, all: 0, none: 0, partial: 0, gapMin: null, gapMax: null, gapN: 0, robust: []};
+  const gaps = [];
+  for(const row of rows){
+   const items = (row.basis_comparison || [])
+    .filter(item => item && item.ready === true && isNum(item.margin) && !marginIsDistorted(item.margin));
+   if(!items.length) continue;
+   out.computable += 1;
+   const met = items.filter(item => Number(item.margin) * 100 >= thr).length;
+   if(met === items.length){ out.all += 1; out.robust.push(row); }
+   else if(met === 0) out.none += 1;
+   else out.partial += 1;
+   const operating = items.find(item => item.key === 'operating');
+   const median = items.find(item => item.key === 'median');
+   if(operating && median) gaps.push((Number(operating.margin) - Number(median.margin)) * 100);
+  }
+  if(gaps.length){ out.gapMin = Math.min(...gaps); out.gapMax = Math.max(...gaps); out.gapN = gaps.length; }
+  return out;
  }
 
  function skippedOf(data){
