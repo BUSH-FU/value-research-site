@@ -186,7 +186,7 @@ function renderState(){
  $('candidate-criteria').textContent=`严格财务通过 + 定性审核有效 + 安全边际至少 ${state.quality_policy.margin_min}% + 清单逐项人工核查；完成仍需自行决定是否投资。`;renderQualitySettings();
  $('management-count').textContent=`管理层 ${state.management_ready||0} / ${state.quality_counts.passed} · 历年事件 ${state.history_ready||0} / ${state.quality_counts.passed} · 掌舵人资讯 ${state.people_news_ready||0} / ${state.quality_counts.passed} · 全历史财务 ${state.financial_archive_ready||0} / ${state.quality_counts.passed} · 行业档案 ${state.industry_ready||0} / ${state.quality_counts.passed}`;
  for(const id of ['update-management-pool','update-company-history-pool','update-people-news-pool','update-financial-archive-pool','update-financial-filings-pool','update-industry-research-pool'])$(id).disabled=state.job.state==='running'||state.quality_counts.passed===0;
- $('job').textContent=state.job.message;$('job').className='job '+state.job.state;$('refresh-market').disabled=state.job.state==='running';$('updated').textContent=state.market_fetched_at?'主表更新：'+stamp(state.market_fetched_at)+' · 来源：'+(state.market_source||'待核'):'尚未连接股票数据';renderPool();renderCandidates();
+ $('job').textContent=state.job.message;$('job').className='job '+state.job.state;$('refresh-market').disabled=state.job.state==='running';$('updated').textContent=state.market_fetched_at?'主表更新：'+stamp(state.market_fetched_at)+' · 来源：'+(state.market_source||'待核'):'尚未连接股票数据';renderPool();renderBusinessQuality();renderCandidates();
 }
 function renderQualitySettings(){
  const box=$('quality-settings'),p=state.quality_policy,signature=JSON.stringify(p);
@@ -214,11 +214,231 @@ function dividendPanel(d,archive){
  return `<div class="panel"><h3>分红与借款派息核查 ${flag}</h3><p class="small muted">近十年有现金分红 <strong>${esc(d.paying_year_count)}</strong> 年，最长连续 <strong>${esc(d.consecutive_years)}</strong> 年，最近一次 ${esc(d.last_dividend_year||'—')} 年。${esc(d.note||'')}</p><p class="small muted">判定口径：当年<strong>已实施</strong>的现金分红 &gt; 当年经营活动现金流量净额（用每股口径比较），<strong>且</strong>当年有息负债净增加 &gt; 0 —— 缺口由新增负债补上，才算借钱派息。分红超过经营现金流但没有增负债的照实列出，但不判为借钱派息。</p><div class="scroll"><table><thead><tr><th>年度</th><th>每股分红</th><th>每股经营现金流</th><th>分红缺口</th><th>有息负债净增</th><th>判定</th>${hasArchive?'<th>资产负债率</th><th>筹资净额</th><th>分配股利及付息</th><th>取得借款收到的现金</th>':''}</tr></thead><tbody>${rows.map(item=>`<tr${item.borrowing_to_pay_dividend?' class="row-flag"':''}><td>${esc(item.year)}</td><td>${(item.dividend_per_share||0)>0?num(item.dividend_per_share,4)+' 元':'—'}</td><td>${item.ocf_per_share==null?'—':num(item.ocf_per_share,4)+' 元'}</td><td>${item.cash_gap==null?'—':num(item.cash_gap,4)+' 元'}</td><td>${item.interest_debt_change==null?'—':yi(item.interest_debt_change)+' 亿'}</td><td>${item.borrowing_to_pay_dividend?'<span class="pill gray">借钱派息</span>':((item.dividend_per_share||0)>0&&item.covered_by_operating_cash===false?'<span title="当年分红超过经营活动现金流量净额，但当年有息负债没有净增加，缺口不是新增负债补的，不判为借钱派息">未覆盖 · 未增负债</span>':'<span title="当年分红被经营活动现金流量净额覆盖">现金流覆盖</span>')}</td>${hasArchive?`<td>${ratioCell(item)}</td><td>${moneyCell(item,['cash_flow','n_cash_flows_fnc_act'])}</td><td>${moneyCell(item,['cash_flow','c_pay_dist_dpcp_int_exp'])}</td><td>${moneyCell(item,['cash_flow','c_recp_borrow'])}</td>`:''}</tr>`).join('')}</tbody></table></div><p class="small muted">分红方案只认「已实施」；预案和股东大会通过不算钱已经掏出去。分红用每股税前金额，按除权除息日归年；经营现金流取 Tushare 每股经营现金流 ocfps，与分红同为每股口径，股本变动不会让两边对不上。</p>${hasArchive?'<p class="small muted">右侧四列来自公司财务档案（上市以来逐年）：资产负债率＝总负债÷总资产；筹资净额、分配股利及付息、取得借款收到的现金均取自当年现金流量表。「分配股利及付息」是合计口径，含利息与少数股东利润分配；它与上面按除权除息日归年的分红不是同一年的口径，两列不能直接相减。</p>':''}</div>`;
 }
 function statusCell(row){if(row.screen.state==='excluded')return '<span class="pill gray">已排除</span>';if(row.screen.state==='pending')return '<span class="pill warning">数据待补</span>';if(row.quality_free_preview)return '<span class="pill warning">旧筛选记录 · 免费数据待核</span>';if(row.quality?.state==='passed')return '<span class="pill">财务预筛通过 · 待定性</span>';if(row.quality?.state==='excluded')return '<span class="pill gray">财务预筛未通过</span>';if(row.quality?.state==='separate')return '<span class="pill gray">金融单独研究</span>';if(row.review_current)return '<span class="pill">审核有效</span>';return '<span class="pill warning">待审核与风险核验</span>';}
-const POOL_SORT_COLUMNS=[['symbol','公司'],['industry','行业'],['list_date','上市日期'],['roe','十年 ROE 均值'],['cyclicality','周期属性'],['dividend','分红与借款'],['quality_date','筛选日期'],['status','状态']];
-const POOL_FIRST_DIR={roe:-1,cyclicality:-1};
+const POOL_SORT_COLUMNS=[['symbol','公司'],['industry','行业'],['list_date','上市日期'],['roe','十年 ROE 均值'],['cyclicality','周期属性'],['dividend','分红与借款'],['business_quality','生意质量门禁'],['quality_date','筛选日期'],['status','状态']];
+const POOL_FIRST_DIR={roe:-1,cyclicality:-1,business_quality:1};
 const poolCollator=new Intl.Collator('zh-Hans-CN',{numeric:true,sensitivity:'base'});
 function poolSortLabel(key){const found=POOL_SORT_COLUMNS.find(column=>column[0]===key);return found?found[1]:key;}
 function poolSortHead(){return POOL_SORT_COLUMNS.map(([key,label])=>{if(!key)return `<th>${label}</th>`;const active=poolSortKey===key;const arrow=active?(poolSortDir>0?'▲':'▼'):'↕';return `<th><button type="button" class="pool-sort${active?' active':''}" data-pool-sort="${key}" aria-label="按${label}排序">${label}<span class="sort-arrow" aria-hidden="true">${arrow}</span></button></th>`;}).join('')+'<th></th>';}
+// 生意质量门禁：DCF 公式答不了的那 70～85%（生意 20 年后还在吗、赚的钱再投回去
+// 还能不能维持超额回报）。每条判据都自带实测值，完整原因句在悬停里。
+// 这一格只说「合格 / 观察」，不替人说「生意好不好」——判断仍是人的事。
+function businessQualityCell(row){
+ const gate=row.business_quality;
+ if(!gate)return '<span class="muted">—</span>';
+ if(gate.ready===true){
+  const checks=(gate.checks||[]).filter(c=>c.passed===true).length;
+  return `<span class="pill" title="${esc((gate.checks||[]).map(c=>c.text).join('；'))}">合格 · ${checks} 条判据全过</span>`;
+ }
+ const blockers=gate.blockers||[];
+ const gaps=gate.gaps||[];
+ // 阻断项与证据缺失形状一致（都是带 text 的对象），所以这里可以拼在一起处理。
+ const parts=blockers.concat(gaps);
+ const first=(parts[0]||{}).text||'未通过（原因缺失）';
+ return `<span class="pill warning" title="${esc(parts.map(p=>p.text).join('；'))}">观察 · ${blockers.length?blockers.length+' 项不达标':(gaps.length?gaps.length+' 项证据缺失':'原因缺失')}</span><br><span class="small muted">${esc(first)}</span>`;
+}
+// ── 生意质量与终值可持续性：一家一张图 ───────────────────────────────────
+// DCF 公式答不了的那 70～85% 得靠这一层回答：生意 20 年后还在吗、赚的钱再投
+// 回去还能不能维持超额回报。
+//
+// 一张卡两幅图（共用年份横轴）：
+//   上：ROIC 十年轨迹 + WACC 门槛线 + 十年中位数 —— 中位数与门槛之间那条带就是
+//       「持续超额回报」的幅度，最新一年的点是「现在站在哪儿」；
+//   下：毛利率与营业利润率轨迹 —— 毛利率在不在系统性下滑、盈利可不可预测；
+//       并表口径跳变年用空心点标出（那年不可比，判据里已经剔除）。
+//
+// 数字一律从门禁的 metrics 里读，不在这里重算——重算就会和判据差一个数。
+const BQ_W=250;
+const bqIsNum=value=>value!==null&&value!==undefined&&value!==''&&Number.isFinite(Number(value));
+function bqPoints(series,key){
+ return ((series||{})[key]||[]).filter(item=>Array.isArray(item)&&bqIsNum(item[0])&&bqIsNum(item[1]))
+  .map(item=>[Number(item[0]),Number(item[1])]);
+}
+function bqDomain(values){
+ if(!values.length)return null;
+ let lo=Math.min(...values),hi=Math.max(...values);
+ const pad=(hi-lo)*0.16||1;
+ lo-=pad;hi+=pad;
+ // 刻度取整到整数，标签才不会出现「-0%」这种没意义的读数；
+ // 取整后把区间压扁了（比如利润率都在 1%～3%），就退回原来的小数。
+ const floored=Math.floor(lo),ceiled=Math.ceil(hi);
+ if(ceiled-floored>=1){ lo=floored; hi=ceiled; }
+ return {lo,hi};
+}
+// 百分比刻度：-0 要写成 0。
+function bqTick(value){const rounded=Math.round(value);return (rounded===0?0:rounded)+'%';}
+// 一家两幅图。共用年份横轴，两幅图上下对齐，能直接看出同一年的 ROIC 与利润率。
+function bqCharts(gate,name){
+ const series=gate?.series||{};
+ const metrics=gate?.metrics||{};
+ const roic=bqPoints(series,'roic');
+ const gross=bqPoints(series,'gross_margin');
+ const operating=bqPoints(series,'operating_margin');
+ const all=[...roic,...gross,...operating];
+ if(all.length<2)return {roic:'',margin:''};
+ const years=[...new Set(all.map(item=>item[0]))].sort((a,b)=>a-b);
+ const first=years[0],last=years[years.length-1];
+ const PL=36,PR=12;
+ const xOf=year=>PL+(BQ_W-PL-PR)*(last===first?0.5:(year-first)/(last-first));
+ const polyline=(points)=>points.map(item=>`${xOf(item[0]).toFixed(1)},${item[1].toFixed(1)}`).join(' ');
+ // 判据窗口：判断只看近十年，展示看上市以来全量。两个口径不混——
+ // 浅色区间里的年份才是判据下结论的依据，区间外只是背景。窗口年份由后端给，别在前端猜。
+ const winStart=bqIsNum(metrics.window_start_year)?Number(metrics.window_start_year):null;
+ const winEnd=bqIsNum(metrics.window_end_year)?Number(metrics.window_end_year):null;
+ const windowRect=(top,bottom)=>{
+  if(winStart===null||winEnd===null)return '';
+  const x1=Math.max(PL,xOf(winStart)),x2=Math.min(BQ_W-PR,xOf(winEnd));
+  if(x2<=x1)return '';
+  return `<rect class="bq-window" x="${x1.toFixed(1)}" y="${top.toFixed(1)}" width="${(x2-x1).toFixed(1)}" height="${(bottom-top).toFixed(1)}"/>`;
+ };
+ // ── 上：ROIC ──────────────────────────────────────────────────────────
+ const wacc=bqIsNum(metrics.wacc_pct)?Number(metrics.wacc_pct):null;
+ const median=bqIsNum(metrics.roic_median_pct)?Number(metrics.roic_median_pct):null;
+ let roicSvg='';
+ if(roic.length>=2){
+  const PT=8,PB=18,H=94,plotH=H-PT-PB;
+  const values=roic.map(item=>item[1]);
+  if(wacc!==null)values.push(wacc);
+  if(median!==null)values.push(median);
+  const domain=bqDomain(values);
+  const yOf=value=>PT+plotH*(1-(value-domain.lo)/(domain.hi-domain.lo||1));
+  const parts=[windowRect(PT,PT+plotH)];
+  // 中位数与门槛之间那条带：带上沿高过门槛，就是持续创造超额回报。
+  if(median!==null&&wacc!==null&&median!==wacc){
+   const ya=yOf(median),yb=yOf(wacc);
+   parts.push(`<rect class="bq-band ${median>=wacc?'ok':'bad'}" x="${PL}" y="${Math.min(ya,yb).toFixed(1)}" width="${BQ_W-PL-PR}" height="${Math.max(Math.abs(ya-yb),1.5).toFixed(1)}"/>`);
+  }
+  if(domain.lo<0&&domain.hi>0)parts.push(`<line class="bq-zero" x1="${PL}" y1="${yOf(0).toFixed(1)}" x2="${BQ_W-PR}" y2="${yOf(0).toFixed(1)}"/>`);
+  if(wacc!==null)parts.push(`<line class="bq-wacc" x1="${PL}" y1="${yOf(wacc).toFixed(1)}" x2="${BQ_W-PR}" y2="${yOf(wacc).toFixed(1)}"/>`);
+  if(median!==null)parts.push(`<line class="bq-median" x1="${PL}" y1="${yOf(median).toFixed(1)}" x2="${BQ_W-PR}" y2="${yOf(median).toFixed(1)}"/>`);
+  parts.push(`<polyline class="bq-roic" points="${polyline(roic)}"/>`);
+  const lastPoint=roic[roic.length-1];
+  parts.push(`<circle class="bq-latest" cx="${xOf(lastPoint[0]).toFixed(1)}" cy="${yOf(lastPoint[1]).toFixed(1)}" r="3.4"/>`);
+  parts.push(`<text class="bq-tick" x="${PL-4}" y="${(PT+7).toFixed(1)}" text-anchor="end">${bqTick(domain.hi)}</text>`);
+  parts.push(`<text class="bq-tick" x="${PL-4}" y="${(PT+plotH).toFixed(1)}" text-anchor="end">${bqTick(domain.lo)}</text>`);
+  parts.push(`<text class="bq-tick" x="${PL}" y="${H-4}">${first}</text>`);
+  parts.push(`<text class="bq-tick" x="${BQ_W-PR}" y="${H-4}" text-anchor="end">${last}</text>`);
+  const title=`${name||''} 近十年 ROIC ${num(median,1)}%（中位）与 WACC 门槛 ${num(wacc,1)}%；最新一年 ${lastPoint[0]} 年 ${num(lastPoint[1],1)}%。`;
+  roicSvg=`<svg class="bq-chart" width="${BQ_W}" height="${H}" viewBox="0 0 ${BQ_W} ${H}" role="img" aria-label="${esc(title)}"><title>${esc(title)}</title>${parts.join('')}</svg>`;
+ }
+ // ── 下：毛利率与营业利润率 ─────────────────────────────────────────────
+ let marginSvg='';
+ if(gross.length>=2){
+  const PT=6,PB=18,H=68,plotH=H-PT-PB;
+  const values=[...gross,...operating].map(item=>item[1]);
+  const domain=bqDomain(values);
+  const yOf=value=>PT+plotH*(1-(value-domain.lo)/(domain.hi-domain.lo||1));
+  const parts=[windowRect(PT,PT+plotH)];
+  const grossMedian=bqIsNum(metrics.gross_margin_median_pct)?Number(metrics.gross_margin_median_pct):null;
+  if(grossMedian!==null)parts.push(`<line class="bq-gmedian" x1="${PL}" y1="${yOf(grossMedian).toFixed(1)}" x2="${BQ_W-PR}" y2="${yOf(grossMedian).toFixed(1)}"/>`);
+  parts.push(`<polyline class="bq-oper" points="${polyline(operating)}"/>`);
+  parts.push(`<polyline class="bq-gross" points="${polyline(gross)}"/>`);
+  // 并表口径跳变年：那年不可比（判据里已剔除），图上用空心点标出来，别混进趋势。
+  const jumps=new Set((metrics.jump_years||[]).map(Number));
+  for(const item of gross){
+   if(!jumps.has(item[0]))continue;
+   parts.push(`<circle class="bq-jump" cx="${xOf(item[0]).toFixed(1)}" cy="${yOf(item[1]).toFixed(1)}" r="3.2"/>`);
+  }
+  parts.push(`<text class="bq-tick" x="${PL-4}" y="${(PT+7).toFixed(1)}" text-anchor="end">${bqTick(domain.hi)}</text>`);
+  parts.push(`<text class="bq-tick" x="${PL-4}" y="${(PT+plotH).toFixed(1)}" text-anchor="end">${bqTick(domain.lo)}</text>`);
+  parts.push(`<text class="bq-tick" x="${PL}" y="${H-4}">${gross[0][0]}</text>`);
+  parts.push(`<text class="bq-tick" x="${BQ_W-PR}" y="${H-4}" text-anchor="end">${gross[gross.length-1][0]}</text>`);
+  const title=`${name||''} 近十年毛利率与营业利润率轨迹；毛利率十年中位 ${num(grossMedian,1)}%。`;
+  marginSvg=`<svg class="bq-chart" width="${BQ_W}" height="${H}" viewBox="0 0 ${BQ_W} ${H}" role="img" aria-label="${esc(title)}"><title>${esc(title)}</title>${parts.join('')}</svg>`;
+ }
+ return {roic:roicSvg,margin:marginSvg};
+}
+// 一家一张卡：图 + 实测值读数。读数里的每个数都来自门禁 metrics。
+function bqCard(row,gate,watchCodes){
+ const metrics=gate.metrics||{};
+ const charts=bqCharts(gate,row.name||row.symbol);
+ if(!charts.roic&&!charts.margin)return '';
+ const median=bqIsNum(metrics.roic_median_pct)?Number(metrics.roic_median_pct):null;
+ const wacc=bqIsNum(metrics.wacc_pct)?Number(metrics.wacc_pct):null;
+ const lines=[];
+ if(median!==null&&wacc!==null){
+  const gap=median-wacc;
+  lines.push(`<p class="bq-read">ROIC 十年中位 <strong>${num(median,1)}%</strong> · WACC 门槛 ${num(wacc,1)}% → ${gap>=0?`持续超额 <strong>+${num(gap,1)}</strong> 个百分点`:`低于门槛 <strong>${num(gap,1)}</strong> 个百分点`}${bqIsNum(metrics.roic_years_above_wacc)?` · 十年里 ${metrics.roic_years_above_wacc} 年高于门槛`:''}</p>`);
+ }else{
+  lines.push('<p class="bq-read muted">ROIC 中位数或 WACC 算不出（证据缺失，失败关闭）</p>');
+ }
+ if(bqIsNum(metrics.gross_margin_median_pct)){
+  const decay=bqIsNum(metrics.gross_margin_decay_pp)?Number(metrics.gross_margin_decay_pp):null;
+  lines.push(`<p class="bq-read">毛利率 十年中位 ${num(metrics.gross_margin_median_pct,1)}% → ${esc(metrics.gross_margin_latest_year||'—')} 年 ${num(metrics.gross_margin_latest_pct,1)}%${decay!==null?`（差 ${num(decay,2)} 个百分点）`:''}</p>`);
+ }
+ if(bqIsNum(metrics.operating_margin_residual_std_pp)){
+  const excluded=(metrics.operating_margin_excluded_years||[]).join('、');
+  lines.push(`<p class="bq-read">营业利润率波动 ${num(metrics.operating_margin_residual_std_pp,2)} 个百分点（扣趋势）${excluded?` · 已剔除并表跳变年 ${esc(excluded)}`:''}</p>`);
+ }
+ if(bqIsNum(metrics.incremental_roic_pct)){
+  lines.push(`<p class="bq-read">近五年增量 ROIC ${num(metrics.incremental_roic_pct,1)}%${bqIsNum(metrics.incremental_roic_delta_capital_yi)?` · 新增投入资本 ${num(metrics.incremental_roic_delta_capital_yi,1)} 亿`:''}</p>`);
+ }
+ if(bqIsNum(metrics.terminal_reinvestment_pct)){
+  lines.push(`<p class="bq-read">终值隐含再投资率 ${num(metrics.terminal_reinvestment_pct,1)}%（永续增长 ÷ ROIC 中位）</p>`);
+ }
+ const isWatch=watchCodes.has(row.symbol);
+ const reason=isWatch?((gate.blockers||[])[0]||(gate.gaps||[])[0]||{}).text:'';
+ const head=`<div class="bq-head"><strong>${esc(row.name||row.symbol)}</strong> <span class="code">${esc(row.symbol)}</span>${isWatch?'<span class="pill warning">观察</span>':''}</div>`;
+ const watchLine=isWatch&&reason?`<p class="bq-watch">${esc(reason)}</p>`:'';
+ return `<div class="bq-card${isWatch?' watch':''}">${head}`
+  + (charts.roic?`<p class="bq-sub">ROIC 与 WACC 门槛（上市以来全量 · 浅色区间＝判据窗口近十年）</p>${charts.roic}`:'')
+  + (charts.margin?`<p class="bq-sub">毛利率与营业利润率（上市以来全量 · 浅色区间＝判据窗口近十年）</p>${charts.margin}`:'')
+  + lines.join('') + watchLine + '</div>';
+}
+// 生意质量面板：这层门禁的证据长什么样。一家一张卡，合格池在前、观察名单在后。
+function renderBusinessQuality(){
+ const box=$('business-quality');
+ if(!box)return;
+ const pool=state?.pool||{};
+ const watchCodes=new Set((pool.watch||[]).map(item=>item.code));
+ const rows=(state?.rows||[]).filter(row=>row.business_quality&&row.business_quality.series);
+ if(!rows.length){box.innerHTML='';return;}
+ const cards=new Map();
+ for(const row of rows){
+  const html=bqCard(row,row.business_quality,watchCodes);
+  if(html)cards.set(row.symbol,html);
+ }
+ if(!cards.size){box.innerHTML='';return;}
+ const medianOf=row=>{const value=row.business_quality?.metrics?.roic_median_pct;return bqIsNum(value)?Number(value):null;};
+ const sorted=[...rows].sort((a,b)=>{
+  const wa=watchCodes.has(a.symbol)?1:0,wb=watchCodes.has(b.symbol)?1:0;
+  if(wa!==wb)return wa-wb;
+  const ma=medianOf(a),mb=medianOf(b);
+  if(ma===null||mb===null)return a.symbol.localeCompare(b.symbol);
+  return mb-ma;
+ });
+ const ordered=sorted.map(row=>cards.get(row.symbol)||'').join('');
+ const watchCount=watchCodes.size;
+ box.innerHTML=`<div class="panel"><h3>生意质量与终值可持续性 · 这生意 20 年后还在吗</h3>
+ <p class="small muted"><strong>这一层回答 DCF 公式答不了的东西</strong>：公式只把 WACC 与永续增长率代进去，70～85% 的答案由终值决定，而终值假设的正是「这生意 20 年后还在，赚的钱再投回去还能维持超额回报」——公式对这两件事一个字都没说。这里的 ${cards.size} 家是过了严格财务预筛的公司（合格池 ${(pool.pool_size)||0} 家 + 观察名单 ${watchCount} 家），每家一张图。</p>
+ <p class="small muted"><strong>怎么读</strong>：上半是 ROIC 十年实测轨迹（深绿实线）、WACC 门槛（琥珀虚线，就是 DCF 用的同一个数）与 ROIC 十年中位（蓝实线）——<strong>中位线与门槛线之间那条带就是「持续超额回报」的幅度</strong>，带上沿高过门槛就是赚得到超额回报，最新一年的点是现在站在哪儿；下半是毛利率（深绿）与营业利润率（灰蓝）轨迹，毛利率中位数用点线标出，<strong>空心点＝并表口径跳变年</strong>（那年不可比，判据里已经剔除，不是恶化）。</p>
+ <p class="small muted"><strong>口径</strong>：判断窗口是近十年（<strong>图上浅色区间</strong>，判据据此下结论），图上画的是上市以来全量，区间外只是背景——展示给全量、判断保持严格，两者不混。ROIC ＝ 息前税后利润 ÷ 投入资本，与经营驱动的股权桥同一套定义；WACC 取当前口径，与主情景同一个数；永续增长率取主情景那一档 1%。阈值一个没新造：5 个百分点沿用既有「十年 ROE 标准差」的尺度。</p>
+ <p class="small muted"><strong>哪几条真在筛公司</strong>：A1 近十年 ROIC 中位数高于 WACC、A2 近五年增量 ROIC 高于 WACC、终值隐含再投资率小于 1，这三条当前池内全部通过——它们是<strong>守门</strong>，价值在于挡住将来不合格的，不负责区分谁好谁坏；真正筛出公司的是<strong>盈利可预测性</strong>（营业利润率波动 ≤ 5 个百分点）与<strong>毛利率趋势</strong>（最近可比年 vs 十年中位数 ≤ 5 个百分点）。</p>
+ <div class="bq-grid">${ordered}</div>
+ <p class="small muted">护城河目前是「有说法」不是「有量化证据」：全部公司都缺可量化的市占率，这是系统级缺口，不是某家的毛病；缺行业研究的公司按失败关闭处理。</p></div>`;
+}
+// 池子会变，变化要能查：合格池、观察名单、进出记录、下次自动重评。
+function renderPoolStatus(){
+ const pool=state.pool;
+ const box=$('pool-status');
+ if(!box)return;
+ if(!pool){box.innerHTML='';return;}
+ const watch=(pool.watch||[]).map(item=>`<tr><td><strong>${esc(item.name||item.code)}</strong> <span class="code">${esc(item.code)}</span></td><td>${(item.reasons||[]).map(reason=>esc(reason)).join('<br>')||'<span class="muted">原因待补</span>'}</td></tr>`).join('');
+ const changes=(pool.changes||[]).map(change=>{
+  const added=(change.added||[]).map(item=>esc(item.name||item.code)).join('、');
+  const removed=(change.removed||[]).map(item=>esc(item.name||item.code)).join('、');
+  // 基线那条不是「今天进池」——这批公司是今天才开始留痕的，这么写会误导。
+  if(change.baseline)return `<tr><td>${esc((change.at||'').replace('T',' ').slice(0,16))}</td><td colspan="2">开始留痕的基线：${esc(String((change.added||[]).length))} 家</td></tr>`;
+  return `<tr><td>${esc((change.at||'').replace('T',' ').slice(0,16))}</td><td>${removed?`出：${removed}`:'—'}</td><td>${added?`进：${added}`:'—'}</td></tr>`;
+ }).join('');
+ box.innerHTML=`<div class="panel"><h3>池子会变 · 现在的名单是怎么来的</h3>
+ <p class="small muted"><strong>合格池 ${pool.pool_size||0} 家</strong>：两道门都过——① 严格财务预筛（水平：十年 ROE、ROIC、负债率、扣非与现金流年份、分红闸门）；② 生意质量门禁（持续性：近十年 ROIC 中位数高于 WACC、增量 ROIC、盈利可预测性、毛利率趋势、终值隐含再投资率）。</p>
+ <p class="small muted"><strong>观察名单 ${(pool.watch||[]).length} 家</strong>：过了财务预筛、但生意质量门禁没过。它们<strong>不进池子</strong>（不参与价格门槛与最终候选），但仍然跟踪、仍然测算、仍然日更报价——条件修好了，下一轮自动回池。</p>
+ <p class="small muted"><strong>名单什么时候会变</strong>：池子不是名单，是每次现算的结果。系统每天收盘后自动重评池子成员、观察名单与「只差一条」的候选，不达标的出去、达标的进来；池子进出记录在下面，可复查。</p>
+ ${watch?`<div class="scroll"><table><thead><tr><th>观察名单</th><th>差在哪一条（自带实测值）</th></tr></thead><tbody>${watch}</tbody></table></div>`:''}
+ ${changes?`<details><summary>池子进出记录（最近 ${(pool.changes||[]).length} 次）</summary><div class="scroll"><table><thead><tr><th>时间</th><th>出去</th><th>进来</th></tr></thead><tbody>${changes}</tbody></table></div></details>`:'<p class="small muted">还没有进出记录——名单从建立至今没有变过。</p>'}
+ <p class="small muted">最近一次更新：${esc((pool.updated_at||'').replace('T',' ').slice(0,16)||'—')}。每行「筛选日期」是那次判定的日期，年报更新后自动重评。</p></div>`;
+}
+
 // 分红与借款：只显示真正核查过的公司；没核查的不留空白误导，写明原因。
 function dividendCell(row){
  const d=row.quality?.dividend;
@@ -250,6 +470,15 @@ function poolSortValue(row,key){
  if(key==='dividend'){const d=row.quality?.dividend;if(!d||d.state==='skipped')return null;const rank=d.state==='borrowing'?0:(d.state==='no_data'?2:1);return rank*1000-(Number(d.paying_year_count)||0);}
  if(key==='quality_date')return row.quality?.as_of||null;
  if(key==='status')return poolStatusRank(row);
+ // 生意质量门禁：合格池在前，同为合格时 ROIC 十年中位数高的在前；
+ // 观察名单在后。缺门禁结论的（没进过判定）排最后。
+ if(key==='business_quality'){
+  const gate=row.business_quality;
+  if(!gate)return null;
+  const median=Number(gate.metrics?.roic_median_pct);
+  const within=Number.isFinite(median)?1000-median:1000;
+  return (gate.ready===true?0:10000)+within;
+ }
  return null;
 }
 function comparePoolRows(a,b,key,dir){
@@ -273,7 +502,8 @@ function renderPool(){
  const query=$('search').value.trim().toLowerCase(),filter=$('filter').value;
  const rows=state.rows.filter(r=>{const match=filter==='all'||r.screen.state===filter||(r.screen.state==='eligible'&&((filter==='quality_passed'&&r.quality?.state==='passed')||(filter==='quality_pending'&&['pending','unscanned'].includes(r.quality?.state))||(filter==='quality_excluded'&&r.quality?.state==='excluded')||(filter==='quality_separate'&&r.quality?.state==='separate')));return match&&(!query||(r.symbol+r.name).toLowerCase().includes(query));});
  const sorted=sortPoolRows(rows);
- $('pool-table').innerHTML=sorted.length?`<table><thead><tr>${poolSortHead()}</tr></thead><tbody>${sorted.map(r=>`<tr><td><strong>${esc(r.name)}</strong><br><span class="code">${esc(r.symbol)}</span></td><td>${esc(r.industry||'—')}</td><td>${esc(cnDate(r.list_date))}</td><td>${r.roe?num(r.roe.mean)+'%'+(r.roe.complete?'':'（不完整）'):r.quality?.metrics?.roe_mean!=null?num(r.quality.metrics.roe_mean)+'%':'尚未拉取'}</td><td>${window.Cyclicality?.poolCell(r.cyclicality)||'<span class="muted">待补</span>'}</td><td>${dividendCell(r)}</td><td>${esc(r.quality?.as_of||'—')}</td><td title="${esc([...(r.quality?.reasons||[]),...(r.quality?.missing||[]),...r.screen.reasons].join('；'))}">${statusCell(r)}</td><td><button data-company="${esc(r.symbol)}">查看公司</button></td></tr>`).join('')}</tbody></table><div class="small muted">共 ${sorted.length} 家${poolSortKey?`，已按「${poolSortLabel(poolSortKey)}」${poolSortDir>0?'升序':'降序'}`:''}；点击表头可切换排序，缺数据的排在最后；表内可按列筛选</div>`:'<div class="empty">当前筛选下没有匹配公司。未扫描和缺数据不会被误认为通过。</div>';
+ $('pool-table').innerHTML=sorted.length?`<table><thead><tr>${poolSortHead()}</tr></thead><tbody>${sorted.map(r=>`<tr><td><strong>${esc(r.name)}</strong><br><span class="code">${esc(r.symbol)}</span></td><td>${esc(r.industry||'—')}</td><td>${esc(cnDate(r.list_date))}</td><td>${r.roe?num(r.roe.mean)+'%'+(r.roe.complete?'':'（不完整）'):r.quality?.metrics?.roe_mean!=null?num(r.quality.metrics.roe_mean)+'%':'尚未拉取'}</td><td>${window.Cyclicality?.poolCell(r.cyclicality)||'<span class="muted">待补</span>'}</td><td>${dividendCell(r)}</td><td>${businessQualityCell(r)}</td><td>${esc(r.quality?.as_of||'—')}</td><td title="${esc([...(r.quality?.reasons||[]),...(r.quality?.missing||[]),...r.screen.reasons].join('；'))}">${statusCell(r)}</td><td><button data-company="${esc(r.symbol)}">查看公司</button></td></tr>`).join('')}</tbody></table><div class="small muted">共 ${sorted.length} 家${poolSortKey?`，已按「${poolSortLabel(poolSortKey)}」${poolSortDir>0?'升序':'降序'}`:''}；点击表头可切换排序，缺数据的排在最后；表内可按列筛选</div>`:'<div class="empty">当前筛选下没有匹配公司。未扫描和缺数据不会被误认为通过。</div>';
+ renderPoolStatus();
  // 页内事件统一委托，所有来源文本转义后渲染。
 }
 function renderCandidates(){const rows=state.price_candidates||[];$('candidate-table').innerHTML=rows.length?`<p class="small muted">价格条件达标 ${rows.length} 家；其中清单全部人工核实且仍有效 ${state.counts.candidates} 家。清单完成表示可进入最终判断，不是买入指令。导出的 CSV 与这张表是同一批行，并单列标出最终核查是否通过。</p><div class="scroll"><table><thead><tr><th>公司</th><th>收盘日期</th><th>收盘价</th><th>基准价值 / 股</th><th>安全边际</th><th>逐项清单</th><th>最终核查</th></tr></thead><tbody>${rows.map(r=>`<tr><td><button data-company="${esc(r.symbol)}">${esc(r.name)}</button> <span class="code">${esc(r.symbol)}</span></td><td>${esc(r.comparison.quote_date)}</td><td>¥${num(r.comparison.price)}</td><td>¥${num(r.valuation.result.per_share)}</td><td>${pct(r.comparison.margin)}</td><td>${esc(r.checklist_summary?.yes||0)}/${esc(r.checklist_summary?.total||0)} 已核 · ${esc(r.checklist_summary?.stale||0)} 待复核</td><td><span class="pill ${r.investment_ready?'':'warning'}">${r.investment_ready?'核查就绪':'尚未完成'}</span></td></tr>`).join('')}</tbody></table></div>`:`<div class="candidate-blockers"><h3>当前没有最终候选</h3><div class="progress-steps"><span><strong>${state.quality_counts.passed}</strong>家等待定性审核</span><span><strong>${state.counts.approved}</strong>家已完成定性审核</span><span><strong>${state.counts.price_candidates||0}</strong>家满足价格条件</span><span><strong>${state.counts.candidates}</strong>家完成全部清单</span></div><p class="small muted">数据缺失或未审核的公司不会自动入选。请从「精选标的」继续审核。</p></div>`; }

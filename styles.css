@@ -425,3 +425,31 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:250px;
 .vs-disclosure{display:block;font-size:11px;line-height:1.55;color:#6b6b6b;border-left:2px solid #d8d8d8;padding-left:6px;margin-top:2px}
 .vs-flat-evidence{margin-top:8px}
 .vs-flat-evidence h5{margin:10px 0 4px}
+
+/* 生意质量与终值可持续性：一家一张图。
+   上半 ROIC 轨迹 + WACC 门槛 + 十年中位（带）；下半毛利率与营业利润率轨迹。
+   带子上沿高过门槛＝持续创造超额回报；空心点＝并表口径跳变年（不可比，已剔除）。 */
+.bq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:16px;margin:16px 0}
+.bq-card{border:1px solid var(--line);border-radius:9px;background:#fbfcfa;padding:13px 14px}
+.bq-card.watch{border-color:#e0c9a8;background:#fdfaf4}
+.bq-head{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:4px}
+.bq-sub{margin:8px 0 1px;font-size:11px;color:var(--muted)}
+.bq-chart{display:block;width:100%;height:auto;margin:2px 0 3px}
+/* 判据窗口：判断只看近十年，展示看全量——浅色区间标出判据下结论的那几年。 */
+.bq-window{fill:#ecefe8}
+.bq-read{margin:3px 0;font-size:12px;line-height:1.55;color:#4b5a52}
+.bq-read strong{font-variant-numeric:tabular-nums}
+.bq-watch{margin:7px 0 0;font-size:11px;line-height:1.55;color:#8a5a3c;border-left:2px solid #e0c9a8;padding-left:6px}
+.bq-roic{fill:none;stroke:#276a52;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bq-latest{fill:#276a52;stroke:#fff;stroke-width:1.6}
+.bq-wacc{stroke:#bb9b5d;stroke-width:1.6;stroke-dasharray:5 3}
+.bq-median{stroke:#2f5580;stroke-width:1.4}
+.bq-band{fill:#dcecdf;opacity:.55}
+.bq-band.bad{fill:#f6e0cd;opacity:.6}
+.bq-zero{stroke:#c3cdc4;stroke-width:1}
+.bq-gross{fill:none;stroke:#276a52;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bq-oper{fill:none;stroke:#8fa3b8;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.bq-gmedian{stroke:#2f5580;stroke-width:1.2;stroke-dasharray:4 3}
+.bq-jump{fill:#fff;stroke:#a8663f;stroke-width:1.6}
+.bq-tick{fill:#829087;font-size:9px;font-family:inherit;font-variant-numeric:tabular-nums}
+@media(max-width:680px){.bq-grid{grid-template-columns:minmax(0,1fr)}}
