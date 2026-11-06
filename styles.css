@@ -453,3 +453,20 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:250px;
 .bq-jump{fill:#fff;stroke:#a8663f;stroke-width:1.6}
 .bq-tick{fill:#829087;font-size:9px;font-family:inherit;font-variant-numeric:tabular-nums}
 @media(max-width:680px){.bq-grid{grid-template-columns:minmax(0,1fr)}}
+
+/* 系统结论：机器链条走通就给出有条件的结论——价位、依据、前提、作废条件、
+   以及系统没有验证的那几项。 */
+.vc-steps{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0 18px;font-size:12px;color:var(--muted)}
+.vc-steps span{border:1px solid var(--line);border-radius:7px;padding:7px 12px;background:#fafbf8}
+.vc-steps strong{font-size:16px;color:var(--ink);margin-right:3px}
+.vc-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px;margin:10px 0 18px}
+.vc-card{border:1px solid var(--line);border-radius:9px;background:#fbfcfa;padding:14px 16px}
+.vc-card.actionable{border-color:#c3d9c9;background:#f7faf6}
+.vc-card.blocked{border-color:#e0c9a8;background:#fdfaf4}
+.vc-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.vc-verdict{margin:4px 0 8px;font-size:13px;line-height:1.6}
+.vc-evidence,.vc-premise,.vc-invalidate,.vc-blocked{margin:4px 0;font-size:12px;line-height:1.6;color:#4b5a52}
+.vc-gaps{margin:4px 0 8px;padding-left:18px;font-size:12px;line-height:1.6;color:#8a5a3c}
+.vc-premise,.vc-invalidate{color:#5f6d64}
+.vc-unverified{margin:8px 0 0;font-size:11px;line-height:1.6;color:#7a6a55;border-left:2px solid #e0c9a8;padding-left:7px}
+@media(max-width:680px){.vc-cards{grid-template-columns:minmax(0,1fr)}}

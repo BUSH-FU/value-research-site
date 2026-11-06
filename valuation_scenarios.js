@@ -1367,5 +1367,166 @@ window.ValuationScenarios = (() => {
 
  function resizeCharts(){ renderCharts(); }
 
- return {render, renderCharts, resizeCharts, selectBasis, applyOrder, currentBasis:()=>selectedBasis};
+ // ── 系统结论：机器链条走到哪一步，就直接说什么 ──────────────────────────
+ //
+ // 「最终候选」页要回答的是「那我现在能干什么」，不是再摆一遍数字。
+ // 所以这里给的是**有条件的结论**：在什么价位、依据是什么、成立前提是什么、
+ // 什么条件下这条结论作废，以及——系统没有验证的那几项。
+ //
+ // 三条规矩：
+ // 1. 结论只从**已经算好的那批行**里读（与「批量测算」同一批数），不另算一遍；
+ // 2. 不用「建议买入」这种话术——结论是「低于某个价才满足本工具的价格条件」，
+ //    并且写清成立前提；机器算得出来的，不冒充机器算不出来的；
+ // 3. 系统没验证的部分（护城河、控制人品行、关联交易与致命风险）要单列出来，
+ //    不能因为机器链条走通就当它们也通过了。
+ const UNVERIFIED = ['护城河（有没有、能不能守住）', '实际控制人的品行与承诺', '关联交易与致命风险'];
+
+ function conclusionState(row, threshold, validThreshold){
+  const neu = mainOf(row);
+  const met = validThreshold && neu.comparable && isNum(neu.margin) && Number(neu.margin) * 100 >= threshold;
+  const research = researchReady(row);
+  const quality = (row.business_quality || {}).ready === true;
+  if(met && research && quality) return 'actionable';
+  if(met) return 'blocked';
+  return 'below';
+ }
+
+ // 一家一条结论。state 决定这句话怎么说。
+ function conclusionCard(row, threshold, validThreshold){
+  const neu = mainOf(row);
+  const gate = valuationGate(row);
+  const bq = row.business_quality || {};
+  const metrics = bq.metrics || {};
+  const state = conclusionState(row, threshold, validThreshold);
+  const target = priceCondition(neu.per, threshold);
+  const blockers = gateBlockers(row);
+  const gaps = (gate.gaps || []).filter(gap => gap && gap.text);
+  const thresholdText = validThreshold ? num(threshold, 0) + '%' : '未配置';
+
+  // 结论句：一句话说清「现在能不能动、什么价位能动」。
+  let verdict;
+  if(neu.per === null){
+   verdict = '<strong>三档均无法测算</strong>，不参与价格判断';
+  }else if(!validThreshold){
+   verdict = '请先配置安全边际门槛';
+  }else if(!neu.comparable){
+   verdict = '<strong>报价不可比较</strong>' + (neu.reason ? '（' + esc(neu.reason) + '）' : '') + '，不参与价格判断';
+  }else if(state === 'actionable'){
+   verdict = `现价 <strong>¥${num(neu.price)}</strong> 低于价格条件线 <strong>¥${num(target)}</strong>`
+     + `（安全边际 ${pct1(neu.margin)} ≥ ${thresholdText}）——机器链条走通：`
+     + `价格条件达线、预测/估值门禁放行、生意质量门禁通过`;
+  }else if(state === 'blocked'){
+   verdict = `现价 <strong>¥${num(neu.price)}</strong> 低于价格条件线 <strong>¥${num(target)}</strong>`
+     + `（安全边际 ${pct1(neu.margin)} ≥ ${thresholdText}），但门禁未放行——价格够了，结论先不出`;
+  }else{
+   const gapPP = isNum(neu.margin) ? (threshold - Number(neu.margin) * 100) : null;
+   verdict = `现价 <strong>¥${num(neu.price)}</strong> 高于价格条件线 <strong>¥${num(target)}</strong>`
+     + `（安全边际 ${pct1(neu.margin)}，差 ${gapPP === null ? '—' : num(gapPP, 1) + ' 个百分点'}）——不满足价格条件`;
+  }
+
+  // 依据：每条都带实测值。
+  const evidence = [];
+  if(neu.per !== null){
+   const band = (neu.low !== null && neu.high !== null) ? `（1%/2%/3% 三档 ¥${num(neu.low)} ～ ¥${num(neu.high)}）` : '';
+   evidence.push(`主情景 ${MID_LABEL} 档每股内在价值 ¥${num(neu.per)}${band}`);
+  }
+  const items = (row.basis_comparison || []).filter(item => item && item.ready === true && isNum(item.margin) && !marginIsDistorted(item.margin));
+  const metCount = items.filter(item => Number(item.margin) * 100 >= threshold).length;
+  if(items.length){
+   const labels = items.map(item => {
+    const spec = BASIS_LANES.find(lane => lane.key === item.key);
+    return (spec ? spec.short : item.key) + ' ' + pct1(item.margin);
+   }).join('、');
+   evidence.push(`跨口径：${metCount}/${items.length} 个可算口径达线（${labels}）`);
+  }
+  if(metrics.roic_median_pct !== undefined && metrics.roic_median_pct !== null){
+   const wacc = metrics.wacc_pct;
+   const excess = isNum(wacc) ? Number(metrics.roic_median_pct) - Number(wacc) : null;
+   evidence.push(`生意质量：近十年 ROIC 中位数 ${num(metrics.roic_median_pct, 1)}%`
+     + (excess === null ? '' : ` vs WACC ${num(wacc, 1)}%（${excess >= 0 ? '+' : ''}${num(excess, 1)} 个百分点）`)
+     + `；门禁${bq.ready === true ? '通过' : '未通过'}`);
+  }
+  if(gate.ready === true) evidence.push('预测/估值门禁：放行');
+  else if(blockers.length) evidence.push(`预测/估值门禁：${blockers.length} 项未放行`);
+
+  // 前提与作废条件：结论只在这些前提下成立。
+  const premises = [];
+  const waccNow = (row.scenario || {}).wacc || {};
+  if(isNum(waccNow.wacc_pct)) premises.push(`WACC ${num(waccNow.wacc_pct, 2)}%`);
+  premises.push(`永续增长率 ${MID_LABEL}`);
+  const basisName = {operating: '经营驱动', median: '五年中位数', mean: '五年均值', latest: '最近一年'};
+  if(row.current_basis) premises.push(`现金流口径 ${basisName[row.current_basis] || row.current_basis}`);
+  if(neu.comparable) premises.push(`现价 ¥${num(neu.price)}（${neu.priceDate}）`);
+  if(bq.as_of) premises.push(`财报判定日 ${bq.as_of}`);
+  if(metrics.window_start_year) premises.push(`生意质量判据窗口 ${metrics.window_start_year}～${metrics.window_end_year}`);
+
+  const invalidations = [];
+  if(bq.as_of) invalidations.push(`最新年报与 ${bq.as_of} 的判定不一致`);
+  if(target !== null) invalidations.push(`价格涨过 ¥${num(target)}`);
+  if(items.length > 1) invalidations.push('换一种现金流口径不再达线');
+  invalidations.push('生意质量门禁任一条不再成立');
+
+  const blocked = state === 'blocked';
+  const blockedLines = blockers.concat(gaps.map(gap => gap.text)).map(text => `<li>${esc(text)}</li>`).join('');
+
+  return `<div class="vc-card ${state}">
+   <div class="vc-head"><strong>${esc(row.name || row.code)}</strong> <span class="code">${esc(row.code)}</span>`
+   + `<span class="pill ${state === 'actionable' ? '' : 'warning'}">${state === 'actionable' ? '机器链条走通' : (state === 'blocked' ? '价格够了，门禁未放行' : '不满足价格条件')}</span></div>
+   <p class="vc-verdict">${verdict}</p>
+   <p class="vc-evidence"><strong>依据</strong>：${evidence.map(item => esc(item)).join('；')}</p>
+   ${blockedLines ? `<p class="vc-blocked"><strong>差在哪</strong>：</p><ul class="vc-gaps">${blockedLines}</ul>` : ''}
+   <p class="vc-premise"><strong>成立前提</strong>：${esc(premises.join(' · '))}</p>
+   <p class="vc-invalidate"><strong>作废条件</strong>：${invalidations.map(item => esc(item)).join('；')}</p>
+   <p class="vc-unverified"><strong>系统没有验证的</strong>：${UNVERIFIED.map(item => esc(item)).join('、')}——这三项要你自己判断，机器链条走通不代表它们通过。</p>
+  </div>`;
+ }
+
+ // 「最终候选」页的系统结论。
+ function conclusions(data){
+  const threshold = isNum(data?.margin_min_pct) ? Number(data.margin_min_pct) : NaN;
+  const validThreshold = Number.isFinite(threshold) && threshold >= 0 && threshold < 100;
+  const rows = rowsOf(data, null, true);
+  if(!rows.length) return '';
+  const actionable = [], blocked = [], below = [];
+  for(const row of rows){
+   const state = conclusionState(row, threshold, validThreshold);
+   if(state === 'actionable') actionable.push(row);
+   else if(state === 'blocked') blocked.push(row);
+   else below.push(row);
+  }
+  const byMargin = (a, b) => {
+   const ma = mainOf(a).margin, mb = mainOf(b).margin;
+   if(!isNum(ma) || !isNum(mb)) return 0;
+   return Number(mb) - Number(ma);
+  };
+  actionable.sort(byMargin); blocked.sort(byMargin); below.sort(byMargin);
+  const skipped = data?.skipped || [];
+  // 股权价值为负被剔除的那几家：判断层剔掉了，但**结论页也必须列出**——
+  // 静默丢掉一家，读者只会以为「它不满足价格条件」，而真实原因是「算出来是负的」。
+  const droppedRows = rowsOf(data, null).filter(isNegativeEquity);
+  const belowRows = below.map(row => {
+   const neu = mainOf(row);
+   const target = priceCondition(neu.per, threshold);
+   return `<tr><td><button type="button" data-company="${esc(row.code)}">${esc(row.name || row.code)}</button> <span class="code">${esc(row.code)}</span></td>`
+    + `<td>${isNum(neu.price) ? '¥' + num(neu.price) : '—'}</td>`
+    + `<td>${neu.per === null ? '—' : '¥' + num(neu.per)}</td>`
+    + `<td>${isNum(neu.margin) ? pct1(neu.margin) : '—'}</td>`
+    + `<td>${target === null ? '—' : '¥' + num(target)}</td>`
+    + `<td>${(row.business_quality || {}).ready === true ? '门禁通过' : '生意质量未通过'}</td></tr>`;
+  }).join('');
+  const skippedRows = skipped.map(item => `<tr><td>${esc(item.code)}</td><td>${esc(item.name || '—')}</td><td>${esc((item.missing || []).join('；') || '该口径不可用')}</td></tr>`).join('');
+
+  return `<div class="panel"><h3>系统结论 · 机器链条现在能支持什么</h3>
+  <p class="small muted"><strong>结论是有条件的</strong>：下面每一条都写清「在什么价位、依据是什么、成立前提是什么、什么条件下作废」。机器链条走通只说明<strong>价格条件、预测/估值门禁、生意质量门禁</strong>这三道都过了，护城河、控制人品行、关联交易这三项<strong>系统没有验证</strong>，要你自己判断。</p>
+  <p class="small muted">数据与「批量测算」同一批（保守正式排名口径，已定档 ${MID_LABEL} 永续增长率），不另算一遍。</p>
+  <div class="vc-steps"><span><strong>${rows.length}</strong>家可测算</span><span>→</span><span><strong>${actionable.length + blocked.length}</strong>家价格条件达线</span><span>→</span><span><strong>${actionable.length}</strong>家机器链条走通</span><span>→</span><span><strong>0</strong>家完成人工核查（人工那一步还没做）</span></div>
+  ${actionable.length ? `<h4>可以执行到这一步</h4><div class="vc-cards">${actionable.map(row => conclusionCard(row, threshold, validThreshold)).join('')}</div>` : ''}
+  ${blocked.length ? `<h4>价格够了，但门禁还没放行</h4><div class="vc-cards">${blocked.map(row => conclusionCard(row, threshold, validThreshold)).join('')}</div>` : ''}
+  ${below.length ? `<h4>其余 ${below.length} 家：当前不满足价格条件</h4><div class="scroll"><table><thead><tr><th>公司</th><th>现价</th><th>主情景每股</th><th>安全边际</th><th>价格条件线</th><th>生意质量</th></tr></thead><tbody>${belowRows}</tbody></table></div>` : ''}
+  ${skipped.length ? `<h4>${skipped.length} 家这轮算不出来</h4><div class="scroll"><table><thead><tr><th>代码</th><th>公司</th><th>原因</th></tr></thead><tbody>${skippedRows}</tbody></table></div>` : ''}
+  ${droppedRows.length ? droppedPanel(droppedRows) : ''}
+  </div>`;
+ }
+
+ return {render, renderCharts, resizeCharts, selectBasis, applyOrder, currentBasis:()=>selectedBasis, conclusions};
 })();
