@@ -1,0 +1,1927 @@
+{
+  "meta": {
+    "title": "巴菲特的两条时间轴：公开重大投资 ＋ 个人净资产（按年龄）",
+    "intro": "左轨是公开可查的重大投资与资本配置（伯克希尔致股东信、官网新闻稿与 SEC 13F 口径），右轨是福布斯公布的个人净资产估算；两轨共用同一条年份脊轴，同一年份用同一条底纹带，年份与年龄因此互相对应。持有时段只写一手来源能核到的部分：核得到退出年的写「持有至 X 年」，仍在持有的写「持续持有（最近一手披露：X 年）」，一手年信里查不到退出时点的就明说查不到，不拿别处的说法顶替。右轨图上按每 5 年与关键节点画点：1982—1990 用福布斯 400（美国榜，9—10 月刊），1993 年起用福布斯全球亿万富豪榜（3 月快照）；两份榜单同年数值不同、各自标注，不混算。逐年全量与两个榜的对照在下方明细表里。",
+    "coverage": "1950—2026",
+    "note": "年龄按 1930 年 8 月 30 日生折算（年份 − 1930）。福布斯 3 月发布的全球榜上印的年龄比这小一岁（他 8 月底才过生日），两份榜单的榜上年龄与名次都列在下方明细表里。「持续持有」的判断依据是伯克希尔 2025 财年 10-K 的业务与持股清单；13F 口径的条目按同一发行人的所有行合计计算（13F 按 otherManager 分行列示），与年报口径不混算。"
+  },
+  "investments": [
+    {
+      "year": 1951,
+      "name": "GEICO（个人账户首批持股）",
+      "type": "普通股",
+      "amount": "成本 10,282 美元；1952 年全部卖出得 15,259 美元",
+      "logic": "20 岁时押上大部分身家：350 股 GEICO 在 1951 年末占他个人净资产 65% 以上",
+      "source": "伯克希尔 1995 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1995.html",
+      "quote": "I accumulated 350 shares of GEICO during the year, at a cost of $10,282. At yearend, this holding was worth $13,125, more than 65% of my net worth. ... Alas, I sold my entire GEICO position in 1952 for $15,259.",
+      "yearEnd": 1952,
+      "holding": "已退出"
+    },
+    {
+      "year": 1953,
+      "name": "IDS（Industrial Distributors）",
+      "type": "普通股",
+      "amount": "按约 3 倍市盈率买入，金额未披露",
+      "logic": "看得懂、且价格只有 3 倍市盈率时他才敢重仓",
+      "source": "伯克希尔 1994 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1994.html",
+      "quote": "I first purchased stock in IDS in 1953 when it was growing rapidly and selling at a price-earnings ratio of only 3.",
+      "periodText": "买入 1953 · 退出时点未在公开年信中披露（金额也未披露）"
+    },
+    {
+      "year": 1954,
+      "name": "Rockwood & Co.（实物分派套利）",
+      "type": "套利（实物分派）",
+      "amount": "盈利金额未披露；期间股价从 15 美元涨到 100 美元",
+      "logic": "1954 年税法的漏洞：LIFO 存货分派免税，他大量买股票再把可可豆卖掉——他说「利润不错，唯一的开销是地铁票」",
+      "source": "伯克希尔 1988 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1988.html",
+      "quote": "For several weeks I busily bought shares, sold beans, and made periodic stops at Schroeder Trust to exchange stock certificates for warehouse receipts. The profits were good and my only expense was subway tokens.",
+      "yearEnd": 1954,
+      "holding": "已退出",
+      "periodNote": "1954 年前后持续数周"
+    },
+    {
+      "year": 1956,
+      "name": "巴菲特合伙人公司（Buffett Partnership）",
+      "type": "投资合伙企业",
+      "amount": "自有资金 10 余美元起家，1962 年资本 720 万美元",
+      "logic": "格雷厄姆式套利的练手场；1965 年靠它拿下伯克希尔的控制权",
+      "source": "伯克希尔 1991 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1991.html",
+      "quote": "Starting in 1956, I applied Ben Graham's arbitrage principles, first at Buffett Partnership and then Berkshire. ... This purchase gave our partnership effective control of the company.",
+      "yearEnd": 1965,
+      "holding": "已退出",
+      "periodNote": "1965 年取得伯克希尔控制权"
+    },
+    {
+      "year": 1964,
+      "name": "伯克希尔·哈撒韦（纺织厂）",
+      "type": "控股收购",
+      "amount": "会计净值 2200 万美元",
+      "logic": "买下一个濒临破产的纺织厂当投资标的——他人生第一笔「烟蒂股」；1985 年 7 月决定关停",
+      "source": "伯克希尔 1985 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1985.html",
+      "quote": "When Buffett Partnership, Ltd. ... bought control of Berkshire Hathaway 21 years ago, it had an accounting net worth of $22 million. ... In July we decided to close our textile operation, and by yearend this unpleasant job was largely completed.",
+      "yearEnd": 1985,
+      "holding": "已退出"
+    },
+    {
+      "year": 1964,
+      "name": "美国运通（合伙企业买入 40%）",
+      "type": "普通股",
+      "amount": "1300 万美元，换到 5% 以上股权",
+      "logic": "沙拉油丑闻后逆向买入：与市场对着干的第一笔大注",
+      "source": "伯克希尔 1994 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1994.html",
+      "quote": "In the mid-1960's, just after the stock was battered by the company's infamous salad-oil scandal, we put about 40% of Buffett Partnership Ltd.'s capital into the stock ... cost of $13 million.",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "1994 年信称当时仍持有近 10%",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 1965,
+      "name": "Diversified Retailing（百货公司）",
+      "type": "控股收购",
+      "amount": "金额未披露",
+      "logic": "他自认的三个错误之一：买下一家百货公司，三年后卖掉",
+      "source": "伯克希尔 1989 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1989.html",
+      "quote": "My first mistake ... buying control of Berkshire ... the purchase of Diversified Retailing ... which we sold three years later.",
+      "yearEnd": 1968,
+      "holding": "已退出"
+    },
+    {
+      "year": 1966,
+      "name": "迪士尼（Disney）",
+      "type": "普通股",
+      "amount": "拆股调整后每股 31 美元买入，1967 年以每股 48 美元全部卖出",
+      "logic": "1966 年市值不到 9000 万美元、1965 年税前利润约 2100 万美元，只有五倍游乐场；买完就卖，是他自认的一次失败",
+      "source": "伯克希尔 1995 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1995.html",
+      "quote": "Buffett Partnership Ltd. bought a significant amount of Disney stock at a split-adjusted price of $31 per share. ... In 1967 I sold out at $48 per share.",
+      "yearEnd": 1967,
+      "holding": "已退出"
+    },
+    {
+      "year": 1967,
+      "name": "National Indemnity（进入保险）",
+      "type": "控股收购",
+      "amount": "约 860 万美元",
+      "logic": "买下第一家保险公司，从此浮存金变成永久资本",
+      "source": "伯克希尔 1977 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1977.html",
+      "quote": "It was early in 1967 that we made our entry into this industry through the purchase of National Indemnity Company and National Fire and Marine Insurance Company ... for approximately $8.6 million.",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列 National Indemnity 为集团核心业务",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 1969,
+      "name": "Illinois National Bank",
+      "type": "银行控股",
+      "amount": "金额未披露；到 1980 年止累计分红 2000 万美元",
+      "logic": "早期银行股实验；因《银行控股公司法》被迫处置",
+      "source": "伯克希尔 1985 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1985.html",
+      "quote": "Five years ago we were required by the Bank Holding Company Act of 1969 to dispose of our holdings in The Illinois National Bank and Trust Company of Rockford, Illinois.",
+      "yearEnd": 1980,
+      "holding": "已退出"
+    },
+    {
+      "year": 1972,
+      "name": "See's Candies",
+      "type": "控股收购",
+      "amount": "2500 万美元",
+      "logic": "买下一家每年只赚约 400 万美元的糖果公司，只为证明「好生意可以穿越通胀」",
+      "source": "伯克希尔 1991 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1991.html",
+      "quote": "on January 3, 1972, Blue Chip Stamps bought control of See's ... $25 million was as high as we would go.",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍在零售业务清单内",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 1973,
+      "name": "华盛顿邮报",
+      "type": "普通股",
+      "amount": "1060 万美元，买在每股商业价值四分之一以内",
+      "logic": "用格雷厄姆式的「烟蒂股」价格，买下后来成为他最大媒体资产的东西",
+      "source": "伯克希尔 1985 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1985.html",
+      "quote": "We bought all of our WPC holdings in mid-1973 at a price of not more than one-fourth of the then per-share business value.",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列 Washington Post Company 持股",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 1977,
+      "name": "Capital Cities Communications（首次建仓后卖出）",
+      "type": "普通股",
+      "amount": "1090 万美元 / 22 万股，1978—1980 年以每股 43 美元卖出",
+      "logic": "同一门生意买过两次：1977 年高位建仓割肉，1986 年暴跌后重仓",
+      "source": "伯克希尔 1977 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1977.html",
+      "quote": "we invested $10.9 million in Capital Cities Communications during 1977",
+      "yearEnd": 1980,
+      "holding": "已退出"
+    },
+    {
+      "year": 1977,
+      "name": "《布法罗新闻报》",
+      "type": "控股收购",
+      "amount": "金额未披露",
+      "logic": "买下一家小城报纸——「报纸是护城河」的雏形",
+      "source": "伯克希尔 1994 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1994.html",
+      "quote": "We purchased National Indemnity in 1967, See's in 1972, Buffalo News in 1977, Nebraska Furniture Mart in 1983, and Scott Fetzer in 1986.",
+      "periodText": "买入 1977 · 退出时点未在公开年信中披露",
+      "periodNote": "最近一次一手列示：2006 年信（提及「our Buffalo News」）；2025 财年 10-K 的业务清单中已无此项"
+    },
+    {
+      "year": 1980,
+      "name": "通用食品（General Foods）",
+      "type": "普通股",
+      "amount": "卖出时税前 3380 万美元（当年总利税前 4880 万美元）",
+      "logic": "教科书式的高股息低估值股票，1985 年卖出时落袋 3380 万美元",
+      "source": "伯克希尔 1985 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1985.html",
+      "quote": "we sold our General Foods stock for $338 million pre-tax ... of the $488 million total pre-tax profit.",
+      "yearEnd": 1985,
+      "holding": "已退出"
+    },
+    {
+      "year": 1983,
+      "name": "Nebraska Furniture Mart",
+      "type": "控股收购",
+      "amount": "买入 80%—90% 股权，金额未披露",
+      "logic": "无库存、现金收款的家具城；管理层诚信本身就是护城河",
+      "source": "伯克希尔 1988 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1988.html",
+      "quote": "It was in 1983 that Berkshire purchased an 80% interest in The Nebraska Furniture Mart.",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍在零售业务清单内",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 1983,
+      "name": "WPPSS（华盛顿邮递债）",
+      "type": "债券",
+      "amount": "1985 年末摊余成本 1.94 亿美元；1987 年末账面 2.47 亿美元、市值约 3.52 亿美元",
+      "logic": "危机里买高息公用事业债，这是伯克希尔最早的重仓固收",
+      "source": "伯克希尔 1985 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1985.html",
+      "quote": "Our WPPSS bonds ... at yearend 1985 ... $194 million amortized cost.",
+      "yearEnd": 1988,
+      "holding": "已退出",
+      "extraSources": [
+        {
+          "source": "伯克希尔 1988 年致股东信",
+          "sourceUrl": "https://www.berkshirehathaway.com/letters/1988.html"
+        }
+      ]
+    },
+    {
+      "year": 1985,
+      "name": "Fireman's Fund（FFIC 7% 份额再保）",
+      "type": "份额再保",
+      "amount": "1985-09-01 起 7% 份额：转移未到期责任准备金 9270 万美元，同时支付 2940 万美元承保费用",
+      "logic": "跟着 GEICO 的复兴人 Jack Byrne 走，用 7% 份额换 FFIC 全部业务的参与权",
+      "source": "伯克希尔 1985 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1985.html",
+      "quote": "On September 1, 1985 we became a 7% participant in all of the business in force of the FFIC group ... it therefore transferred 7% of this, or $92.7 million, to us at initiation of the contract. We concurrently paid them $29.4 million representing the underwriting expenses",
+      "yearEnd": 1989,
+      "holding": "已退出",
+      "periodNote": "合约期四年"
+    },
+    {
+      "year": 1986,
+      "name": "Capital Cities / ABC（第二次建仓）",
+      "type": "普通股",
+      "amount": "300 万股 × 172.50 美元 = 5.175 亿美元；1993 年以 630 美元/股卖出三分之一（税后利润 2.97 亿美元）；1995 年再卖三分之一（6.35 亿美元）；1996 年并入迪士尼",
+      "logic": "1977 年高位割肉、1986 年暴跌后重仓——同一门生意两次下注",
+      "source": "伯克希尔 1993 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1993.html",
+      "quote": "in 1986 we bought three million shares of Capital Cities/ABC for $172.50 per share and late last year sold one-third of that holding for $630 per share. After paying 35% capital gains taxes, we realized a $297 million profit from the sale.",
+      "yearEnd": 1996,
+      "holding": "已退出",
+      "extraSources": [
+        {
+          "source": "伯克希尔 1995 年致股东信",
+          "sourceUrl": "https://www.berkshirehathaway.com/letters/1995.html"
+        }
+      ]
+    },
+    {
+      "year": 1986,
+      "name": "Fechheimer（工作服）",
+      "type": "控股收购",
+      "amount": "按 5500 万美元估值买入 84%",
+      "logic": "用「临时工也算正式员工」的经营方式，救活一家工作服公司",
+      "source": "伯克希尔 1986 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1986.html",
+      "quote": "our purchase ... 84% of the stock ... based on a $55 million valuation.",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列 Fechheimer Brothers Company",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 1986,
+      "name": "Scott & Fetzer",
+      "type": "控股收购",
+      "amount": "约 3.2 亿美元",
+      "logic": "买下他从消费品牌学到的保险公司",
+      "source": "伯克希尔 1985 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1985.html",
+      "quote": "Right after yearend we acquired The Scott & Fetzer Company of Cleveland for about $320 million.",
+      "periodText": "买入 1986 · 退出时点未在公开年信中披露",
+      "periodNote": "最近一次一手列示：1997 年信分部表；2025 财年 10-K 的业务清单中已无此项"
+    },
+    {
+      "year": 1987,
+      "name": "所罗门兄弟（Salomon）",
+      "type": "9% 可转换优先股",
+      "amount": "7 亿美元可转换优先股（1987 年买入）；1990-08-18 出任临时董事长；1997 年随合并换股进入 Travelers",
+      "logic": "别人恐慌时出手，用资本换到位置与话语权——他后来说这是「把嘴放在钱上」的一次接盘",
+      "source": "伯克希尔 1995 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1995.html",
+      "quote": "Salomon Inc .... 9% 1987 700 728(3) ... Certainly I never dreamed I would take a new job at age 60 - Salomon interim chairman, that is - because of an earlier purchase of a fixed-income security.",
+      "yearEnd": 1997,
+      "holding": "已退出",
+      "extraSources": [
+        {
+          "source": "伯克希尔 1991 年致股东信",
+          "sourceUrl": "https://www.berkshirehathaway.com/letters/1991.html"
+        },
+        {
+          "source": "伯克希尔 1997 年致股东信",
+          "sourceUrl": "https://www.berkshirehathaway.com/letters/1997.html"
+        }
+      ]
+    },
+    {
+      "year": 1989,
+      "name": "Borsheim's（珠宝零售）",
+      "type": "控股收购",
+      "amount": "买入 80% 股权，金额未披露",
+      "logic": "奥马哈的家族珠宝店，靠低成本与回头客",
+      "source": "伯克希尔 1988 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1988.html",
+      "quote": "we purchased an 80% interest in Borsheim's",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列 Borsheims 为珠宝零售业务",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 1989,
+      "name": "Champion International（可转换优先股）",
+      "type": "9¼% 可转换优先股",
+      "amount": "3 亿美元优先股；1995 年转股后卖出，回收 3.88 亿美元",
+      "logic": "五笔可转换优先股之一：最初为固定收益，转股权只是附加赠品",
+      "source": "伯克希尔 1995 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1995.html",
+      "quote": "Berkshire made five private purchases of convertible preferred stocks during the 1987-91 period ... Champion International Corp. ... 9 1/4% 1989 $300 $388(1) ... (1) Proceeds from sale of common we received through conversion in 1995.",
+      "yearEnd": 1995,
+      "holding": "已退出"
+    },
+    {
+      "year": 1989,
+      "name": "Gillette 吉列（可转换优先股→普通股）",
+      "type": "8¾% 可转换优先股 → 普通股",
+      "amount": "6 亿美元可转换优先股（8¾% 股息），1991 年转成 4800 万股普通股；1997 年末市值 48.21 亿美元",
+      "logic": "他自认「最大的一笔错误」：同样 6 亿美元，直接买普通股能多拿 1200 万股",
+      "source": "伯克希尔 1995 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1995.html",
+      "quote": "We paid $600 million in 1989 for Gillette preferred shares that were convertible into 48 million (split-adjusted) common shares. ... Taking an alternative route with the $600 million, I probably could have purchased 60 million shares of common from the company.",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "1997 年信：年初投入的 6 亿美元已增值到 48 亿美元",
+      "extraSources": [
+        {
+          "source": "伯克希尔 1997 年致股东信",
+          "sourceUrl": "https://www.berkshirehathaway.com/letters/1997.html"
+        }
+      ]
+    },
+    {
+      "year": 1989,
+      "name": "USAir 优先股",
+      "type": "9.25% 优先股",
+      "amount": "3.58 亿美元，票息 9.25%",
+      "logic": "他承认的一次错判：以为优先股的保护能挡住航空业取消管制后的成本失衡",
+      "source": "伯克希尔 1996 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1996.html",
+      "quote": "your Chairman decided in 1989 to test it by investing $358 million in a 9.25% preferred stock of USAir. ... our preferred stock is now probably worth its par value of $358 million, give or take a little.",
+      "periodText": "买入 1989 · 退出时点未在公开年信中披露",
+      "periodNote": "最近一次一手列示：1996 年信专章"
+    },
+    {
+      "year": 1989,
+      "name": "可口可乐（首次重仓）",
+      "type": "普通股",
+      "amount": "10 亿美元（1988—1989 年）",
+      "logic": "「把资金放在我嘴巴所在的地方」——之后股价五年不动他也认了",
+      "source": "伯克希尔 1991 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1991.html",
+      "quote": "In 1989 when I ... announced our purchase of $1 billion worth of Coca-Cola stock, I described the move as a rather extreme example of putting my money where my mouth was.",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列可口可乐持股",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 1991,
+      "name": "Central States Indemnity",
+      "type": "控股收购",
+      "amount": "买入 82% 股权，金额未披露",
+      "logic": "1991 年那次差点谈崩的收购：价格没谈成，改成买股份",
+      "source": "伯克希尔 1992 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1992.html",
+      "quote": "we acquired 82% of Central States Indemnity",
+      "periodText": "买入 1991 · 退出时点未在公开年信中披露",
+      "periodNote": "最近一次一手列示：2006 年信旗下经理人名单"
+    },
+    {
+      "year": 1991,
+      "name": "First Empire State（可转换优先股）",
+      "type": "9% 可转换优先股 → 普通股",
+      "amount": "4000 万美元优先股（1991 年买入），1997 年末市值 2.36 亿美元",
+      "logic": "五笔可转换优先股里唯一一路上涨的一笔",
+      "source": "伯克希尔 1995 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1995.html",
+      "quote": "First Empire State Corp. ... 9% 1991 40 110 ... We are comfortable owning stock in well-run banks, and we will convert and keep our First Empire common shares.",
+      "yearEnd": 1997,
+      "holding": "持续",
+      "periodNote": "最近一次一手列示：1997 年信（投入 4000 万美元已升至 2.36 亿美元）",
+      "extraSources": [
+        {
+          "source": "伯克希尔 1997 年致股东信",
+          "sourceUrl": "https://www.berkshirehathaway.com/letters/1997.html"
+        }
+      ]
+    },
+    {
+      "year": 1991,
+      "name": "H.H. Brown（鞋业）",
+      "type": "控股收购",
+      "amount": "金额未披露",
+      "logic": "接掌杰夫·沃克留下的鞋业公司——那是他接手伯克希尔时背的一堆「麻烦」之一",
+      "source": "伯克希尔 1991 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1991.html",
+      "quote": "Frank Rooney (CEO of H.H. Brown, our latest acquisition, which I will describe later)",
+      "periodText": "买入 1991 · 退出时点未在公开年信中披露",
+      "periodNote": "2025 财年 10-K 的业务清单中已无 H.H. Brown 独立列示（其鞋业资产在 BH Shoe Holdings 名下）"
+    },
+    {
+      "year": 1991,
+      "name": "美国运通 Percs（优先股）",
+      "type": "优先股",
+      "amount": "3 亿美元，股息 8.85%，可转最多 12,244,898 股",
+      "logic": "危机里抄运通的便宜，三年后自动转成普通股",
+      "source": "伯克希尔 1991 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1991.html",
+      "quote": "we purchased $300 million of American Express Percs ... 8.85% dividend ... into no more than 12,244,898 shares of Amex.",
+      "yearEnd": 1994,
+      "holding": "已退出",
+      "extraSources": [
+        {
+          "source": "伯克希尔 1995 年致股东信",
+          "sourceUrl": "https://www.berkshirehathaway.com/letters/1995.html"
+        }
+      ]
+    },
+    {
+      "year": 1992,
+      "name": "通用动力（General Dynamics）",
+      "type": "普通股",
+      "amount": "持股 14.1%，金额未披露",
+      "logic": "军工股重仓；到 1995 年已不在主要持股名单内",
+      "source": "伯克希尔 1992 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1992.html",
+      "quote": "General Dynamics 14.1% of our shareholders' equity",
+      "yearEnd": 1995,
+      "holding": "已退出",
+      "extraSources": [
+        {
+          "source": "伯克希尔 1995 年致股东信",
+          "sourceUrl": "https://www.berkshirehathaway.com/letters/1995.html"
+        }
+      ]
+    },
+    {
+      "year": 1993,
+      "name": "Dexter Shoe",
+      "type": "控股收购",
+      "amount": "4.34 亿美元（其中发行 25,203 股伯克希尔股票支付）",
+      "logic": "他称之为「特别严重的错误」：用股票买下一家价值迅速归零的鞋厂",
+      "source": "伯克希尔 1993 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1993.html",
+      "quote": "on November 7, 1993 ... we acquired Dexter Shoe ... issuing 25,203 shares of Berkshire stock",
+      "periodText": "买入 1993 · 退出时点未在公开年信中披露",
+      "periodNote": "2016 年信：「Dexter's value promptly went to zero」",
+      "extraSources": [
+        {
+          "source": "伯克希尔 2016 年致股东信",
+          "sourceUrl": "https://www.berkshirehathaway.com/letters/2016ltr.pdf"
+        }
+      ]
+    },
+    {
+      "year": 1995,
+      "name": "GEICO（买下剩余 49%）",
+      "type": "控股收购",
+      "amount": "23 亿美元（1995 年定约，1996-01-02 完成交割）；因分步收购把原有 51% 账面减记 4.784 亿美元",
+      "logic": "把没做完的控股补齐，从此不再依赖别人承保",
+      "source": "伯克希尔 1996 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1996.html",
+      "quote": "GEICO became a wholly-owned subsidiary of Berkshire on January 2, 1996 ... required us to write down the value of our 51% ... amounted to $478.4 million. ... I felt Berkshire should pay $2.3 billion last year for the 49% of the company that we didn't then own.",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列 GEICO 为集团全资业务",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 1996,
+      "name": "FlightSafety International",
+      "type": "控股收购",
+      "amount": "约 15 亿美元",
+      "logic": "买下全球最大的航空安全培训生意",
+      "source": "伯克希尔 1996 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1996.html",
+      "quote": "we bought FlightSafety International for about $1.5 billion",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列 FlightSafety 业务",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 1996,
+      "name": "Kansas Bankers Surety",
+      "type": "控股收购",
+      "amount": "7500 万美元",
+      "logic": "危机里接下一家小保险公司",
+      "source": "伯克希尔 1996 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1996.html",
+      "quote": "we acquired Kansas Bankers Surety for $75 million",
+      "periodText": "买入 1996 · 退出时点未在公开年信中披露",
+      "periodNote": "最近一次一手列示：2006 年信旗下经理人名单"
+    },
+    {
+      "year": 1997,
+      "name": "可口可乐（加仓到 2 亿股）",
+      "type": "普通股",
+      "amount": "累计成本 12.989 亿美元，1997 年末市值 133.375 亿美元",
+      "logic": "亚洲金融危机时逆势加仓到 2 亿股",
+      "source": "伯克希尔 1997 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1997.html",
+      "quote": "200,000,000 The Coca-Cola Company 1,298.9 13,337.5",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列可口可乐持股",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 1998,
+      "name": "Executive Jet Aviation（公务机）",
+      "type": "控股收购",
+      "amount": "7.25 亿美元（一半现金一半股票）",
+      "logic": "买下他自己在用的公务机公司——这是他第一次买「自己需要的东西」",
+      "source": "伯克希尔 1998 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1998htm.html",
+      "quote": "Luckily, he phoned me last May, and we quickly made a $725 million deal, paying equal amounts of cash and stock.",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列 NetJets（Executive Jet Aviation）业务",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 1998,
+      "name": "General Re（再保险）",
+      "type": "控股收购",
+      "amount": "220 亿美元",
+      "logic": "用自家股票买承保能力，浮存金规模再上一个台阶——他后来说这是「一个可怕的错误」",
+      "source": "伯克希尔 1998 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/1998htm.html",
+      "quote": "On December 21, we completed our $22 billion acquisition of General Re Corp.",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列 General Re 为集团再保险业务",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        },
+        {
+          "source": "伯克希尔 2016 年致股东信",
+          "sourceUrl": "https://www.berkshirehathaway.com/letters/2016ltr.pdf"
+        }
+      ]
+    },
+    {
+      "year": 2000,
+      "name": "伯克希尔能源 BHE（公用事业平台）",
+      "type": "控股收购",
+      "amount": "2000 年购入 76%，对价未披露",
+      "logic": "用公用事业吸收能源转型所需的大额资本",
+      "source": "伯克希尔 2019 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2019ltr.pdf",
+      "quote": "When Berkshire entered the utility business in 2000, purchasing 76% of BHE",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列 Berkshire Hathaway Energy",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 2008,
+      "name": "Constellation Energy（电力）",
+      "type": "危机注资换股权",
+      "amount": "金额未在年信披露；2008 年为伯克希尔「主要被投资公司」，当年视同收益 10.92 亿美元",
+      "logic": "濒临破产时出手：MidAmerican 进场为 Constellation Energy 输血救急",
+      "source": "伯克希尔 2008 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2008ltr.pdf",
+      "quote": "at Constellation Energy, which was within hours of bankruptcy when MidAmerican arrived to effect a rescue.",
+      "periodText": "2008 年仍为伯克希尔主要被投资公司 · 2009 年已不在名单内",
+      "extraSources": [
+        {
+          "source": "伯克希尔 2009 年致股东信",
+          "sourceUrl": "https://www.berkshirehathaway.com/letters/2009ltr.pdf"
+        }
+      ]
+    },
+    {
+      "year": 2008,
+      "name": "两家爱尔兰银行（未具名）",
+      "type": "银行股",
+      "amount": "投入 2.44 亿美元，年末减记至 2700 万美元（−89%）",
+      "logic": "危机里买「看起来便宜」的银行股——他自认的非受迫性失误",
+      "source": "伯克希尔 2008 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2008ltr.pdf",
+      "quote": "During 2008, I spent $244 million for shares of two Irish banks that appeared cheap to me. At yearend we wrote these holdings down to market: $27 million, for an 89% loss.",
+      "yearEnd": 2008,
+      "holding": "已退出"
+    },
+    {
+      "year": 2008,
+      "name": "比亚迪 BYD",
+      "type": "普通股",
+      "amount": "10% 股权；2021 年末 2.25 亿股、成本 2.32 亿美元、市值 76.93 亿美元、持股 7.7%",
+      "logic": "芒格劝他投一家他不懂的电池厂——这是他承认的「不划算但该做」的一笔",
+      "source": "伯克希尔 2008 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2008ltr.pdf",
+      "quote": "a plug-in electric car developed by BYD, an amazing Chinese company in which we have a 10% interest.",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列 BYD 持股",
+      "extraSources": [
+        {
+          "source": "伯克希尔 2021 年致股东信",
+          "sourceUrl": "https://www.berkshirehathaway.com/letters/2021ltr.pdf"
+        },
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 2008,
+      "name": "箭牌 · 高盛 · 通用电气（危机固收＋附赠股权）",
+      "type": "固收＋附赠股权",
+      "amount": "三项合计 145 亿美元",
+      "logic": "危机里出手的固定收益，还附赠了股权",
+      "source": "伯克希尔 2008 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2008ltr.pdf",
+      "quote": "we made purchases totaling $14.5 billion in fixed-income securities issued by Wrigley, Goldman Sachs and General Electric ... we also acquired a substantial equity participation as a bonus.",
+      "yearEnd": 2011,
+      "holding": "已退出",
+      "extraSources": [
+        {
+          "source": "伯克希尔 2011 年致股东信",
+          "sourceUrl": "https://www.berkshirehathaway.com/letters/2011ltr.pdf"
+        }
+      ]
+    },
+    {
+      "year": 2008,
+      "name": "考克隆石油",
+      "type": "普通股",
+      "amount": "2009 年末 3771 万股，成本 27.41 亿美元",
+      "logic": "油价高峰期没人要的时候他自己买了",
+      "source": "伯克希尔 2009 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2009ltr.pdf",
+      "quote": "Without urging from Charlie or anyone else, I bought a large amount of ConocoPhillips stock when oil and gas prices were near their peak.",
+      "yearEnd": 2009,
+      "holding": "已退出"
+    },
+    {
+      "year": 2008,
+      "name": "道氏化学 · 瑞士再保险（危机注资换股权）",
+      "type": "固收＋股权",
+      "amount": "五项非交易证券合计成本 211 亿、账面 260 亿美元；2011 年瑞士再保险／高盛／通用电气合计赎回 128 亿",
+      "logic": "危机中注入资本，换来股权与优先认股权",
+      "source": "伯克希尔 2009 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2009ltr.pdf",
+      "quote": "we own positions in non-traded securities of Dow Chemical, General Electric, Goldman Sachs, Swiss Re and Wrigley with an aggregate cost of $21.1 billion and a carrying value of $26.0 billion",
+      "yearEnd": 2011,
+      "holding": "已退出",
+      "extraSources": [
+        {
+          "source": "伯克希尔 2011 年致股东信",
+          "sourceUrl": "https://www.berkshirehathaway.com/letters/2011ltr.pdf"
+        }
+      ]
+    },
+    {
+      "year": 2009,
+      "name": "伯克迪亚商业按揭 Berkadia",
+      "type": "控股收购",
+      "amount": "2009 年成为 50% 股东，金额未披露",
+      "logic": "和房地产低迷一起吃下的商业地产贷款服务商",
+      "source": "伯克希尔 2009 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2009ltr.pdf",
+      "quote": "At the end of 2009, we became a 50% owner of Berkadia Commercial Mortgage (formerly known as Capmark), the country's third-largest servicer of commercial mortgages.",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列 Berkadia",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 2009,
+      "name": "伯灵顿北方圣塔菲 BNSF",
+      "type": "控股收购",
+      "amount": "每股 100 美元，总估值约 440 亿美元（含 100 亿债务）",
+      "logic": "伯克希尔史上最大的一笔收购",
+      "source": "伯克希尔官网新闻稿（2009-11-03）",
+      "sourceUrl": "https://www.berkshirehathaway.com/news/nov0309.pdf",
+      "quote": "the transaction is valued at approximately $44 billion, including $10 billion of outstanding BNSF debt, making it the largest acquisition in Berkshire Hathaway history",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列 BNSF 为全资子公司",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 2011,
+      "name": "IBM",
+      "type": "普通股",
+      "amount": "6390 万股，成本 109 亿美元",
+      "logic": "2011 年逆向重仓科技股，2017—2018 年逐步清仓",
+      "source": "伯克希尔 2011 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2011ltr.pdf",
+      "quote": "63.9 million shares of IBM that cost us $10.9 billion",
+      "yearEnd": 2018,
+      "holding": "已退出",
+      "extraSources": [
+        {
+          "source": "伯克希尔 2018 年致股东信",
+          "sourceUrl": "https://www.berkshirehathaway.com/letters/2018ltr.pdf"
+        }
+      ]
+    },
+    {
+      "year": 2011,
+      "name": "富国银行（追加）",
+      "type": "普通股",
+      "amount": "追加 10 亿美元；2011 年末 4.00 亿股 / 7.6%；13F 口径 2019 年末 3.23 亿股、2020 年末 5242 万股，2021 年末仅余 67.5 万股",
+      "logic": "银行股重仓，2018—2021 年持续减持直至清空",
+      "source": "伯克希尔 2011 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2011ltr.pdf",
+      "quote": "the $1 billion addition we made to our Wells Fargo position",
+      "yearEnd": 2021,
+      "holding": "已退出",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 13F-HR（2019-12-31 期末）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000095012320002466/form13fInfoTable.xml"
+        },
+        {
+          "source": "SEC EDGAR 13F-HR（2020-12-31 期末）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000095012321002786/0000950123-21-002786-3286.xml"
+        },
+        {
+          "source": "SEC EDGAR 13F-HR（2021-12-31 期末）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000095012322002973/0000950123-22-002973-9815.xml"
+        }
+      ]
+    },
+    {
+      "year": 2011,
+      "name": "美国银行",
+      "type": "6% 优先股＋认股权证",
+      "amount": "50 亿美元 6% 优先股（年息 3 亿美元），认股权证可按 7.14 美元买 7 亿股；2017 年行权取得 7 亿股；2021 年末持普通股 10.33 亿股 / 12.8%",
+      "logic": "危机里注资美国银行，换来一张极便宜的看涨期权",
+      "source": "伯克希尔 2011 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2011ltr.pdf",
+      "quote": "a $5 billion 6% preferred stock of Bank of America that came with warrants allowing us to buy 700 million common shares at $7.14 per share any time before September 2, 2021",
+      "yearEnd": 2022,
+      "holding": "持续",
+      "periodNote": "2022 年信仍称伯克希尔是美国银行最大股东之一",
+      "extraSources": [
+        {
+          "source": "伯克希尔 2016 年致股东信",
+          "sourceUrl": "https://www.berkshirehathaway.com/letters/2016ltr.pdf"
+        },
+        {
+          "source": "伯克希尔 2017 年致股东信",
+          "sourceUrl": "https://www.berkshirehathaway.com/letters/2017ltr.pdf"
+        },
+        {
+          "source": "伯克希尔 2022 年致股东信",
+          "sourceUrl": "https://www.berkshirehathaway.com/letters/2022ltr.pdf"
+        }
+      ]
+    },
+    {
+      "year": 2011,
+      "name": "路博润 Lubrizol",
+      "type": "控股收购",
+      "amount": "对价未在年信披露",
+      "logic": "2011 年给化工业务找的新家",
+      "source": "伯克希尔 2011 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2011ltr.pdf",
+      "quote": "On September 16th we acquired Lubrizol, a worldwide producer of additives and other specialty chemicals.",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列 Lubrizol 业务",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 2012,
+      "name": "GUARD 保险集团",
+      "type": "控股收购",
+      "amount": "2.21 亿美元（约等于当时净资产）",
+      "logic": "阿吉特用「几乎不费脑子」的低价买下一家小保险公司",
+      "source": "伯克希尔 2019 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2019ltr.pdf",
+      "quote": "Ajit Jain ... was buying a tiny company - GUARD Insurance Group - in that small Pennsylvania city for $221 million (roughly its net worth at the time).",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列 GUARD 业务",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 2013,
+      "name": "H.J. Heinz（亨氏）",
+      "type": "优先股＋普通股",
+      "amount": "80 亿美元亨氏优先股（9% 票息），另以 42.5 亿美元与 3G 各买一半普通股；2013 年 6 月取得控制权",
+      "logic": "与 3G 资本联手，用「伯克希尔做融资方」的模板拿下消费品巨头",
+      "source": "伯克希尔 2013 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2013ltr.pdf",
+      "quote": "we purchased $8 billion of Heinz preferred stock that carries a 9% coupon ... Berkshire and 3G each purchased half of the Heinz common stock for $4.25 billion. ... Our partnership took control of Heinz in June",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列 Kraft Heinz 为主要权益法投资",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 2013,
+      "name": "NV Energy",
+      "type": "控股收购",
+      "amount": "56 亿美元（由 MidAmerican 收购）",
+      "logic": "内华达州约 88% 人口的电力供应商",
+      "source": "伯克希尔 2013 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2013ltr.pdf",
+      "quote": "NV Energy, purchased for $5.6 billion by MidAmerican Energy, our utility subsidiary, supplies electricity to about 88% of Nevada's population.",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列 NV Energy 业务",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 2015,
+      "name": "Kraft Heinz（卡夫亨氏）",
+      "type": "权益法投资",
+      "amount": "亨氏与卡夫合并后持有 3.254 亿股（约 27%），总成本 98 亿美元；2017 年末市值 253 亿美元",
+      "logic": "伯克希尔至今仍承认「回报远不及预期」的一笔巨额权益投资",
+      "source": "伯克希尔 2015 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2015ltr.pdf",
+      "quote": "Before this transaction, we owned about 53% of Heinz at a cost of $4.25 billion. Now we own 325.4 million shares of Kraft Heinz (about 27%) that cost us $9.8 billion.",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列 Kraft Heinz 为主要权益法投资",
+      "extraSources": [
+        {
+          "source": "伯克希尔 2017 年致股东信",
+          "sourceUrl": "https://www.berkshirehathaway.com/letters/2017ltr.pdf"
+        },
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 2015,
+      "name": "精密铸件 PCC",
+      "type": "控股收购",
+      "amount": "每股 235 美元全现金，约 372 亿美元（含净债务）",
+      "logic": "伯克希尔史上最大的现金收购",
+      "source": "伯克希尔官网新闻稿（2016-01-29）",
+      "sourceUrl": "https://www.berkshirehathaway.com/news/jan2916.pdf",
+      "quote": "the completion of the acquisition of PCC for $235 per share in an all-cash transaction ... valued at approximately $37.2 billion, including outstanding PCC net debt.",
+      "yearEnd": 2016,
+      "holding": "已退出"
+    },
+    {
+      "year": 2017,
+      "name": "Pilot Travel Centers（卡车驿站）",
+      "type": "控股收购",
+      "amount": "2017 年入股；2021 年末持股 38.6%，2023 年初增持到 80%",
+      "logic": "巴菲特自己爱去的卡车驿站",
+      "source": "伯克希尔 2021 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2021ltr.pdf",
+      "quote": "Berkshire also owns ... 38.6% of Pilot Corp. ... Since we purchased our Pilot stake in 2017 ... Early in 2023, Berkshire will purchase an additional interest in Pilot that will raise our ownership to 80%.",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列 Pilot 业务",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 2018,
+      "name": "亚马逊",
+      "type": "13F 口径",
+      "amount": "13F 口径：2024-12-31 合计 1000 万股、申报市值 21.94 亿美元；2025-12-31 降至 227.6 万股、5.25 亿美元",
+      "logic": "不投自己看不懂的东西——但芒格推了，他就买了",
+      "source": "SEC EDGAR 13F-HR（2024-12-31 期末）",
+      "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000095012325002701/39042.xml",
+      "quote": "AMAZON COM INC / COM / value 1694568360 / sshPrnamt 7724000",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "13F 信息表按 otherManager 分行列示，同一发行人的行数已合计；2025 财年 10-K 仍列亚马逊持股",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 13F-HR（2025-12-31 期末）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526054580/50240.xml"
+        },
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 2019,
+      "name": "伯克希尔股票回购",
+      "type": "自有股票回购",
+      "amount": "50 亿美元（约 1% 股本）",
+      "logic": "股价低于内在价值时回购——他最看重的那种「投资」",
+      "source": "伯克希尔 2019 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2019ltr.pdf",
+      "quote": "we spent $5 billion in repurchasing about 1% of the company.",
+      "yearEnd": 2019,
+      "holding": "已退出"
+    },
+    {
+      "year": 2019,
+      "name": "日本五大商社（伊藤忠／丸红／三菱商事／三井物产／住友商事）",
+      "type": "普通股",
+      "amount": "首笔 2019 年 7 月；2024 年末合计成本 138 亿美元、市值 235 亿美元",
+      "logic": "「以合理价格买入 sensible 的生意」的日本版：低估值、高回购",
+      "source": "伯克希尔 2024 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2024ltr.pdf",
+      "quote": "Berkshire made its first purchases involving the five in July 2019. ... At yearend, Berkshire's aggregate cost (in dollars) was $13.8 billion and the market value of our holdings totaled $23.5 billion.",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列日本商社持股",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 2019,
+      "name": "西方石油",
+      "type": "优先股＋认股权证",
+      "amount": "100 亿美元，8% 股息，2029 年起按清算价 105% 赎回",
+      "logic": "油价的「看涨期权」：8% 票息的优先股＋认股权证",
+      "source": "伯克希尔 2019 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2019ltr.pdf",
+      "quote": "Includes $10 billion investment in Occidental Petroleum Corporation consisting of preferred stock and warrants to buy common stock.",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列西方石油为主要权益法投资",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 2020,
+      "name": "伯克希尔股票回购（规模化）",
+      "type": "自有股票回购",
+      "amount": "两年合计 517 亿美元（回购 2019 年末股本的 9%）",
+      "logic": "疫情里没什么可买时，把钱还给出资人",
+      "source": "伯克希尔 2021 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2021ltr.pdf",
+      "quote": "we therefore repurchased 9% of the shares that were outstanding at yearend 2019 for a total cost of $51.7 billion.",
+      "yearEnd": 2021,
+      "holding": "已退出"
+    },
+    {
+      "year": 2024,
+      "name": "BHE 剩余股权（增持至 100%）",
+      "type": "增持",
+      "amount": "约 39 亿美元（其中 29 亿现金）",
+      "logic": "把公用事业平台补到 100% 控股",
+      "source": "伯克希尔 2024 年致股东信",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2024ltr.pdf",
+      "quote": "Late in the year we increased our ownership of the utility operation from about 92% to 100% at a cost of roughly $3.9 billion, of which $2.9 billion was paid in cash with a balance in Berkshire 'B' shares.",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 2024,
+      "name": "Constellation Brands（酒类 STZ）",
+      "type": "13F 口径",
+      "amount": "2024-12-31 持 562 万股、申报市值 12.43 亿美元；2025-12-31 增至 1300 万股、17.93 亿美元",
+      "logic": "13F 里新出现的酒类持仓",
+      "source": "SEC EDGAR 13F-HR（2024-12-31 期末）",
+      "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000095012325002701/39042.xml",
+      "quote": "CONSTELLATION BRANDS INC / CL A / cusip 21036P108 / value 1242975604 / sshPrnamt 5624324",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "13F 信息表同一发行人只有 1 行；2025 财年 10-K 仍列 Constellation Brands 持股",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 13F-HR（2025-12-31 期末）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526054580/50240.xml"
+        },
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 2024,
+      "name": "苹果（13F 口径 3 亿股）",
+      "type": "13F 口径",
+      "amount": "2024-12-31 合计 3 亿股、申报市值 751.26 亿美元；2025-12-31 降至 2.279 亿股、619.62 亿美元",
+      "logic": "长期积累的科技仓位，到 2024 年才在 13F 里第一次公开浮出水面",
+      "source": "SEC EDGAR 13F-HR（2024-12-31 期末）",
+      "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000095012325002701/39042.xml",
+      "quote": "APPLE INC / value 38250906745 / sshPrnamt 152747012",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "13F 信息表按 otherManager 分 12 行列示，合计为 3 亿股 / 751.26 亿美元；2025 财年 10-K 仍列苹果持股",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 13F-HR（2025-12-31 期末）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526054580/50240.xml"
+        },
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 2024,
+      "name": "达美乐比萨",
+      "type": "13F 口径",
+      "amount": "2024-12-31 持 238 万股、申报市值 9.999 亿美元；2025-12-31 增至 335 万股、13.96 亿美元",
+      "logic": "13F 里新出现的持仓",
+      "source": "SEC EDGAR 13F-HR（2024-12-31 期末）",
+      "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000095012325002701/39042.xml",
+      "quote": "DOMINOS PIZZA INC / COM / cusip 25754A201 / value 999868320 / sshPrnamt 2382000",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "13F 信息表同一发行人只有 1 行",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 13F-HR（2025-12-31 期末）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526054580/50240.xml"
+        }
+      ]
+    },
+    {
+      "year": 2025,
+      "name": "Bell Laboratories（灭鼠家族企业）",
+      "type": "控股收购",
+      "amount": "金额未披露",
+      "logic": "家族企业主动来投奔——「高利润率、增长好、永远有人需要」",
+      "source": "伯克希尔 2025 年致股东信（阿贝尔）",
+      "sourceUrl": "https://www.berkshirehathaway.com/letters/2025ltr.pdf",
+      "quote": "Last year, Warren received a letter from Steve Levy, Bell Laboratories' CEO, asking that we look at the family-owned business he manages for the daughters of founder Malcolm Stack.",
+      "yearEnd": 2025,
+      "holding": "持续",
+      "periodNote": "2025 财年 10-K 仍列 Bell Laboratories 业务",
+      "extraSources": [
+        {
+          "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
+          "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
+        }
+      ]
+    },
+    {
+      "year": 2025,
+      "name": "OxyChem（西方石油化工业务）",
+      "type": "控股收购",
+      "amount": "97 亿美元全现金",
+      "logic": "把西方石油的化工资产买进来，切入基础化工",
+      "source": "伯克希尔官网新闻稿（2025-10-02）",
+      "sourceUrl": "https://www.berkshirehathaway.com/news/oct0225.pdf",
+      "quote": "a definitive agreement for Berkshire Hathaway to acquire Occidental's chemical business, OxyChem, in an all-cash transaction for $9.7 billion, subject to customary purchase price adjustments.",
+      "yearEnd": 2025,
+      "holding": "已退出"
+    },
+    {
+      "year": 2026,
+      "name": "管理层交接：阿贝尔任 CEO，巴菲特转任董事长",
+      "type": "—",
+      "amount": "无对价",
+      "logic": "巴菲特交棒：格雷格·阿贝尔接任 CEO，巴菲特转任董事长",
+      "source": "伯克希尔官网新闻稿（2025-12-08）",
+      "sourceUrl": "https://www.berkshirehathaway.com/news/dec0825.pdf",
+      "quote": "We are fortunate to have Warren as Berkshire's Chairman, in the office five days a week",
+      "periodText": "2026-01-01 起 · 阿贝尔任 CEO，巴菲特转任董事长"
+    }
+  ],
+  "netWorth": [
+    {
+      "year": 1960,
+      "netWorth": null,
+      "status": "no-source",
+      "list": "",
+      "listLabel": "",
+      "rank": "",
+      "source": "",
+      "sourceUrl": "",
+      "listAge": null,
+      "track": true,
+      "note": "福布斯个人身家榜 1982 年才创刊；伯克希尔官网致股东信最早只到 1977 年，其中也没有个人身家披露。这一段公开一手来源未覆盖，不拿别处的估算顶替。",
+      "short": "—"
+    },
+    {
+      "year": 1965,
+      "netWorth": null,
+      "status": "no-source",
+      "list": "",
+      "listLabel": "",
+      "rank": "",
+      "source": "",
+      "sourceUrl": "",
+      "listAge": null,
+      "track": true,
+      "note": "福布斯个人身家榜 1982 年才创刊；伯克希尔官网致股东信最早只到 1977 年，其中也没有个人身家披露。这一段公开一手来源未覆盖，不拿别处的估算顶替。",
+      "short": "—"
+    },
+    {
+      "year": 1970,
+      "netWorth": null,
+      "status": "no-source",
+      "list": "",
+      "listLabel": "",
+      "rank": "",
+      "source": "",
+      "sourceUrl": "",
+      "listAge": null,
+      "track": true,
+      "note": "福布斯个人身家榜 1982 年才创刊；伯克希尔官网致股东信最早只到 1977 年，其中也没有个人身家披露。这一段公开一手来源未覆盖，不拿别处的估算顶替。",
+      "short": "—"
+    },
+    {
+      "year": 1975,
+      "netWorth": null,
+      "status": "no-source",
+      "list": "",
+      "listLabel": "",
+      "rank": "",
+      "source": "",
+      "sourceUrl": "",
+      "listAge": null,
+      "track": true,
+      "note": "福布斯个人身家榜 1982 年才创刊；伯克希尔官网致股东信最早只到 1977 年，其中也没有个人身家披露。这一段公开一手来源未覆盖，不拿别处的估算顶替。",
+      "short": "—"
+    },
+    {
+      "year": 1980,
+      "netWorth": null,
+      "status": "no-source",
+      "list": "",
+      "listLabel": "",
+      "rank": "",
+      "source": "",
+      "sourceUrl": "",
+      "listAge": null,
+      "track": true,
+      "note": "福布斯个人身家榜 1982 年才创刊；伯克希尔官网致股东信最早只到 1977 年，其中也没有个人身家披露。这一段公开一手来源未覆盖，不拿别处的估算顶替。",
+      "short": "—"
+    },
+    {
+      "year": 1982,
+      "netWorth": 250000000,
+      "status": "value",
+      "list": "forbes-400",
+      "listLabel": "福布斯 400（美国富豪榜）",
+      "rank": "待核对",
+      "source": "福布斯 400 首榜（1982 年 9 月刊）",
+      "sourceUrl": "https://www.forbes.com/sites/sarahthomasoxtoby/2022/09/28/forbes-400-billionaire-streakers-people-on-1982-and-2022-lists",
+      "listAge": 52,
+      "track": true,
+      "note": "福布斯当年写：\"Lives modestly... Estimated net worth: $250 million.\" 这是第一份公开的个人净资产估算；当年名次未在可查来源里出现，标待核对。",
+      "short": "福布斯 400 1982"
+    },
+    {
+      "year": 1985,
+      "netWorth": 1000000000,
+      "status": "value",
+      "list": "forbes-400",
+      "listLabel": "福布斯 400（美国富豪榜）",
+      "rank": "13",
+      "source": "福布斯 400（1985 年 10 月刊，洛杉矶时报转录全榜）",
+      "sourceUrl": "https://www.latimes.com/archives/la-xpm-1985-10-15-fi-16339-story.html",
+      "listAge": 55,
+      "track": true,
+      "note": "转录原文：\"Buffett, Warren Edward, 55, Omaha, Neb., stock market, $1 billion.\"",
+      "short": "福布斯 400 1985"
+    },
+    {
+      "year": 1987,
+      "netWorth": 2100000000,
+      "status": "value",
+      "list": "forbes-400",
+      "listLabel": "福布斯 400（美国富豪榜）",
+      "rank": "9",
+      "source": "福布斯 400（1987 年 10 月刊，洛杉矶时报转录全榜）",
+      "sourceUrl": "https://www.latimes.com/archives/la-xpm-1987-10-13-fi-13869-story.html",
+      "listAge": 57,
+      "track": true,
+      "note": "转录原文：\"9--Buffett, Warren Edward, 2,100, Omaha, Stock market, 57\"；同期美联社稿：\"investor Warren E. Buffett, $2.1 billion\"。",
+      "short": "福布斯 400 1987"
+    },
+    {
+      "year": 1988,
+      "netWorth": 2200000000,
+      "status": "value",
+      "list": "forbes-400",
+      "listLabel": "福布斯 400（美国富豪榜）",
+      "rank": "10",
+      "source": "福布斯 400（1988 年 10 月刊，洛杉矶时报转录全榜）",
+      "sourceUrl": "https://www.latimes.com/archives/la-xpm-1988-10-11-fi-3693-story.html",
+      "listAge": 58,
+      "track": true,
+      "note": "转录原文：\"10) Warren Edward Buffett, $2,200, Omaha, Neb., stock market, 58.\"",
+      "short": "福布斯 400 1988"
+    },
+    {
+      "year": 1990,
+      "netWorth": 3300000000,
+      "status": "value",
+      "list": "forbes-400",
+      "listLabel": "福布斯 400（美国富豪榜）",
+      "rank": "2",
+      "source": "福布斯 400（1990 年 10 月 22 日刊，华盛顿邮报报道，网页存档）",
+      "sourceUrl": "https://web.archive.org/web/20220123200327/https://www.washingtonpost.com/archive/business/1990/10/09/on-this-years-forbes-400-list-the-rich-start-getting-poorer/9454c8d6-88e1-49a6-9d76-2f106f0eb288/",
+      "listAge": 60,
+      "track": true,
+      "note": "原文：\"No. 2 is Omaha investor Warren Buffett, 60, who bought his first stock at age 11 and parlayed a savvy for stocks into a $3.3 billion fortune.\" 原报链接已失效，这里用网页存档；同一年 3 月的全球榜不是同一口径。",
+      "short": "福布斯 400 1990"
+    },
+    {
+      "year": 1993,
+      "netWorth": 6600000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "9",
+      "source": "福布斯全球亿万富豪榜 1993 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#1993",
+      "listAge": 62,
+      "track": true,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 1993"
+    },
+    {
+      "year": 1994,
+      "netWorth": 7900000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "6",
+      "source": "福布斯全球亿万富豪榜 1994 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#1994",
+      "listAge": 63,
+      "track": false,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 1994"
+    },
+    {
+      "year": 1995,
+      "netWorth": 10700000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "3",
+      "source": "福布斯全球亿万富豪榜 1995 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#1995",
+      "listAge": 64,
+      "track": true,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 1995"
+    },
+    {
+      "year": 1996,
+      "netWorth": 15300000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "3",
+      "source": "福布斯全球亿万富豪榜 1996 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#1996",
+      "listAge": 65,
+      "track": false,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 1996"
+    },
+    {
+      "year": 1997,
+      "netWorth": 23200000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "3",
+      "source": "福布斯全球亿万富豪榜 1997 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#1997",
+      "listAge": 66,
+      "track": false,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 1997"
+    },
+    {
+      "year": 1998,
+      "netWorth": 33000000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "3",
+      "source": "福布斯全球亿万富豪榜 1998 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#1998",
+      "listAge": 67,
+      "track": false,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 1998"
+    },
+    {
+      "year": 1999,
+      "netWorth": 36000000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "2",
+      "source": "福布斯全球亿万富豪榜 1999 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#1999",
+      "listAge": 68,
+      "track": false,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 1999"
+    },
+    {
+      "year": 2000,
+      "netWorth": 25600000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "4",
+      "source": "福布斯全球亿万富豪榜 2000 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2000",
+      "listAge": 69,
+      "track": true,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2000"
+    },
+    {
+      "year": 2001,
+      "netWorth": 32300000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "2",
+      "source": "福布斯全球亿万富豪榜 2001 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2001",
+      "listAge": 70,
+      "track": false,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2001"
+    },
+    {
+      "year": 2002,
+      "netWorth": 35000000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "2",
+      "source": "福布斯全球亿万富豪榜 2002 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2002",
+      "listAge": 71,
+      "track": false,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2002"
+    },
+    {
+      "year": 2003,
+      "netWorth": 30500000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "2",
+      "source": "福布斯全球亿万富豪榜 2003 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2003",
+      "listAge": 72,
+      "track": false,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2003"
+    },
+    {
+      "year": 2004,
+      "netWorth": 42900000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "2",
+      "source": "福布斯全球亿万富豪榜 2004 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2004",
+      "listAge": 73,
+      "track": false,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2004"
+    },
+    {
+      "year": 2005,
+      "netWorth": 44000000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "2",
+      "source": "福布斯全球亿万富豪榜 2005 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2005",
+      "listAge": 74,
+      "track": true,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2005"
+    },
+    {
+      "year": 2006,
+      "netWorth": 42000000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "2",
+      "source": "福布斯全球亿万富豪榜 2006 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2006",
+      "listAge": 75,
+      "track": false,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2006"
+    },
+    {
+      "year": 2007,
+      "netWorth": 52000000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "2",
+      "source": "福布斯全球亿万富豪榜 2007 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2007",
+      "listAge": 76,
+      "track": false,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2007"
+    },
+    {
+      "year": 2008,
+      "netWorth": 62000000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "1",
+      "source": "福布斯全球亿万富豪榜 2008 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2008",
+      "listAge": 77,
+      "track": true,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2008"
+    },
+    {
+      "year": 2008,
+      "netWorth": 50000000000,
+      "status": "value",
+      "list": "forbes-400",
+      "listLabel": "福布斯 400（美国富豪榜）",
+      "rank": "2",
+      "source": "福布斯 400（2008 年 9 月 17 日刊首版，新华社转述）",
+      "sourceUrl": "https://www.chinanews.com.cn/gj/bm/news/2008/09-18/1385476.shtml",
+      "listAge": 78,
+      "track": false,
+      "note": "9 月 17 日首版按 8 月 29 日收盘价计价：巴菲特 500 亿美元列第 2，盖茨 570 亿美元居首。原文：\"今年榜上的前十名富豪依次为：比尔·盖茨(570亿美元)、巴菲特(500亿美元)\"。同月 27 日修订版为 580 亿美元 / 第 1 位——两次印次不是同一口径。",
+      "short": "福布斯 400 2008 首版"
+    },
+    {
+      "year": 2008,
+      "netWorth": 58000000000,
+      "status": "value",
+      "list": "forbes-400",
+      "listLabel": "福布斯 400（美国富豪榜）",
+      "rank": "1",
+      "source": "福布斯 400（2008 年 10 月 27 日刊修订版，彭博报道转述）",
+      "sourceUrl": "https://articles.latimes.com/2008/oct/10/business/fi-forbes10",
+      "listAge": 78,
+      "track": false,
+      "note": "10 月 27 日刊按 8/29—10/1 的 33 天窗口重算：巴菲特净增 80 亿美元至 580 亿美元，取代盖茨成为第一。原文：\"Warren Buffett overtook Microsoft Corp. co-founder Bill Gates as the richest American by posting an $8-billion gain to $58 billion during the period\"。同榜 9 月 17 日首版是 500 亿美元 / 第 2 位——两次印次不是同一口径。",
+      "short": "福布斯 400 2008"
+    },
+    {
+      "year": 2009,
+      "netWorth": 37000000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "2",
+      "source": "福布斯全球亿万富豪榜 2009 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2009",
+      "listAge": 78,
+      "track": true,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2009"
+    },
+    {
+      "year": 2010,
+      "netWorth": 47000000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "3",
+      "source": "福布斯全球亿万富豪榜 2010 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2010",
+      "listAge": 79,
+      "track": true,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2010"
+    },
+    {
+      "year": 2010,
+      "netWorth": 45000000000,
+      "status": "value",
+      "list": "forbes-400",
+      "listLabel": "福布斯 400（美国富豪榜）",
+      "rank": "2",
+      "source": "福布斯 400（2010 年 9 月刊，纽约时报 DealBook 转述）",
+      "sourceUrl": "https://archive.nytimes.com/dealbook.nytimes.com/2010/09/22/gates-and-buffett-remain-atop-the-forbes-400/",
+      "listAge": 80,
+      "track": false,
+      "note": "9 月快照：\"second place this year with fortunes worth $45 billion\"。",
+      "short": "福布斯 400 2010"
+    },
+    {
+      "year": 2011,
+      "netWorth": 50000000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "3",
+      "source": "福布斯全球亿万富豪榜 2011 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2011",
+      "listAge": 80,
+      "track": false,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2011"
+    },
+    {
+      "year": 2012,
+      "netWorth": 44000000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "3",
+      "source": "福布斯全球亿万富豪榜 2012 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2012",
+      "listAge": 81,
+      "track": false,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2012"
+    },
+    {
+      "year": 2013,
+      "netWorth": 53500000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "4",
+      "source": "福布斯全球亿万富豪榜 2013 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2013",
+      "listAge": 82,
+      "track": false,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2013"
+    },
+    {
+      "year": 2013,
+      "netWorth": 58500000000,
+      "status": "value",
+      "list": "forbes-400",
+      "listLabel": "福布斯 400（美国富豪榜）",
+      "rank": "待核对",
+      "source": "福布斯 400（2013 年 9 月刊，维基百科引榜页）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Warren_Buffett#Wealth",
+      "listAge": 83,
+      "track": false,
+      "note": "原文：\"His net worth had risen to $58.5 billion as of September 2013\"。",
+      "short": "福布斯 400 2013"
+    },
+    {
+      "year": 2014,
+      "netWorth": 58200000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "4",
+      "source": "福布斯全球亿万富豪榜 2014 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2014",
+      "listAge": 83,
+      "track": false,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2014"
+    },
+    {
+      "year": 2015,
+      "netWorth": 72700000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "3",
+      "source": "福布斯全球亿万富豪榜 2015 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2015",
+      "listAge": 84,
+      "track": true,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2015"
+    },
+    {
+      "year": 2016,
+      "netWorth": 60800000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "3",
+      "source": "福布斯全球亿万富豪榜 2016 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2016",
+      "listAge": 85,
+      "track": true,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2016"
+    },
+    {
+      "year": 2017,
+      "netWorth": 75600000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "2",
+      "source": "福布斯全球亿万富豪榜 2017 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2017",
+      "listAge": 86,
+      "track": false,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2017"
+    },
+    {
+      "year": 2018,
+      "netWorth": 84000000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "3",
+      "source": "福布斯全球亿万富豪榜 2018 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2018",
+      "listAge": 87,
+      "track": false,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2018"
+    },
+    {
+      "year": 2019,
+      "netWorth": 82500000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "3",
+      "source": "福布斯全球亿万富豪榜 2019 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2019",
+      "listAge": 88,
+      "track": false,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2019"
+    },
+    {
+      "year": 2020,
+      "netWorth": 67500000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "4",
+      "source": "福布斯全球亿万富豪榜 2020 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2020",
+      "listAge": 89,
+      "track": true,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2020"
+    },
+    {
+      "year": 2021,
+      "netWorth": 96000000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "6",
+      "source": "福布斯全球亿万富豪榜 2021 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2021",
+      "listAge": 90,
+      "track": false,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2021"
+    },
+    {
+      "year": 2022,
+      "netWorth": 118000000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "5",
+      "source": "福布斯全球亿万富豪榜 2022 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2022",
+      "listAge": 91,
+      "track": true,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2022"
+    },
+    {
+      "year": 2022,
+      "netWorth": 97000000000,
+      "status": "value",
+      "list": "forbes-400",
+      "listLabel": "福布斯 400（美国富豪榜）",
+      "rank": "待核对",
+      "source": "福布斯 400（2022 年 9 月刊，福布斯官方 40 周年文）",
+      "sourceUrl": "https://www.forbes.com/sites/sarahthomasoxtoby/2022/09/28/forbes-400-billionaire-streakers-people-on-1982-and-2022-lists",
+      "listAge": 92,
+      "track": false,
+      "note": "\"Net worth in 2022: $97 billion\"，快照日 2022-09-02。",
+      "short": "福布斯 400 2022"
+    },
+    {
+      "year": 2023,
+      "netWorth": 106000000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "5",
+      "source": "福布斯全球亿万富豪榜 2023 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2023",
+      "listAge": 92,
+      "track": true,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2023"
+    },
+    {
+      "year": 2024,
+      "netWorth": 133000000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "6",
+      "source": "福布斯全球亿万富豪榜 2024 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2024",
+      "listAge": 93,
+      "track": false,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2024"
+    },
+    {
+      "year": 2024,
+      "netWorth": 150000000000,
+      "status": "value",
+      "list": "forbes-400",
+      "listLabel": "福布斯 400（美国富豪榜）",
+      "rank": "5",
+      "source": "福布斯 400（2024 年 9 月快照，福布斯官方稿）",
+      "sourceUrl": "https://www.forbes.com/sites/chasewithorn/2024/10/01/the-2024-forbes-400-the-25-wealthiest-people-in-america/",
+      "listAge": 94,
+      "track": false,
+      "note": "原文：\"5. Warren Buffett — Net worth: $150 billion ... Age: 94\"，快照日 2024-09-01。",
+      "short": "福布斯 400 2024"
+    },
+    {
+      "year": 2025,
+      "netWorth": 154000000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "6",
+      "source": "福布斯全球亿万富豪榜 2025 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2025",
+      "listAge": 94,
+      "track": true,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2025"
+    },
+    {
+      "year": 2025,
+      "netWorth": 150000000000,
+      "status": "value",
+      "list": "forbes-400",
+      "listLabel": "福布斯 400（美国富豪榜）",
+      "rank": "9",
+      "source": "福布斯 400（2025 年 9 月 9 日刊，德梅因寄存器报转述）",
+      "sourceUrl": "https://finance.yahoo.com/news/forbes-released-list-countrys-richest-100420137.html",
+      "listAge": 95,
+      "track": false,
+      "note": "原文：\"Buffett – with a net worth of about $150 billion – placed 9th\"。",
+      "short": "福布斯 400 2025"
+    },
+    {
+      "year": 2026,
+      "netWorth": 149000000000,
+      "status": "value",
+      "list": "forbes-world",
+      "listLabel": "福布斯全球亿万富豪榜",
+      "rank": "9",
+      "source": "福布斯全球亿万富豪榜 2026 年刊（3 月快照，维基百科转录）",
+      "sourceUrl": "https://en.wikipedia.org/wiki/The_World%27s_Billionaires#2026",
+      "listAge": 95,
+      "track": true,
+      "note": "福布斯该年榜单公布的个人净资产估算与名次。3 月快照时他还没过 8 月 30 日生日，所以榜上年龄比\"年份减 1930\"小一岁。",
+      "short": "福布斯全球榜 2026"
+    },
+    {
+      "year": 2026,
+      "netWorth": 144000000000,
+      "status": "value",
+      "list": "forbes-400",
+      "listLabel": "福布斯 400（美国富豪榜）",
+      "rank": "10",
+      "source": "福布斯 400（2026 年 9 月 4 日快照，福布斯官方榜页）",
+      "sourceUrl": "https://www.forbes.com/forbes-400/",
+      "listAge": 96,
+      "track": false,
+      "note": "表行：\"10 ‖ Warren Buffett ‖ $144 B ‖ 96 ‖ Nebraska ‖ Berkshire Hathaway\"。",
+      "short": "福布斯 400 2026"
+    }
+  ]
+}

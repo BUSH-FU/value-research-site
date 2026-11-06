@@ -470,3 +470,53 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:250px;
 .vc-premise,.vc-invalidate{color:#5f6d64}
 .vc-unverified{margin:8px 0 0;font-size:11px;line-height:1.6;color:#7a6a55;border-left:2px solid #e0c9a8;padding-left:7px}
 @media(max-width:680px){.vc-cards{grid-template-columns:minmax(0,1fr)}}
+
+/* 巴菲特双时间轴：年份竖排，中间一根脊轴写「年份 · 年龄」。
+   同一年份用同一条底纹带，左边投资、右边净资产，年龄与年份因此互相对应。
+   颜色与宽度一律走 CSS 类（服务器 CSP 是 style-src 'self'，行内 style 会被静默忽略）。 */
+.btl{border:1px solid var(--line);border-radius:10px;background:#fff;padding:20px 22px 18px;margin:26px 0 4px}
+.btl-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
+.btl-head h2{margin:0 0 4px}
+.btl-head p{margin:0;max-width:720px;font-size:12px;line-height:1.7}
+.btl-summary{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);align-items:baseline}
+.btl-summary b{font-size:17px;color:var(--ink);font-weight:600;margin-right:3px;font-variant-numeric:tabular-nums}
+.btl-scroll{margin-top:16px;max-height:540px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;background:#fbfcfa}
+.btl-canvas{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 96px 292px;min-width:820px}
+.btl-guides{position:absolute;inset:0;pointer-events:none}
+.btl-band{position:absolute;left:0;right:0;background:#f2f6f1;border-bottom:1px solid #eef2ec}
+.btl-col{position:relative;z-index:1}
+.btl-col-axis{border-left:1px solid var(--line);background:rgba(255,255,255,.55)}
+.btl-col-invest{padding-left:12px}
+.btl-col-net{padding-left:14px}
+.btl-tick{position:absolute;left:0;right:0;padding:2px 0 0 9px;font-size:11px;line-height:1.35;color:var(--muted);font-variant-numeric:tabular-nums}
+.btl-tick-year{display:block;font-weight:600;color:#5d6b63}
+.btl-tick-age{display:block;font-size:10px;color:#93a098}
+.btl-slot{position:absolute;left:0;right:0}
+.btl-card{background:#fff;border:1px solid var(--line);border-left:3px solid var(--green);border-radius:7px;padding:6px 11px;height:76px;overflow:hidden}
+.btl-card-head{display:flex;align-items:baseline;gap:9px;flex-wrap:nowrap}
+.btl-card-head b{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.btl-card-period{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
+.btl-card-logic{font-size:12px;color:#4b5a52;line-height:1.45;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btl-card-meta{font-size:10px;color:#8b968e;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btl-nw{background:#fff;border:1px solid var(--line);border-radius:7px;padding:5px 11px;height:46px;overflow:hidden}
+.btl-nw-top{display:flex;align-items:baseline;gap:9px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.btl-nw-age{font-weight:600;color:var(--green)}
+.btl-nw-val{margin-left:auto;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap}
+.btl-nw-usd{display:block;font-size:10px;color:#8b968e;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4}
+.btl-notice{border-left:3px solid #c1a570;background:#f3efe5;padding:10px 14px;color:#7e693f;font-size:12px;border-radius:3px;margin-top:12px}
+.btl-tables{margin-top:16px}
+.btl-table-wrap{overflow:auto;border:1px solid var(--line);border-radius:8px;margin-bottom:14px;background:#fff}
+.btl-table{white-space:normal;font-size:12px}
+.btl-table caption{caption-side:top;text-align:left;padding:11px 14px;color:var(--muted);font-size:12px;background:#fafbf8;border-bottom:1px solid var(--line)}
+.btl-table th,.btl-table td{padding:9px 12px;vertical-align:top}
+.btl-td-age{font-variant-numeric:tabular-nums;color:var(--muted)}
+.btl-td-logic{min-width:200px;color:#4b5a52}
+.btl-td-src{min-width:150px;color:var(--muted);font-size:11px}
+.btl-td-note{display:block;color:var(--muted);font-size:11px;line-height:1.45;margin-top:2px}
+@media(max-width:900px){.btl{padding:16px 14px}.btl-canvas{grid-template-columns:minmax(0,1fr) 74px 210px;min-width:640px}.btl-scroll{max-height:440px}.btl-nw-val{font-size:15px}}
+.btl-nw.gap{border-left:3px solid #d8ddd6;background:#fbfcfa;height:44px}
+.btl-nw.gap.pending{border-left-color:#e0c9a8}
+.btl-nw-none{display:block;font-size:11px;font-weight:600;color:#7d8a82;line-height:1.45;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btl-nw.gap.pending .btl-nw-none{color:#8a5a3c}
+.btl-td-missing{color:#8a5a3c;white-space:nowrap}
+.btl-note{margin:10px 0 0;line-height:1.7}
