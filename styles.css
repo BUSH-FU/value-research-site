@@ -471,6 +471,39 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:250px;
 .vc-unverified{margin:8px 0 0;font-size:11px;line-height:1.6;color:#7a6a55;border-left:2px solid #e0c9a8;padding-left:7px}
 @media(max-width:680px){.vc-cards{grid-template-columns:minmax(0,1fr)}}
 
+/* ── 巴菲特双时间轴：行业配色（徽章、总览着色、图例共用这一份） ─────────── */
+.btl-s-fin{--sec:#2f6fa8;--sec-tint:#e9f0f8}
+.btl-s-cons{--sec:#b5622f;--sec-tint:#fdf0e4}
+.btl-s-energy{--sec:#8a6a1f;--sec-tint:#f7f1dd}
+.btl-s-ind{--sec:#5b6b52;--sec-tint:#eef1e9}
+.btl-s-media{--sec:#8a4b6d;--sec-tint:#f7ecf2}
+.btl-s-tech{--sec:#4a4f8a;--sec-tint:#eceef8}
+.btl-s-transport{--sec:#3f7f86;--sec-tint:#e8f3f4}
+.btl-s-trade{--sec:#7a5a3a;--sec-tint:#f4efe8}
+.btl-s-capital{--sec:#6b6f76;--sec-tint:#f0f1f3}
+
+/* 一生总览：真实线性时间轴（一年一年等宽），上层投资履历、下层净资产曲线。
+   纵轴与右轨金额条是同一把尺子（对数 1 亿 → 1 万亿）。 */
+.btl-overview{margin-top:16px;border:1px solid var(--line);border-radius:8px;background:#fbfcfa;padding:12px 14px 10px}
+.ov-title{font-size:12px;font-weight:600;color:#5d6b63;margin-bottom:6px}
+.ov-chart{display:block;width:100%;height:auto}
+.ov-grid{stroke:#e6ebe3;stroke-width:1}
+.ov-axis{font-size:9px;fill:#93a098}
+.ov-axis-line{stroke:#eef1ec;stroke-width:1}
+.ov-year{font-size:9px;fill:#93a098}
+.ov-gap{fill:#f1f3ef}
+.ov-gap-label{font-size:10px;fill:#9aa59c}
+.ov-area{fill:rgba(36,94,73,.10)}
+.ov-line{fill:none;stroke:var(--green);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.ov-dot{fill:var(--green);stroke:#fbfcfa;stroke-width:1.5}
+.ov-key-label{font-size:10px;fill:#5d6b63;font-weight:600}
+.ov-band{fill:#f4f6f1;stroke:#ecefe9;stroke-width:1}
+.ov-band-label{font-size:10px;fill:#93a098}
+.ov-mark{fill:var(--sec)}
+.ov-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:11px;color:#5d6b63}
+.ov-legend-item{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.ov-key{display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--sec);flex:none}
+
 /* 巴菲特双时间轴：年份竖排，中间一根脊轴写「年份 · 年龄」。
    同一年份用同一条底纹带，左边投资、右边净资产，年龄与年份因此互相对应。
    颜色与宽度一律走 CSS 类（服务器 CSP 是 style-src 'self'，行内 style 会被静默忽略）。 */
@@ -501,7 +534,9 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:250px;
 .btl-dot.net.hollow{background:#fbfcfa;border:2px solid #bb9b5d}
 .btl-slot{position:absolute;left:0;right:0}
 .btl-card{background:#fff;border:1px solid var(--line);border-left:3px solid var(--green);border-radius:7px;padding:6px 11px;height:76px;overflow:hidden}
-.btl-card-head{display:flex;align-items:baseline;gap:9px;flex-wrap:nowrap}
+.btl-card-head{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
+.btl-badge{width:20px;height:20px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;line-height:1;flex:none;background:var(--sec-tint);border:1px solid rgba(0,0,0,.05)}
+.btl-sec-tag{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:4px;font-size:10px;color:var(--sec);background:var(--sec-tint);white-space:nowrap}
 .btl-card-head b{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .btl-card-period{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
 .btl-card-logic{font-size:12px;color:#4b5a52;line-height:1.45;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

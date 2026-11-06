@@ -1,9 +1,9 @@
 {
   "meta": {
     "title": "巴菲特的两条时间轴：公开重大投资 ＋ 个人净资产（按年龄）",
-    "intro": "左轨是公开可查的重大投资与资本配置（伯克希尔致股东信、官网新闻稿与 SEC 13F 口径），右轨是福布斯公布的个人净资产估算；两轨共用同一条年份脊轴，同一年份用同一条底纹带，年份与年龄因此互相对应。脊轴上每一年的刻度都在：绿点是那年的公开重大投资，金点是那年的净资产节点，右轨的条长是对数刻度（1 亿 → 1 万亿，每格 10 倍）——净资产跨了三个数量级，线性刻度下 1982 年的 2.5 亿会缩成看不见的一根针，刻度固定不跟数据缩放。福布斯 1982 年才有首份 400 榜，1960—1981 那段在右轨上画成斜纹带，写明无公开一手来源。持有时段只写一手来源能核到的部分：核得到退出年的写「持有至 X 年」，仍在持有的写「持续持有（最近一手披露：X 年）」，一手年信里查不到退出时点的就明说查不到，不拿别处的说法顶替。右轨图上按每 5 年与关键节点画点：1982—1990 用福布斯 400（美国榜，9—10 月刊），1993 年起用福布斯全球亿万富豪榜（3 月快照）；两份榜单同年数值不同、各自标注，不混算。逐年全量与两个榜的对照在下方明细表里。",
+    "intro": "左轨是公开可查的重大投资与资本配置（伯克希尔致股东信、官网新闻稿与 SEC 13F 口径），右轨是福布斯公布的个人净资产估算；两轨共用同一条年份脊轴，同一年份用同一条底纹带，年份与年龄因此互相对应。最上面那张「一生总览」用的是真实线性时间轴：上层是每一笔投资（按行业着色，悬停看标的），下层是净资产增长曲线，一眼看出一辈子押了哪些行当、财富是怎么滚起来的。脊轴上每一年的刻度都在：绿点是那年的公开重大投资，金点是那年的净资产节点，右轨的条长是对数刻度（1 亿 → 1 万亿，每格 10 倍）——净资产跨了三个数量级，线性刻度下 1982 年的 2.5 亿会缩成看不见的一根针，刻度固定不跟数据缩放。福布斯 1982 年才有首份 400 榜，1950—1981 那段画成斜纹带，写明无公开一手来源。持有时段只写一手来源能核到的部分：核得到退出年的写「持有至 X 年」，仍在持有的写「持续持有（最近一手披露：X 年）」，一手年信里查不到退出时点的就明说查不到，不拿别处的说法顶替。右轨图上按每 5 年与关键节点画点：1982—1990 用福布斯 400（美国榜，9—10 月刊），1993 年起用福布斯全球亿万富豪榜（3 月快照）；两份榜单同年数值不同、各自标注，不混算。逐年全量与两个榜的对照在下方明细表里。",
     "coverage": "1950—2026",
-    "note": "年龄按 1930 年 8 月 30 日生折算（年份 − 1930）。福布斯 3 月发布的全球榜上印的年龄比这小一岁（他 8 月底才过生日），两份榜单的榜上年龄与名次都列在下方明细表里。「持续持有」的判断依据是伯克希尔 2025 财年 10-K 的业务与持股清单；13F 口径的条目按同一发行人的所有行合计计算（13F 按 otherManager 分行列示），与年报口径不混算。"
+    "note": "年龄按 1930 年 8 月 30 日生折算（年份 − 1930）。福布斯 3 月发布的全球榜上印的年龄比这小一岁（他 8 月底才过生日），两份榜单的榜上年龄与名次都列在下方明细表里。「持续持有」的判断依据是伯克希尔 2025 财年 10-K 的业务与持股清单；13F 口径的条目按同一发行人的所有行合计计算（13F 按 otherManager 分行列示），与年报口径不混算。行业分类（徽章、总览着色、图例）只是展示层，不承担任何估值或筛选含义；福布斯名次没核到的写「名次待核对」。"
   },
   "investments": [
     {
@@ -16,7 +16,8 @@
       "sourceUrl": "https://www.berkshirehathaway.com/letters/1995.html",
       "quote": "I accumulated 350 shares of GEICO during the year, at a cost of $10,282. At yearend, this holding was worth $13,125, more than 65% of my net worth. ... Alas, I sold my entire GEICO position in 1952 for $15,259.",
       "yearEnd": 1952,
-      "holding": "已退出"
+      "holding": "已退出",
+      "sector": "fin"
     },
     {
       "year": 1953,
@@ -27,7 +28,8 @@
       "source": "伯克希尔 1994 年致股东信",
       "sourceUrl": "https://www.berkshirehathaway.com/letters/1994.html",
       "quote": "I first purchased stock in IDS in 1953 when it was growing rapidly and selling at a price-earnings ratio of only 3.",
-      "periodText": "买入 1953 · 退出时点未在公开年信中披露（金额也未披露）"
+      "periodText": "买入 1953 · 退出时点未在公开年信中披露（金额也未披露）",
+      "sector": "ind"
     },
     {
       "year": 1954,
@@ -40,7 +42,8 @@
       "quote": "For several weeks I busily bought shares, sold beans, and made periodic stops at Schroeder Trust to exchange stock certificates for warehouse receipts. The profits were good and my only expense was subway tokens.",
       "yearEnd": 1954,
       "holding": "已退出",
-      "periodNote": "1954 年前后持续数周"
+      "periodNote": "1954 年前后持续数周",
+      "sector": "ind"
     },
     {
       "year": 1956,
@@ -53,7 +56,8 @@
       "quote": "Starting in 1956, I applied Ben Graham's arbitrage principles, first at Buffett Partnership and then Berkshire. ... This purchase gave our partnership effective control of the company.",
       "yearEnd": 1965,
       "holding": "已退出",
-      "periodNote": "1965 年取得伯克希尔控制权"
+      "periodNote": "1965 年取得伯克希尔控制权",
+      "sector": "capital"
     },
     {
       "year": 1964,
@@ -65,7 +69,8 @@
       "sourceUrl": "https://www.berkshirehathaway.com/letters/1985.html",
       "quote": "When Buffett Partnership, Ltd. ... bought control of Berkshire Hathaway 21 years ago, it had an accounting net worth of $22 million. ... In July we decided to close our textile operation, and by yearend this unpleasant job was largely completed.",
       "yearEnd": 1985,
-      "holding": "已退出"
+      "holding": "已退出",
+      "sector": "ind"
     },
     {
       "year": 1964,
@@ -84,7 +89,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "fin"
     },
     {
       "year": 1965,
@@ -96,7 +102,8 @@
       "sourceUrl": "https://www.berkshirehathaway.com/letters/1989.html",
       "quote": "My first mistake ... buying control of Berkshire ... the purchase of Diversified Retailing ... which we sold three years later.",
       "yearEnd": 1968,
-      "holding": "已退出"
+      "holding": "已退出",
+      "sector": "cons"
     },
     {
       "year": 1966,
@@ -108,7 +115,8 @@
       "sourceUrl": "https://www.berkshirehathaway.com/letters/1995.html",
       "quote": "Buffett Partnership Ltd. bought a significant amount of Disney stock at a split-adjusted price of $31 per share. ... In 1967 I sold out at $48 per share.",
       "yearEnd": 1967,
-      "holding": "已退出"
+      "holding": "已退出",
+      "sector": "media"
     },
     {
       "year": 1967,
@@ -127,7 +135,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "fin"
     },
     {
       "year": 1969,
@@ -139,7 +148,8 @@
       "sourceUrl": "https://www.berkshirehathaway.com/letters/1985.html",
       "quote": "Five years ago we were required by the Bank Holding Company Act of 1969 to dispose of our holdings in The Illinois National Bank and Trust Company of Rockford, Illinois.",
       "yearEnd": 1980,
-      "holding": "已退出"
+      "holding": "已退出",
+      "sector": "fin"
     },
     {
       "year": 1972,
@@ -158,7 +168,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "cons"
     },
     {
       "year": 1973,
@@ -177,7 +188,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "media"
     },
     {
       "year": 1977,
@@ -189,7 +201,8 @@
       "sourceUrl": "https://www.berkshirehathaway.com/letters/1977.html",
       "quote": "we invested $10.9 million in Capital Cities Communications during 1977",
       "yearEnd": 1980,
-      "holding": "已退出"
+      "holding": "已退出",
+      "sector": "media"
     },
     {
       "year": 1977,
@@ -201,7 +214,8 @@
       "sourceUrl": "https://www.berkshirehathaway.com/letters/1994.html",
       "quote": "We purchased National Indemnity in 1967, See's in 1972, Buffalo News in 1977, Nebraska Furniture Mart in 1983, and Scott Fetzer in 1986.",
       "periodText": "买入 1977 · 退出时点未在公开年信中披露",
-      "periodNote": "最近一次一手列示：2006 年信（提及「our Buffalo News」）；2025 财年 10-K 的业务清单中已无此项"
+      "periodNote": "最近一次一手列示：2006 年信（提及「our Buffalo News」）；2025 财年 10-K 的业务清单中已无此项",
+      "sector": "media"
     },
     {
       "year": 1980,
@@ -213,7 +227,8 @@
       "sourceUrl": "https://www.berkshirehathaway.com/letters/1985.html",
       "quote": "we sold our General Foods stock for $338 million pre-tax ... of the $488 million total pre-tax profit.",
       "yearEnd": 1985,
-      "holding": "已退出"
+      "holding": "已退出",
+      "sector": "cons"
     },
     {
       "year": 1983,
@@ -232,7 +247,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "cons"
     },
     {
       "year": 1983,
@@ -250,7 +266,8 @@
           "source": "伯克希尔 1988 年致股东信",
           "sourceUrl": "https://www.berkshirehathaway.com/letters/1988.html"
         }
-      ]
+      ],
+      "sector": "fin"
     },
     {
       "year": 1985,
@@ -263,7 +280,8 @@
       "quote": "On September 1, 1985 we became a 7% participant in all of the business in force of the FFIC group ... it therefore transferred 7% of this, or $92.7 million, to us at initiation of the contract. We concurrently paid them $29.4 million representing the underwriting expenses",
       "yearEnd": 1989,
       "holding": "已退出",
-      "periodNote": "合约期四年"
+      "periodNote": "合约期四年",
+      "sector": "fin"
     },
     {
       "year": 1986,
@@ -281,7 +299,8 @@
           "source": "伯克希尔 1995 年致股东信",
           "sourceUrl": "https://www.berkshirehathaway.com/letters/1995.html"
         }
-      ]
+      ],
+      "sector": "media"
     },
     {
       "year": 1986,
@@ -300,7 +319,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "ind"
     },
     {
       "year": 1986,
@@ -312,7 +332,8 @@
       "sourceUrl": "https://www.berkshirehathaway.com/letters/1985.html",
       "quote": "Right after yearend we acquired The Scott & Fetzer Company of Cleveland for about $320 million.",
       "periodText": "买入 1986 · 退出时点未在公开年信中披露",
-      "periodNote": "最近一次一手列示：1997 年信分部表；2025 财年 10-K 的业务清单中已无此项"
+      "periodNote": "最近一次一手列示：1997 年信分部表；2025 财年 10-K 的业务清单中已无此项",
+      "sector": "ind"
     },
     {
       "year": 1987,
@@ -334,7 +355,8 @@
           "source": "伯克希尔 1997 年致股东信",
           "sourceUrl": "https://www.berkshirehathaway.com/letters/1997.html"
         }
-      ]
+      ],
+      "sector": "fin"
     },
     {
       "year": 1989,
@@ -353,7 +375,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "cons"
     },
     {
       "year": 1989,
@@ -365,7 +388,8 @@
       "sourceUrl": "https://www.berkshirehathaway.com/letters/1995.html",
       "quote": "Berkshire made five private purchases of convertible preferred stocks during the 1987-91 period ... Champion International Corp. ... 9 1/4% 1989 $300 $388(1) ... (1) Proceeds from sale of common we received through conversion in 1995.",
       "yearEnd": 1995,
-      "holding": "已退出"
+      "holding": "已退出",
+      "sector": "ind"
     },
     {
       "year": 1989,
@@ -384,7 +408,8 @@
           "source": "伯克希尔 1997 年致股东信",
           "sourceUrl": "https://www.berkshirehathaway.com/letters/1997.html"
         }
-      ]
+      ],
+      "sector": "cons"
     },
     {
       "year": 1989,
@@ -396,7 +421,8 @@
       "sourceUrl": "https://www.berkshirehathaway.com/letters/1996.html",
       "quote": "your Chairman decided in 1989 to test it by investing $358 million in a 9.25% preferred stock of USAir. ... our preferred stock is now probably worth its par value of $358 million, give or take a little.",
       "periodText": "买入 1989 · 退出时点未在公开年信中披露",
-      "periodNote": "最近一次一手列示：1996 年信专章"
+      "periodNote": "最近一次一手列示：1996 年信专章",
+      "sector": "transport"
     },
     {
       "year": 1989,
@@ -415,7 +441,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "cons"
     },
     {
       "year": 1991,
@@ -427,7 +454,8 @@
       "sourceUrl": "https://www.berkshirehathaway.com/letters/1992.html",
       "quote": "we acquired 82% of Central States Indemnity",
       "periodText": "买入 1991 · 退出时点未在公开年信中披露",
-      "periodNote": "最近一次一手列示：2006 年信旗下经理人名单"
+      "periodNote": "最近一次一手列示：2006 年信旗下经理人名单",
+      "sector": "fin"
     },
     {
       "year": 1991,
@@ -446,7 +474,8 @@
           "source": "伯克希尔 1997 年致股东信",
           "sourceUrl": "https://www.berkshirehathaway.com/letters/1997.html"
         }
-      ]
+      ],
+      "sector": "fin"
     },
     {
       "year": 1991,
@@ -458,7 +487,8 @@
       "sourceUrl": "https://www.berkshirehathaway.com/letters/1991.html",
       "quote": "Frank Rooney (CEO of H.H. Brown, our latest acquisition, which I will describe later)",
       "periodText": "买入 1991 · 退出时点未在公开年信中披露",
-      "periodNote": "2025 财年 10-K 的业务清单中已无 H.H. Brown 独立列示（其鞋业资产在 BH Shoe Holdings 名下）"
+      "periodNote": "2025 财年 10-K 的业务清单中已无 H.H. Brown 独立列示（其鞋业资产在 BH Shoe Holdings 名下）",
+      "sector": "cons"
     },
     {
       "year": 1991,
@@ -476,7 +506,8 @@
           "source": "伯克希尔 1995 年致股东信",
           "sourceUrl": "https://www.berkshirehathaway.com/letters/1995.html"
         }
-      ]
+      ],
+      "sector": "fin"
     },
     {
       "year": 1992,
@@ -494,7 +525,8 @@
           "source": "伯克希尔 1995 年致股东信",
           "sourceUrl": "https://www.berkshirehathaway.com/letters/1995.html"
         }
-      ]
+      ],
+      "sector": "ind"
     },
     {
       "year": 1993,
@@ -512,7 +544,8 @@
           "source": "伯克希尔 2016 年致股东信",
           "sourceUrl": "https://www.berkshirehathaway.com/letters/2016ltr.pdf"
         }
-      ]
+      ],
+      "sector": "cons"
     },
     {
       "year": 1995,
@@ -531,7 +564,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "fin"
     },
     {
       "year": 1996,
@@ -550,7 +584,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "transport"
     },
     {
       "year": 1996,
@@ -562,7 +597,8 @@
       "sourceUrl": "https://www.berkshirehathaway.com/letters/1996.html",
       "quote": "we acquired Kansas Bankers Surety for $75 million",
       "periodText": "买入 1996 · 退出时点未在公开年信中披露",
-      "periodNote": "最近一次一手列示：2006 年信旗下经理人名单"
+      "periodNote": "最近一次一手列示：2006 年信旗下经理人名单",
+      "sector": "fin"
     },
     {
       "year": 1997,
@@ -581,7 +617,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "cons"
     },
     {
       "year": 1998,
@@ -600,7 +637,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "transport"
     },
     {
       "year": 1998,
@@ -623,7 +661,8 @@
           "source": "伯克希尔 2016 年致股东信",
           "sourceUrl": "https://www.berkshirehathaway.com/letters/2016ltr.pdf"
         }
-      ]
+      ],
+      "sector": "fin"
     },
     {
       "year": 2000,
@@ -642,7 +681,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "energy"
     },
     {
       "year": 2008,
@@ -659,7 +699,8 @@
           "source": "伯克希尔 2009 年致股东信",
           "sourceUrl": "https://www.berkshirehathaway.com/letters/2009ltr.pdf"
         }
-      ]
+      ],
+      "sector": "energy"
     },
     {
       "year": 2008,
@@ -671,7 +712,8 @@
       "sourceUrl": "https://www.berkshirehathaway.com/letters/2008ltr.pdf",
       "quote": "During 2008, I spent $244 million for shares of two Irish banks that appeared cheap to me. At yearend we wrote these holdings down to market: $27 million, for an 89% loss.",
       "yearEnd": 2008,
-      "holding": "已退出"
+      "holding": "已退出",
+      "sector": "fin"
     },
     {
       "year": 2008,
@@ -694,7 +736,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "transport"
     },
     {
       "year": 2008,
@@ -712,7 +755,8 @@
           "source": "伯克希尔 2011 年致股东信",
           "sourceUrl": "https://www.berkshirehathaway.com/letters/2011ltr.pdf"
         }
-      ]
+      ],
+      "sector": "fin"
     },
     {
       "year": 2008,
@@ -724,7 +768,8 @@
       "sourceUrl": "https://www.berkshirehathaway.com/letters/2009ltr.pdf",
       "quote": "Without urging from Charlie or anyone else, I bought a large amount of ConocoPhillips stock when oil and gas prices were near their peak.",
       "yearEnd": 2009,
-      "holding": "已退出"
+      "holding": "已退出",
+      "sector": "energy"
     },
     {
       "year": 2008,
@@ -742,7 +787,8 @@
           "source": "伯克希尔 2011 年致股东信",
           "sourceUrl": "https://www.berkshirehathaway.com/letters/2011ltr.pdf"
         }
-      ]
+      ],
+      "sector": "fin"
     },
     {
       "year": 2009,
@@ -761,7 +807,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "fin"
     },
     {
       "year": 2009,
@@ -780,7 +827,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "transport"
     },
     {
       "year": 2011,
@@ -798,7 +846,8 @@
           "source": "伯克希尔 2018 年致股东信",
           "sourceUrl": "https://www.berkshirehathaway.com/letters/2018ltr.pdf"
         }
-      ]
+      ],
+      "sector": "tech"
     },
     {
       "year": 2011,
@@ -824,7 +873,8 @@
           "source": "SEC EDGAR 13F-HR（2021-12-31 期末）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000095012322002973/0000950123-22-002973-9815.xml"
         }
-      ]
+      ],
+      "sector": "fin"
     },
     {
       "year": 2011,
@@ -851,7 +901,8 @@
           "source": "伯克希尔 2022 年致股东信",
           "sourceUrl": "https://www.berkshirehathaway.com/letters/2022ltr.pdf"
         }
-      ]
+      ],
+      "sector": "fin"
     },
     {
       "year": 2011,
@@ -870,7 +921,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "ind"
     },
     {
       "year": 2012,
@@ -889,7 +941,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "fin"
     },
     {
       "year": 2013,
@@ -908,7 +961,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "cons"
     },
     {
       "year": 2013,
@@ -927,7 +981,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "energy"
     },
     {
       "year": 2015,
@@ -950,7 +1005,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "cons"
     },
     {
       "year": 2015,
@@ -962,7 +1018,8 @@
       "sourceUrl": "https://www.berkshirehathaway.com/news/jan2916.pdf",
       "quote": "the completion of the acquisition of PCC for $235 per share in an all-cash transaction ... valued at approximately $37.2 billion, including outstanding PCC net debt.",
       "yearEnd": 2016,
-      "holding": "已退出"
+      "holding": "已退出",
+      "sector": "ind"
     },
     {
       "year": 2017,
@@ -981,7 +1038,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "cons"
     },
     {
       "year": 2018,
@@ -1004,7 +1062,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "tech"
     },
     {
       "year": 2019,
@@ -1016,7 +1075,8 @@
       "sourceUrl": "https://www.berkshirehathaway.com/letters/2019ltr.pdf",
       "quote": "we spent $5 billion in repurchasing about 1% of the company.",
       "yearEnd": 2019,
-      "holding": "已退出"
+      "holding": "已退出",
+      "sector": "capital"
     },
     {
       "year": 2019,
@@ -1035,7 +1095,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "trade"
     },
     {
       "year": 2019,
@@ -1054,7 +1115,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "energy"
     },
     {
       "year": 2020,
@@ -1066,7 +1128,8 @@
       "sourceUrl": "https://www.berkshirehathaway.com/letters/2021ltr.pdf",
       "quote": "we therefore repurchased 9% of the shares that were outstanding at yearend 2019 for a total cost of $51.7 billion.",
       "yearEnd": 2021,
-      "holding": "已退出"
+      "holding": "已退出",
+      "sector": "capital"
     },
     {
       "year": 2024,
@@ -1084,7 +1147,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "energy"
     },
     {
       "year": 2024,
@@ -1107,7 +1171,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "cons"
     },
     {
       "year": 2024,
@@ -1130,7 +1195,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "tech"
     },
     {
       "year": 2024,
@@ -1149,7 +1215,8 @@
           "source": "SEC EDGAR 13F-HR（2025-12-31 期末）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526054580/50240.xml"
         }
-      ]
+      ],
+      "sector": "cons"
     },
     {
       "year": 2025,
@@ -1168,7 +1235,8 @@
           "source": "SEC EDGAR 伯克希尔 10-K（2025 财年，2026-03-02 报送）",
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526083899/brka-20251231.htm"
         }
-      ]
+      ],
+      "sector": "ind"
     },
     {
       "year": 2025,
@@ -1180,7 +1248,8 @@
       "sourceUrl": "https://www.berkshirehathaway.com/news/oct0225.pdf",
       "quote": "a definitive agreement for Berkshire Hathaway to acquire Occidental's chemical business, OxyChem, in an all-cash transaction for $9.7 billion, subject to customary purchase price adjustments.",
       "yearEnd": 2025,
-      "holding": "已退出"
+      "holding": "已退出",
+      "sector": "energy"
     },
     {
       "year": 2026,
@@ -1191,7 +1260,8 @@
       "source": "伯克希尔官网新闻稿（2025-12-08）",
       "sourceUrl": "https://www.berkshirehathaway.com/news/dec0825.pdf",
       "quote": "We are fortunate to have Warren as Berkshire's Chairman, in the office five days a week",
-      "periodText": "2026-01-01 起 · 阿贝尔任 CEO，巴菲特转任董事长"
+      "periodText": "2026-01-01 起 · 阿贝尔任 CEO，巴菲特转任董事长",
+      "sector": "capital"
     }
   ],
   "netWorth": [
@@ -1923,5 +1993,43 @@
       "note": "表行：\"10 ‖ Warren Buffett ‖ $144 B ‖ 96 ‖ Nebraska ‖ Berkshire Hathaway\"。",
       "short": "福布斯 400 2026"
     }
-  ]
+  ],
+  "sectors": {
+    "fin": {
+      "label": "金融与保险",
+      "icon": "🏦"
+    },
+    "cons": {
+      "label": "消费与零售",
+      "icon": "🍬"
+    },
+    "energy": {
+      "label": "能源与公用",
+      "icon": "⚡"
+    },
+    "ind": {
+      "label": "工业与制造",
+      "icon": "🏭"
+    },
+    "media": {
+      "label": "传媒与出版",
+      "icon": "📰"
+    },
+    "tech": {
+      "label": "科技与互联网",
+      "icon": "💻"
+    },
+    "transport": {
+      "label": "交通与基建",
+      "icon": "🚆"
+    },
+    "trade": {
+      "label": "商贸与物流",
+      "icon": "📦"
+    },
+    "capital": {
+      "label": "资本运作",
+      "icon": "♻️"
+    }
+  }
 }
