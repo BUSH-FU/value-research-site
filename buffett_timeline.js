@@ -12,6 +12,15 @@
 //
 // 版面：年份竖着走，中间一根脊轴写「年份 · 年龄」。同一年份用同一条底纹带，
 // 左边是那一年的投资，右边是那一年的净资产——年龄和年份因此互相对应。
+//
+// 为什么竖排而不是横排：横着铺的话两轨要共享一条 x 轴，投资卡又必须留得住
+// 「名称／持有时段／核心逻辑／金额／来源」，70 张卡至少 400px 一张，整条轴
+// 要拉到两万像素——网页里横滚两万像素没人受得了。竖排用底纹带对齐同年份，
+// 一眼扫下去就行。
+//
+// 金额条用对数刻度（1 亿 → 1 万亿，每格 10 倍）：净资产跨了三个数量级，线性
+// 刻度下 1982 年的 2.5 亿会缩成看不见的一根针。刻度固定、不跟数据缩放——
+// 刻度一缩放，同一条线上一次的含义就没了。
 // ─────────────────────────────────────────────────────────────────────────────
 window.BuffettTimeline = (() => {
   const BIRTH_YEAR = 1930;   // 1930-08-30 生；福布斯 9 月发榜时已满当年年龄
@@ -20,9 +29,11 @@ window.BuffettTimeline = (() => {
   const ROW_MIN = 20;       // 一年的最小行高（像素）
   const CARD_H = 76;        // 投资卡片高度（像素）：三行都要露出来——
                             // 名称+时段、核心逻辑、类型/金额/来源，缺一行就等于没给数
-  const NW_H = 46;          // 净资产卡片高度（像素）
-  const NW_GAP_H = 44;      // 「无公开一手来源 / 待核对」占位卡高度（像素）
+  const NW_H = 46;          // 净资产轨道行高度（像素）：金额条 + 数值 + 来源
+  const NW_GAP_H = 44;      // 「无公开一手来源 / 待核对」占位行高度（像素）
   const GAP = 8;
+  const HEAD_H = 42;        // 顶部表头高度（年份·年龄、金额条刻度尺）
+  const NW_DECADES = [1e8, 1e9, 1e10, 1e11, 1e12];  // 金额条刻度：1 亿 → 1 万亿
   const esc = x => String(x ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
   const num = (x, n = 0) => x == null ? '—' : Number(x).toLocaleString('zh-CN', { minimumFractionDigits: n, maximumFractionDigits: n });
 
@@ -38,6 +49,18 @@ window.BuffettTimeline = (() => {
     return '$' + num(Number(value));
   }
   const ageOf = year => Number(year) - BIRTH_YEAR;
+
+  // 金额条的长度：对数刻度（1 亿 → 1 万亿，每格 10 倍）。
+  // 数值本身才是权威值，这条只负责把量级画出来——同一个数、同一个来源，不另算一遍。
+  function nwBarPct(value) {
+    const v = Number(value);
+    if (!Number.isFinite(v) || v <= 0) return 0;
+    const lo = Math.log10(NW_DECADES[0]);
+    const hi = Math.log10(NW_DECADES[NW_DECADES.length - 1]);
+    const pct = (Math.log10(v) - lo) / (hi - lo) * 100;
+    // 下限 1.5%：最小的一档也得看得见，不能缩成一个点。
+    return Math.min(100, Math.max(1.5, pct));
+  }
 
   // 持有时段只有三种合法写法，图上的卡片和明细表共用这一个函数——
   // 两处各写一遍，迟早会出现「卡片说持有至 1996、表里说持续持有」。
@@ -79,7 +102,7 @@ window.BuffettTimeline = (() => {
       netByYear.get(year).push(point);
     }
     const rows = [];
-    let y = 0;
+    let y = HEAD_H;   // 顶上留一行表头：年份·年龄、金额条刻度尺
     for (let year = YEAR_MIN; year <= YEAR_MAX; year += 1) {
       const invest = investByYear.get(year) || [];
       const net = netByYear.get(year) || [];
@@ -106,20 +129,46 @@ window.BuffettTimeline = (() => {
       + '</article>';
   }
 
-  function netCard(point) {
+  // 右轨一行：金额条 + 数值 + 来源。年份与年龄由中间的脊轴写，这一行不再重复。
+  // 缺数据的那几年画的是空心点加「无公开一手来源」，不拿别处的估算顶替。
+  function netTrack(point) {
     const missing = point.netWorth == null;
     const status = point.status || (missing ? 'no-source' : 'value');
-    const label = status === 'pending' ? '待核对：该年榜单数值未取到' : '无公开一手来源';
-    const head = `<div class="btl-nw-top"><span class="btl-nw-age">${esc(ageOf(point.year))} 岁</span>`
-      + `<span class="btl-nw-year">${esc(point.year)}</span>`;
+    const year = point.year;
+    const age = ageOf(year);
     if (missing) {
-      return `<article class="btl-nw gap${status === 'pending' ? ' pending' : ''}" data-year="${esc(point.year)}" data-age="${esc(ageOf(point.year))}" data-missing="1" data-status="${esc(status)}" title="${esc(point.note || '')}">`
-        + head + `<span class="btl-nw-none">${esc(label)}</span></article>`;
+      const label = status === 'pending' ? '待核对：该年榜单数值未取到' : '无公开一手来源';
+      const why = status === 'pending' ? '该年榜单存在，数值尚未取到' : '福布斯 1982 年才出首份 400 榜，此前无公开个人净资产口径';
+      return `<article class="btl-nw gap${status === 'pending' ? ' pending' : ''}" data-year="${esc(year)}" data-age="${esc(age)}" data-missing="1" data-status="${esc(status)}" title="${esc(point.note || label)}">`
+        + `<div class="btl-nw-track"><span class="btl-nw-none">${esc(label)}</span></div>`
+        + `<span class="btl-nw-src">${esc(why)}</span></article>`;
     }
     const source = [point.short || point.source || '', point.rank && point.rank !== '—' ? '第 ' + point.rank + ' 位' : ''].filter(Boolean).join(' · ');
-    return `<article class="btl-nw" data-year="${esc(point.year)}" data-age="${esc(ageOf(point.year))}" data-missing="0" data-status="value" title="${esc(source)}">`
-      + head + `<b class="btl-nw-val">${esc(yiText(point.netWorth))}</b></div>`
-      + `<span class="btl-nw-usd" title="${esc(usdText(point.netWorth))}">${esc(source)}</span></article>`;
+    const pct = nwBarPct(point.netWorth).toFixed(2);
+    return `<article class="btl-nw" data-year="${esc(year)}" data-age="${esc(age)}" data-missing="0" data-status="value" title="${esc(source + ' · ' + usdText(point.netWorth))}">`
+      + '<div class="btl-nw-track">'
+      + `<span class="btl-nw-bar"><span class="btl-nw-fill" data-fill="${pct}"></span>`
+      + '<i class="btl-nw-g g1"></i><i class="btl-nw-g g2"></i><i class="btl-nw-g g3"></i></span>'
+      + `<b class="btl-nw-val" data-fill="${pct}">${esc(yiText(point.netWorth))}</b></div>`
+      + `<span class="btl-nw-src">${esc(source)}</span></article>`;
+  }
+
+  // 顶部表头：左列写清楚是什么，中间是年份·年龄，右列顺带就是金额条的刻度尺。
+  function colHead(cls, html) {
+    const el = document.createElement('div');
+    el.className = cls;
+    el.innerHTML = html;
+    return el;
+  }
+
+  function netScaleHead() {
+    return colHead('btl-nw-head',
+      '<span class="btl-nw-scale">'
+      + '<i class="btl-nw-g g1"></i><i class="btl-nw-g g2"></i><i class="btl-nw-g g3"></i>'
+      + '<em class="btl-nw-lab l0">1亿</em><em class="btl-nw-lab l1">10亿</em>'
+      + '<em class="btl-nw-lab l2">100亿</em><em class="btl-nw-lab l3">1000亿</em>'
+      + '<em class="btl-nw-lab l4">1万亿</em></span>'
+      + '<span class="btl-nw-head-note">净资产（福布斯）<br>对数刻度·每格 10 倍</span>');
   }
 
   function renderCanvas(canvas, data) {
@@ -134,19 +183,53 @@ window.BuffettTimeline = (() => {
     const net = document.createElement('div');
     net.className = 'btl-col btl-col-net';
 
+    // 顶部表头：左列写清楚是什么，中间是年份·年龄，右列顺带就是金额条的刻度尺。
+    invest.appendChild(colHead('btl-col-head invest', '公开重大投资'));
+    axis.appendChild(colHead('btl-col-head axis', '年份·年龄'));
+    net.appendChild(netScaleHead());
+
+    // 「无公开一手来源」那一段在右轨上画成一段斜纹带：
+    // 数据里说没有的年份就在那儿空着，读者一眼看出这是缺口，不是页面没画出来。
+    const track = (data.netWorth || []).filter(point => point.track !== false);
+    const nullYears = track.filter(point => point.netWorth == null).map(point => Number(point.year));
+    const valueYears = track.filter(point => point.netWorth != null).map(point => Number(point.year));
+    if (nullYears.length && valueYears.length) {
+      const first = Math.min.apply(null, nullYears);
+      const last = Math.min.apply(null, valueYears) - 1;
+      const startRow = rows.find(row => row.year === first);
+      const endRow = rows.find(row => row.year === last);
+      if (startRow && endRow) {
+        const gap = document.createElement('div');
+        gap.className = 'btl-gapband';
+        gap.style.top = startRow.y + 'px';
+        gap.style.height = (endRow.y + endRow.height - startRow.y) + 'px';
+        gap.innerHTML = `<span class="btl-gapband-label">${first}—${last} 无公开一手来源</span>`;
+        net.appendChild(gap);
+      }
+    }
+
     for (const row of rows) {
       const hasContent = row.invest.length || row.net.length;
+      // 每一年都在脊轴上留一道刻度：有内容的年份写年份与年龄，空年份只留一道短线——
+      // 中间那根线读起来是一把完整的年份尺，而不是几段孤零零的留白。
+      const tick = document.createElement('div');
+      tick.className = 'btl-tick' + (hasContent ? '' : ' empty');
+      tick.style.top = row.y + 'px';
+      const netDot = row.net.some(point => point.netWorth != null) ? '' : ' hollow';
+      tick.innerHTML = (hasContent
+        ? `<span class="btl-tick-year">${esc(row.year)}</span><span class="btl-tick-age">${esc(ageOf(row.year))} 岁</span>`
+        : '')
+        + (row.invest.length ? '<i class="btl-dot invest" title="该年有公开重大投资"></i>' : '')
+        + (row.net.length ? `<i class="btl-dot net${netDot}" title="该年有净资产节点"></i>` : '');
+      axis.appendChild(tick);
       if (!hasContent) continue;
+
       const band = document.createElement('div');
       band.className = 'btl-band';
       band.style.top = row.y + 'px';
       band.style.height = row.height + 'px';
       guides.appendChild(band);
-      const tick = document.createElement('div');
-      tick.className = 'btl-tick';
-      tick.style.top = row.y + 'px';
-      tick.innerHTML = `<span class="btl-tick-year">${esc(row.year)}</span><span class="btl-tick-age">${esc(ageOf(row.year))} 岁</span>`;
-      axis.appendChild(tick);
+
       row.invest.forEach((item, index) => {
         const card = document.createElement('div');
         card.className = 'btl-slot';
@@ -159,7 +242,13 @@ window.BuffettTimeline = (() => {
         const card = document.createElement('div');
         card.className = 'btl-slot';
         card.style.top = netOffset + 'px';
-        card.innerHTML = netCard(point);
+        card.innerHTML = netTrack(point);
+        // 条长与数值的位置都用 CSSOM 赋值：行内 style 属性会被 CSP 的 style-src 'self' 静默忽略。
+        const fill = card.querySelector('.btl-nw-fill');
+        if (fill) fill.style.width = (fill.dataset.fill || '0') + '%';
+        // 数值骑在条尾：它标的就是这一年的落点，不是悬在右边的另一个数。
+        const value = card.querySelector('.btl-nw-val');
+        if (value) value.style.left = (value.dataset.fill || '0') + '%';
         net.appendChild(card);
         netOffset += row.netHeights[index] + GAP;
       });
@@ -273,5 +362,5 @@ window.BuffettTimeline = (() => {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 
-  return { load, render, layout, yiText, usdText, ageOf, periodOf, BIRTH_YEAR, YEAR_MIN, YEAR_MAX };
+  return { load, render, layout, yiText, usdText, ageOf, periodOf, nwBarPct, BIRTH_YEAR, YEAR_MIN, YEAR_MAX, NW_DECADES };
 })();
