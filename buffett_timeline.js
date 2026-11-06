@@ -37,6 +37,13 @@ window.BuffettTimeline = (() => {
   const esc = x => String(x ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
   const num = (x, n = 0) => x == null ? '—' : Number(x).toLocaleString('zh-CN', { minimumFractionDigits: n, maximumFractionDigits: n });
 
+  // 一笔投资的持有状态：数据里只有「持续／已退出」两种明确口径，
+  // 其余（没写、写了别的）一律算「时点未披露」，不许猜成「仍在持有」。
+  // 履历标记的形状、表格里的状态栏都读这一个函数——同一个数不许在两处各判一次。
+  function holdState(item) {
+    return item.holding === '持续' ? 'open' : (item.holding === '已退出' ? 'exit' : 'unknown');
+  }
+
   // 净资产单位统一用美元：正文给「亿美元」，小字给完整美元数。
   function yiText(value) {
     if (value == null || !Number.isFinite(Number(value))) return '—';
@@ -125,7 +132,7 @@ window.BuffettTimeline = (() => {
         marks.push({
           year, name: item.name, sector: item.sector || '', amount: item.amount || '',
           // 形状即状态：空心＝仍在持有，实心＝已了结，半透明＝退出时点未披露或非持有类条目。
-          state: item.holding === '持续' ? 'open' : (item.holding === '已退出' ? 'exit' : 'unknown'),
+          state: holdState(item),
           x: ovYearX(year) + (round - (rows - 1) / 2) * 5,
           y: OV.BAND + lane * 11,
         });

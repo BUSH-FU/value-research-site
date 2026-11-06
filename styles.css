@@ -68,6 +68,13 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:250px;
 .structure-panel{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0}.structure-row{display:grid;grid-template-columns:130px minmax(0,1fr) 65px;gap:10px;align-items:center;font-size:12px;margin:9px 0}.structure-row strong{text-align:right;font-variant-numeric:tabular-nums;font-weight:500}.structure-progress{display:block;width:100%;height:9px;border:0;border-radius:10px;background:#edf1ec;overflow:hidden;appearance:none}.structure-progress::-webkit-progress-bar{background:#edf1ec;border-radius:10px}.structure-progress::-webkit-progress-value{background:#8bb49b;border-radius:10px}.structure-progress::-moz-progress-bar{background:#8bb49b;border-radius:10px}.structure-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.structure-facts>div{background:#fafbf8;border:1px solid var(--line);border-radius:7px;padding:10px}.structure-facts span{display:block;color:var(--muted);font-size:12px}.structure-facts strong{display:block;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}@media(max-width:680px){.structure-row{grid-template-columns:105px minmax(0,1fr) 52px}.structure-facts{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.structure-facts strong{font-size:15px}}
 .filing-lineage{margin:20px 0;padding:18px;border:1px solid var(--line);border-radius:10px;background:#fbfcfa}.filing-lineage .section-head{margin:0 0 10px}.filing-lineage h4{margin:0;font-size:15px}.filing-lineage details{margin-top:12px}.filing-lineage summary{cursor:pointer;font-weight:600}.filing-lineage table td{white-space:normal;min-width:110px;vertical-align:top}.filing-lineage table a{display:inline-block;margin:0 0 5px}.filing-lineage .scroll{max-height:360px;overflow:auto}
 
+/* 侧边栏头像：点开巴菲特的两条时间轴。
+   按钮本身要抹掉默认的边框与内边距，只留下照片本身；选中的时候描一圈绿边，
+   让「当前在时间轴这一屏」有地方可看。 */
+.brand-portrait{border:none;background:none;padding:0;margin:0;border-radius:0;line-height:0;flex:none;display:block}
+.brand-portrait:hover .brand-icon,.brand-portrait:focus-visible .brand-icon{outline:2px solid var(--green);outline-offset:2px}
+.brand-portrait.active .brand-icon{outline:2px solid var(--green);outline-offset:2px}
+
 /* 年度财务数字的逐项解释 */
 .metric-table-hint{margin:18px 0 8px}
 .metric-value-button,.metric-head-button{border:0;background:transparent;color:inherit;font:inherit;padding:4px 2px;text-align:left;cursor:pointer;white-space:nowrap}
