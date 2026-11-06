@@ -499,10 +499,15 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:250px;
 .ov-key-label{font-size:10px;fill:#5d6b63;font-weight:600}
 .ov-band{fill:#f4f6f1;stroke:#ecefe9;stroke-width:1}
 .ov-band-label{font-size:10px;fill:#93a098}
-.ov-mark{fill:var(--sec)}
+.ov-mark{fill:var(--sec);cursor:pointer}
+.ov-mark.hold-open{fill:none;stroke:var(--sec);stroke-width:1.3}
+.ov-mark.hold-unknown{fill:var(--sec);opacity:.42}
+.ov-mark.btl-hit{stroke:#20372f;stroke-width:2}
+.btl-card.btl-hit{box-shadow:0 0 0 2px var(--green);border-color:var(--green)}
 .ov-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:11px;color:#5d6b63}
 .ov-legend-item{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
 .ov-key{display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--sec);flex:none}
+.ov-legend-note{margin-top:5px;font-size:10px;color:#93a098;line-height:1.6}
 
 /* 巴菲特双时间轴：年份竖排，中间一根脊轴写「年份 · 年龄」。
    同一年份用同一条底纹带，左边投资、右边净资产，年龄与年份因此互相对应。

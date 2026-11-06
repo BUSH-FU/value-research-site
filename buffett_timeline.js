@@ -124,6 +124,8 @@ window.BuffettTimeline = (() => {
         const round = Math.floor(index / lanes);
         marks.push({
           year, name: item.name, sector: item.sector || '', amount: item.amount || '',
+          // 形状即状态：空心＝仍在持有，实心＝已了结，半透明＝退出时点未披露或非持有类条目。
+          state: item.holding === '持续' ? 'open' : (item.holding === '已退出' ? 'exit' : 'unknown'),
           x: ovYearX(year) + (round - (rows - 1) / 2) * 5,
           y: OV.BAND + lane * 11,
         });
@@ -195,9 +197,13 @@ window.BuffettTimeline = (() => {
       }
     }
     // 履历带：每笔投资一枚色块，按行业着色，悬停看标的。
-    const marks = spec.marks.map(mark =>
-      `<rect class="ov-mark btl-s-${esc(mark.sector)}" x="${(mark.x - 2).toFixed(1)}" y="${mark.y}" width="4" height="7" rx="1">`
-      + `<title>${esc(mark.year + ' 年 · ' + mark.name + (mark.amount ? ' · ' + mark.amount : ''))}</title></rect>`).join('');
+    const marks = spec.marks.map(mark => {
+      const sector = sectorMeta(sectors, mark.sector);
+      const tip = [mark.year + ' 年', mark.name, sector.label, mark.amount].filter(Boolean).join(' · ');
+      return `<rect class="ov-mark hold-${mark.state} btl-s-${esc(mark.sector)}" data-name="${esc(mark.name)}" `
+        + `x="${(mark.x - 2).toFixed(1)}" y="${mark.y}" width="4" height="7" rx="1">`
+        + `<title>${esc(tip)}</title></rect>`;
+    }).join('');
     const axis = spec.ticks.map(tick =>
       `<line class="ov-axis-line" x1="${tick.x.toFixed(1)}" x2="${tick.x.toFixed(1)}" y1="${OV.BAND - 4}" y2="${OV.AXIS - 12}"/>`
       + `<text class="ov-year" x="${tick.x.toFixed(1)}" y="${OV.AXIS}" text-anchor="middle">${tick.year}</text>`).join('');
@@ -212,7 +218,9 @@ window.BuffettTimeline = (() => {
       + `<text class="ov-axis" x="${OV.W - OV.R}" y="${OV.T + 12}" text-anchor="end">净资产（福布斯）· 对数刻度，每格 10 倍</text>`
       + '</svg>';
     box.innerHTML = '<div class="ov-title">一生总览：投资履历与财富增长（1950—2026）</div>' + svg
-      + '<div class="ov-legend">' + legend + '</div>';
+      + '<div class="ov-legend">' + legend + '</div>'
+      + '<div class="ov-legend-note">颜色＝行业；空心＝仍在持有，实心＝已了结，半透明＝退出时点未披露或非持有类条目。'
+      + '点标记可定位到下方那张卡片。</div>';
   }
 
   // 逐年排版：同一年多笔依次下移，行高按内容撑开——这样年份与净资产落点
@@ -462,6 +470,62 @@ window.BuffettTimeline = (() => {
       + '</div>';
   }
 
+  // 把一张卡片滚进滚动框的视野里，放在视口顶端往下 margin 处。
+  //
+  // 两个坑：
+  // 1. 卡片挂在绝对定位的 slot 上，card.offsetTop 落的是 slot 的位置（0），不是
+  //    内容里的位置。所以只能用实测矩形。
+  // 2. 基准必须是滚动框自身的视口位置——它不随内容滚动而移动。画布（.btl-canvas）
+  //    会被内容带着滚，拿它当基准只在 scrollTop=0 时碰巧对；用户先滚过时间轴再
+  //    点总览标记，就会滚不到位。
+  function scrollCardIntoView(scroll, card, margin) {
+    const cardRect = card.getBoundingClientRect();
+    const scrollRect = scroll.getBoundingClientRect();
+    const offsetInContent = scroll.scrollTop + (cardRect.top - scrollRect.top);
+    scroll.scrollTop = Math.max(0, offsetInContent - margin);
+    return scroll.scrollTop;
+  }
+
+  // 总览与明细是同一份数据的两个视图，所以要能互相指认：悬停总览里的标记，
+  // 下方那张卡片就亮起来；点一下直接把卡片滚到眼前。悬停卡片同理。
+  function linkOverviewAndTrack(root) {
+    const overview = root.querySelector('.btl-overview');
+    const scroll = root.querySelector('.btl-scroll');
+    if (!overview || !scroll) return;
+    const marks = [...overview.querySelectorAll('.ov-mark')];
+    const cards = [...root.querySelectorAll('.btl-card')];
+    if (!marks.length || !cards.length) return;
+    const cardByName = new Map();
+    for (const card of cards) cardByName.set(card.dataset.name, card);
+    const markByName = new Map();
+    for (const mark of marks) markByName.set(mark.dataset.name, mark);
+    const clear = () => {
+      for (const el of marks) el.classList.remove('btl-hit');
+      for (const el of cards) el.classList.remove('btl-hit');
+    };
+    const light = (mark, card) => {
+      clear();
+      if (mark) mark.classList.add('btl-hit');
+      if (card) card.classList.add('btl-hit');
+    };
+    for (const mark of marks) {
+      const card = cardByName.get(mark.dataset.name);
+      if (!card) continue;
+      mark.addEventListener('mouseenter', () => light(mark, card));
+      mark.addEventListener('mouseleave', clear);
+      mark.addEventListener('click', () => {
+        light(mark, card);
+        scrollCardIntoView(scroll, card, 140);
+      });
+    }
+    for (const card of cards) {
+      const mark = markByName.get(card.dataset.name);
+      if (!mark) continue;
+      card.addEventListener('mouseenter', () => light(mark, card));
+      card.addEventListener('mouseleave', clear);
+    }
+  }
+
   function render(root, data) {
     if (!root) return;
     const head = root.querySelector('.btl-head');
@@ -476,6 +540,7 @@ window.BuffettTimeline = (() => {
     if (canvas) { canvas.innerHTML = ''; renderCanvas(canvas, data); }
     if (tables) renderTables(tables, data);
     if (notice) { notice.textContent = ''; notice.hidden = true; }
+    linkOverviewAndTrack(root);
   }
 
   function fail(root, message) {
@@ -513,5 +578,5 @@ window.BuffettTimeline = (() => {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 
-  return { load, render, layout, yiText, usdText, ageOf, periodOf, nwBarPct, overviewSpec, BIRTH_YEAR, YEAR_MIN, YEAR_MAX, NW_DECADES };
+  return { load, render, layout, yiText, usdText, ageOf, periodOf, nwBarPct, overviewSpec, scrollCardIntoView, BIRTH_YEAR, YEAR_MIN, YEAR_MAX, NW_DECADES };
 })();
