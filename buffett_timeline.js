@@ -675,16 +675,40 @@ window.BuffettTimeline = (() => {
       + '<tbody>' + net + '</tbody></table></div>';
   }
 
+  // 口径说明分两栏排，栏与栏之间断在句子边界上。
+  // 不用 CSS 的 column-count：多栏会在句子中间断开（「…画成斜纹带，写」／「明无公开一手来源」），
+  // 读者接不上。按句号切开再分栏，断点就在一句话之后。
+  function splitIntro(text) {
+    const s = String(text || '').trim();
+    if (!s) return ['', ''];
+    const parts = s.match(/[^。]*。/g) || [s];
+    if (parts.length < 2) return [s, ''];
+    let acc = 0;
+    for (let i = 0; i < parts.length; i++) {
+      acc += parts[i].length;
+      if (acc >= s.length / 2) {
+        return [parts.slice(0, i + 1).join(''), parts.slice(i + 1).join('')];
+      }
+    }
+    return [s, ''];
+  }
+
   function renderSummary(head, data) {
     const meta = data.meta || {};
     const investCount = (data.investments || []).length;
     const netCount = (data.netWorth || []).length;
-    head.innerHTML = `<div><h2>${esc(meta.title || '巴菲特的两条时间轴')}</h2>`
-      + `<p class="muted">${esc(meta.intro || '')}</p></div>`
+    const columns = splitIntro(meta.intro || '');
+    // 标题、计数、口径说明是三个平级的网格子项：说明段要跨整行铺开（两栏），
+    // 之前它和标题挤在同一个 div 里，被 max-width 定死在左半边，右半边空一整块。
+    head.innerHTML = `<h2>${esc(meta.title || '巴菲特的两条时间轴')}</h2>`
       + `<div class="btl-summary">`
       + `<span><b>${investCount}</b> 笔公开重大投资</span>`
       + `<span><b>${netCount}</b> 个净资产节点</span>`
       + `<span>${esc(meta.coverage || '')}</span>`
+      + '</div>'
+      + `<div class="btl-intro">`
+      + `<p class="muted">${esc(columns[0])}</p>`
+      + `<p class="muted">${esc(columns[1])}</p>`
       + '</div>';
   }
 
@@ -799,5 +823,5 @@ window.BuffettTimeline = (() => {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 
-  return { load, render, layout, yiText, usdText, ageOf, periodOf, nwBarPct, overviewSpec, scrollCardIntoView, matchFilter, filterHits, holdState, HOLD_STATES, BIRTH_YEAR, YEAR_MIN, YEAR_MAX, NW_DECADES };
+  return { load, render, layout, yiText, usdText, ageOf, periodOf, nwBarPct, overviewSpec, scrollCardIntoView, matchFilter, filterHits, holdState, splitIntro, HOLD_STATES, BIRTH_YEAR, YEAR_MIN, YEAR_MAX, NW_DECADES };
 })();

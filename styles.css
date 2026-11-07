@@ -581,9 +581,18 @@ tr.btl-dim{opacity:.42}
    同一年份用同一条底纹带，左边投资、右边净资产，年龄与年份因此互相对应。
    颜色与宽度一律走 CSS 类（服务器 CSP 是 style-src 'self'，行内 style 会被静默忽略）。 */
 .btl{border:1px solid var(--line);border-radius:10px;background:#fff;padding:20px 22px 18px;margin:26px 0 4px}
-.btl-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
-.btl-head h2{margin:0 0 4px}
-.btl-head p{margin:0;max-width:720px;font-size:12px;line-height:1.7}
+/* 头部改成两行网格：标题在左、三个计数在右（第一行），口径说明跨整行（第二行）。
+   之前这里是一块 flex + space-between，左边那块被 p 的 max-width 定死在 720px，
+   右边只挂了一个一行高的计数块——右半边空出来一整块（实测占 head 面积一半以上）。
+   现在说明段分两栏铺满，行长仍在 720px 上下，不超长行。
+   栏与栏的断点在句子边界上（JS 按句号切开），不在句子中间。 */
+.btl-head{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:28px;row-gap:12px;align-items:start}
+.btl-head h2{margin:0}
+.btl-intro{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:40px}
+.btl-intro p{margin:0;font-size:12px;line-height:1.75}
+@media(max-width:1100px){.btl-intro{grid-template-columns:minmax(0,1fr);row-gap:10px}}
+/* 窄屏：计数块挪到标题下面，别把标题挤成三行。 */
+@media(max-width:900px){.btl-head{grid-template-columns:minmax(0,1fr)}.btl-summary{justify-self:start}}
 .btl-summary{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);align-items:baseline}
 .btl-summary b{font-size:17px;color:var(--ink);font-weight:600;margin-right:3px;font-variant-numeric:tabular-nums}
 .btl-scroll{margin-top:16px;max-height:720px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;background:#fbfcfa}
