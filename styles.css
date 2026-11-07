@@ -68,12 +68,22 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:250px;
 .structure-panel{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0}.structure-row{display:grid;grid-template-columns:130px minmax(0,1fr) 65px;gap:10px;align-items:center;font-size:12px;margin:9px 0}.structure-row strong{text-align:right;font-variant-numeric:tabular-nums;font-weight:500}.structure-progress{display:block;width:100%;height:9px;border:0;border-radius:10px;background:#edf1ec;overflow:hidden;appearance:none}.structure-progress::-webkit-progress-bar{background:#edf1ec;border-radius:10px}.structure-progress::-webkit-progress-value{background:#8bb49b;border-radius:10px}.structure-progress::-moz-progress-bar{background:#8bb49b;border-radius:10px}.structure-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.structure-facts>div{background:#fafbf8;border:1px solid var(--line);border-radius:7px;padding:10px}.structure-facts span{display:block;color:var(--muted);font-size:12px}.structure-facts strong{display:block;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}@media(max-width:680px){.structure-row{grid-template-columns:105px minmax(0,1fr) 52px}.structure-facts{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.structure-facts strong{font-size:15px}}
 .filing-lineage{margin:20px 0;padding:18px;border:1px solid var(--line);border-radius:10px;background:#fbfcfa}.filing-lineage .section-head{margin:0 0 10px}.filing-lineage h4{margin:0;font-size:15px}.filing-lineage details{margin-top:12px}.filing-lineage summary{cursor:pointer;font-weight:600}.filing-lineage table td{white-space:normal;min-width:110px;vertical-align:top}.filing-lineage table a{display:inline-block;margin:0 0 5px}.filing-lineage .scroll{max-height:360px;overflow:auto}
 
-/* 侧边栏头像：点开巴菲特的两条时间轴。
-   按钮本身要抹掉默认的边框与内边距，只留下照片本身；选中的时候描一圈绿边，
-   让「当前在时间轴这一屏」有地方可看。 */
-.brand-portrait{border:none;background:none;padding:0;margin:0;border-radius:0;line-height:0;flex:none;display:block}
+/* 侧边栏头像：点开巴菲特的两条时间轴（独立的一页，buffett.html）。
+   这里是个链接不是按钮，所以要抹掉链接的下划线、只留下照片本身；
+   鼠标移上去时描一圈绿边，提示它能点。 */
+.brand-portrait{border:none;background:none;padding:0;margin:0;border-radius:0;line-height:0;flex:none;display:block;text-decoration:none}
 .brand-portrait:hover .brand-icon,.brand-portrait:focus-visible .brand-icon{outline:2px solid var(--green);outline-offset:2px}
-.brand-portrait.active .brand-icon{outline:2px solid var(--green);outline-offset:2px}
+a.nav{cursor:pointer}
+
+/* 独立的时间轴页（buffett.html）：只有一条顶栏，不带工作台的侧边栏——
+   这一页讲的是一个人，不是一道工作流。 */
+.btl-page{background:var(--bg)}
+.btl-page-head{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:26px 34px 0;max-width:1660px}
+.btl-page main{margin-left:0;padding:16px 34px 44px;max-width:1660px}
+.btl-page .btl{margin-top:6px}
+.btl-back{font-size:13px;text-decoration:none;white-space:nowrap}
+.btl-page-foot{max-width:940px;margin:14px auto 0;line-height:1.75}
+@media(max-width:680px){.btl-page-head{padding:18px 15px 0}.btl-page main{padding:12px 15px 30px}}
 
 /* 年度财务数字的逐项解释 */
 .metric-table-hint{margin:18px 0 8px}
