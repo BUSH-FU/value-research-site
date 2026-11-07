@@ -496,10 +496,11 @@ window.BuffettTimeline = (() => {
     const badge = item.sector
       ? `<span class="btl-badge btl-s-${esc(item.sector)}" title="${esc(sector.label)}">${esc(sector.icon)}</span>`
       : '';
-    return `<article class="btl-card" data-year="${esc(item.year)}" data-name="${esc(item.name)}" data-holding="${esc(item.holding || '')}" title="${esc(meta)}">`
+    return `<article class="btl-card" data-year="${esc(item.year)}" data-name="${esc(item.name)}" data-holding="${esc(item.holding || '')}" role="button" tabindex="0" title="${esc(meta)}">`
       + `<div class="btl-card-head">${badge}<b>${esc(item.name)}</b><span class="btl-card-period">${esc(period)}</span></div>`
       + `<div class="btl-card-logic">${esc(item.logic || '')}</div>`
       + `<div class="btl-card-meta">${esc(meta)}</div>`
+      + '<span class="btl-hint">详情</span>'
       + '</article>';
   }
 
@@ -513,18 +514,151 @@ window.BuffettTimeline = (() => {
     if (missing) {
       const label = status === 'pending' ? '待核对：该年榜单数值未取到' : '无公开一手来源';
       const why = status === 'pending' ? '该年榜单存在，数值尚未取到' : '福布斯 1982 年才出首份 400 榜，此前无公开个人净资产口径';
-      return `<article class="btl-nw gap${status === 'pending' ? ' pending' : ''}" data-year="${esc(year)}" data-age="${esc(age)}" data-missing="1" data-status="${esc(status)}" title="${esc(point.note || label)}">`
+      return `<article class="btl-nw gap${status === 'pending' ? ' pending' : ''}" data-year="${esc(year)}" data-age="${esc(age)}" data-missing="1" data-status="${esc(status)}" role="button" tabindex="0" title="${esc(point.note || label)}">`
         + `<div class="btl-nw-track"><span class="btl-nw-none">${esc(label)}</span></div>`
-        + `<span class="btl-nw-src">${esc(why)}</span></article>`;
+        + `<span class="btl-nw-src">${esc(why)}</span><span class="btl-hint">详情</span></article>`;
     }
     const source = [point.short || point.source || '', rankText(point.rank)].filter(Boolean).join(' · ');
     const pct = nwBarPct(point.netWorth).toFixed(2);
-    return `<article class="btl-nw" data-year="${esc(year)}" data-age="${esc(age)}" data-missing="0" data-status="value" title="${esc(source + ' · ' + usdText(point.netWorth))}">`
+    return `<article class="btl-nw" data-year="${esc(year)}" data-age="${esc(age)}" data-missing="0" data-status="value" role="button" tabindex="0" title="${esc(source + ' · ' + usdText(point.netWorth))}">`
       + '<div class="btl-nw-track">'
       + `<span class="btl-nw-bar"><span class="btl-nw-fill" data-fill="${pct}"></span>`
       + '<i class="btl-nw-g g1"></i><i class="btl-nw-g g2"></i><i class="btl-nw-g g3"></i></span>'
       + `<b class="btl-nw-val" data-fill="${pct}">${esc(yiText(point.netWorth))}</b></div>`
-      + `<span class="btl-nw-src">${esc(source)}</span></article>`;
+      + `<span class="btl-nw-src">${esc(source)}</span><span class="btl-hint">详情</span></article>`;
+  }
+
+  // ── 点开看详情 ────────────────────────────────────────────────────────────
+  // 卡片上的字是刻意压缩过的：固定行高、一行一句，所以长逻辑与长来源一定会被
+  // 「…」截掉。截掉不是丢掉——详情层里给全，字段和卡片、明细表读的是同一批数组。
+  //
+  // 三条要守住的：
+  //   1. 内容只有一个来源：详情层不另存一份文本，直接读 data 里的原字段。
+  //   2. CSP 是 style-src 'self'：行内 style 会被静默忽略，样式一律走 CSS 类。
+  //   3. 缺数据要写出来：净资产节点缺数时，详情层写清「无公开一手来源」和原因，
+  //      不拿别处的估算顶替。
+
+  // 持有状态的中文说法只有这一份：矩阵图的列、图例、详情层都读它。
+  const HOLD_LABEL = Object.fromEntries(HOLD_STATES.map(state => [state.key, state.label]));
+
+  function dRow(label, value) {
+    if (value == null || value === '') return '';
+    return '<div class="btl-d-row"><dt class="btl-d-label">' + esc(label) + '</dt><dd class="btl-d-val">' + value + '</dd></div>';
+  }
+
+  function dLink(url, label) {
+    if (!url) return '';
+    return '<a class="btl-d-link" href="' + esc(url) + '" target="_blank" rel="noopener">' + esc(label || '看原文') + '</a>';
+  }
+
+  // 一笔投资的完整详情。
+  function investDetailHtml(item, data) {
+    const sectors = (data && data.sectors) || {};
+    const sector = sectorMeta(sectors, item.sector);
+    const badge = item.sector
+      ? `<span class="btl-badge btl-s-${esc(item.sector)}" title="${esc(sector.label)}">${esc(sector.icon)}</span>`
+      : '';
+    const extras = (item.extraSources || []).map(extra =>
+      '<li>' + esc(extra.source) + (extra.sourceUrl ? ' ' + dLink(extra.sourceUrl, '看原文') : '') + '</li>').join('');
+    const rows = [
+      dRow('买入年份', esc(item.year) + ' 年 · ' + esc(ageOf(item.year)) + ' 岁'),
+      dRow('持有时段', esc(periodOf(item)) + (item.periodNote ? '（' + esc(item.periodNote) + '）' : '')),
+      dRow('持有状态', esc(HOLD_LABEL[holdState(item)])),
+      dRow('类型', esc(item.type)),
+      dRow('金额', esc(item.amount)),
+      dRow('行业', item.sector ? esc(sector.label) : ''),
+      dRow('核心逻辑', esc(item.logic)),
+      dRow('来源', esc(item.source) + (item.sourceUrl ? ' ' + dLink(item.sourceUrl, '看原文') : '')),
+    ].join('');
+    const quote = item.quote
+      ? '<div class="btl-d-block"><div class="btl-d-block-label">一手原文引用</div><blockquote class="btl-d-quote">' + esc(item.quote) + '</blockquote></div>'
+      : '';
+    const also = extras
+      ? '<div class="btl-d-block"><div class="btl-d-block-label">另见</div><ul class="btl-d-ul">' + extras + '</ul></div>'
+      : '';
+    return '<div class="btl-d-head">' + badge + `<h3 class="btl-d-title">${esc(item.name)}</h3></div>`
+      + '<dl class="btl-d-dl">' + rows + '</dl>' + also + quote;
+  }
+
+  // 一个净资产节点的完整详情。缺数时说清缺在哪，而不是留白。
+  function netDetailHtml(point) {
+    const missing = point.netWorth == null;
+    const status = point.status || (missing ? 'no-source' : 'value');
+    const rows = [];
+    if (missing) {
+      const label = status === 'pending' ? '待核对：该年榜单数值未取到' : '无公开一手来源';
+      rows.push(dRow('净资产', `<span class="btl-d-missing">${esc(label)}</span>`));
+    } else {
+      rows.push(dRow('净资产', esc(yiText(point.netWorth)) + `<span class="btl-d-sub">（${esc(usdText(point.netWorth))}）</span>`));
+      rows.push(dRow('福布斯名次', esc(rankText(point.rank))));
+      rows.push(dRow('上榜年龄', point.listAge == null ? '' : esc(point.listAge) + ' 岁'));
+      rows.push(dRow('榜单', esc(point.listLabel || point.list || '')));
+    }
+    rows.push(dRow('来源', esc(point.source || '—') + (point.sourceUrl ? ' ' + dLink(point.sourceUrl, '看原文') : '')));
+    rows.push(dRow('说明', esc(point.note || '')));
+    return `<div class="btl-d-head"><h3 class="btl-d-title">${esc(point.year)} 年 · ${esc(ageOf(point.year))} 岁</h3></div>`
+      + '<dl class="btl-d-dl">' + rows.join('') + '</dl>';
+  }
+
+  let overlayEl = null;
+  let lastFocused = null;
+  let currentData = null;
+
+  function ensureOverlay() {
+    if (overlayEl) return overlayEl;
+    overlayEl = document.createElement('div');
+    overlayEl.className = 'btl-d-overlay';
+    overlayEl.hidden = true;
+    overlayEl.addEventListener('click', event => {
+      // 点遮罩空白处关闭；点面板本身不关（不然读一半就没了）。
+      if (event.target === overlayEl) closeDetail();
+    });
+    document.body.appendChild(overlayEl);
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && overlayEl && !overlayEl.hidden) closeDetail();
+    });
+    return overlayEl;
+  }
+
+  function openDetail(kind, item) {
+    if (!item) return null;
+    const overlay = ensureOverlay();
+    const body = kind === 'net' ? netDetailHtml(item) : investDetailHtml(item, currentData || {});
+    const label = kind === 'net' ? (item.year + ' 年净资产') : item.name;
+    overlay.innerHTML = `<div class="btl-d-panel" role="dialog" aria-modal="true" aria-label="${esc(label)}">`
+      + '<button type="button" class="btl-d-close" aria-label="关闭详情">×</button>'
+      + body
+      + '</div>';
+    overlay.hidden = false;
+    if (document.body && document.body.classList) document.body.classList.add('btl-d-open');
+    lastFocused = document.activeElement;
+    const close = overlay.querySelector('.btl-d-close');
+    if (close) {
+      close.addEventListener('click', closeDetail);
+      if (close.focus) close.focus();
+    }
+    return overlay;
+  }
+
+  function closeDetail() {
+    if (!overlayEl) return;
+    overlayEl.hidden = true;
+    overlayEl.innerHTML = '';
+    if (document.body && document.body.classList) document.body.classList.remove('btl-d-open');
+    if (lastFocused && lastFocused.focus) lastFocused.focus();
+    lastFocused = null;
+  }
+
+  // 点卡片（article 是 innerHTML 里的，没有对象可挂监听器，事件冒泡到 slot）
+  // 与净资产节点开详情；键盘 Enter／空格走同一条路。
+  function bindDetail(host, kind, item) {
+    host.addEventListener('click', () => openDetail(kind, item));
+    host.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
+        event.preventDefault();
+        openDetail(kind, item);
+      }
+    });
   }
 
   // 顶部表头：左列写清楚是什么，中间是年份·年龄，右列顺带就是金额条的刻度尺。
@@ -608,6 +742,9 @@ window.BuffettTimeline = (() => {
         card.className = 'btl-slot';
         card.style.top = (row.y + 8 + index * (CARD_H + GAP)) + 'px';
         card.innerHTML = investCard(item, data.sectors);
+        // 点卡片开详情。监听绑在 slot 上——article 是 innerHTML 生成的，
+        // 没有对象可挂；事件冒泡上来，同一条路也给键盘用。
+        bindDetail(card, 'invest', item);
         invest.appendChild(card);
       });
       let netOffset = row.y + 8;
@@ -616,6 +753,8 @@ window.BuffettTimeline = (() => {
         card.className = 'btl-slot';
         card.style.top = netOffset + 'px';
         card.innerHTML = netTrack(point);
+        // 净资产节点同样点开看详情：来源那一行在图上也是压缩过的。
+        bindDetail(card, 'net', point);
         // 条长与数值的位置都用 CSSOM 赋值：行内 style 属性会被 CSP 的 style-src 'self' 静默忽略。
         const fill = card.querySelector('.btl-nw-fill');
         if (fill) fill.style.width = (fill.dataset.fill || '0') + '%';
@@ -651,7 +790,7 @@ window.BuffettTimeline = (() => {
       + `<td>${esc(item.type || '')}</td>`
       + `<td>${esc(periodOf(item))}${item.periodNote ? '<span class="btl-td-note">（' + esc(item.periodNote) + '）</span>' : ''}</td>`
       + `<td>${esc(item.amount || '—')}</td>`
-      + `<td class="btl-td-logic">${esc(item.logic || '')}</td>`
+      + `<td><div class="prose-cell btl-td-logic">${esc(item.logic || '')}</div></td>`
       + `<td class="btl-td-src">${srcCell(item)}</td>`
       + '</tr>').join('');
     const net = (data.netWorth || []).map(point => {
@@ -664,7 +803,7 @@ window.BuffettTimeline = (() => {
         ? `<td class="btl-td-missing">${esc(label)}</td><td>—</td><td>—</td><td>—</td>`
         : `<td>${esc(yiText(point.netWorth))}</td><td>${esc(usdText(point.netWorth))}</td><td>${esc(point.rank || '—')}</td><td>${esc(point.listAge == null ? '—' : point.listAge + ' 岁')}</td>`)
       + `<td class="btl-td-src">${esc(point.source || '—')}${point.sourceUrl ? ' <a href="' + esc(point.sourceUrl) + '" target="_blank" rel="noopener">原文</a>' : ''}</td>`
-      + `<td class="btl-td-logic">${esc(point.note || '')}</td>`
+      + `<td><div class="prose-cell btl-td-logic">${esc(point.note || '')}</div></td>`
       + '</tr>';
     }).join('');
     box.innerHTML = '<div class="btl-table-wrap"><table class="btl-table"><caption>公开重大投资（按年份排序）</caption>'
@@ -770,6 +909,8 @@ window.BuffettTimeline = (() => {
 
   function render(root, data) {
     if (!root) return;
+    // 详情层要用同一批数据：记下当前这份，点了卡片直接回查，不另存一份文本。
+    currentData = data;
     const head = root.querySelector('.btl-head');
     const canvas = root.querySelector('.btl-canvas');
     const tables = root.querySelector('.btl-tables');
@@ -823,5 +964,5 @@ window.BuffettTimeline = (() => {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 
-  return { load, render, layout, yiText, usdText, ageOf, periodOf, nwBarPct, overviewSpec, scrollCardIntoView, matchFilter, filterHits, holdState, splitIntro, HOLD_STATES, BIRTH_YEAR, YEAR_MIN, YEAR_MAX, NW_DECADES };
+  return { load, render, layout, yiText, usdText, ageOf, periodOf, nwBarPct, overviewSpec, scrollCardIntoView, matchFilter, filterHits, holdState, splitIntro, investDetailHtml, netDetailHtml, openDetail, closeDetail, HOLD_STATES, BIRTH_YEAR, YEAR_MIN, YEAR_MAX, NW_DECADES };
 })();

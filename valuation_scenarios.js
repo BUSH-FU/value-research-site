@@ -1102,8 +1102,8 @@ window.ValuationScenarios = (() => {
  function skippedOf(data){
   const skipped = data?.skipped || [];
   if(!skipped.length) return '';
-  const rows = skipped.map(item => `<tr><td>${esc(item.code)}</td><td>${esc(item.name || '—')}${jumpTag(item)}</td><td>${esc((item.missing || []).join('；'))}</td></tr>`).join('');
-  return `<div class="panel"><h3>当前口径暂不能自动测算的 ${skipped.length} 家</h3><p class="small muted">逐家列出数据缺项或模型条件；可切换另一种现金流口径对照。</p><div class="scroll"><table><thead><tr><th>代码</th><th>公司</th><th>原因</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+  const rows = skipped.map(item => `<tr><td>${esc(item.code)}</td><td>${esc(item.name || '—')}${jumpTag(item)}</td><td><div class="prose-cell">${esc((item.missing || []).join('；'))}</div></td></tr>`).join('');
+  return `<div class="panel"><h3>当前口径暂不能自动测算的 ${skipped.length} 家</h3><p class="small muted">逐家列出数据缺项或模型条件；可切换另一种现金流口径对照。</p><div class="scroll"><table class="prose-table"><thead><tr><th>代码</th><th>公司</th><th>原因</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
  }
 
  // 每个口径怎么介绍自己：口径不同，股权桥不同，每股内在价值也就不是同一个数。
@@ -1468,6 +1468,9 @@ window.ValuationScenarios = (() => {
 
   const blocked = state === 'blocked';
   const blockedLines = blockers.concat(gaps.map(gap => gap.text)).map(text => `<li>${esc(text)}</li>`).join('');
+  // 定性五轴与证据强度：有余数据就用算出来的，没有才退回写死的那三项。
+  const qualBlock=(window.QualitativePanel&&window.QualitativePanel.render)?window.QualitativePanel.render(bq,{}):'';
+  const unverifiedLine=qualBlock?'':`<p class="vc-unverified"><strong>系统没有验证的</strong>：${UNVERIFIED.map(item => esc(item)).join('、')}——这三项要你自己判断，机器链条走通不代表它们通过。</p>`;
 
   return `<div class="vc-card ${state}">
    <div class="vc-head"><strong>${esc(row.name || row.code)}</strong> <span class="code">${esc(row.code)}</span>`
@@ -1477,7 +1480,7 @@ window.ValuationScenarios = (() => {
    ${blockedLines ? `<p class="vc-blocked"><strong>差在哪</strong>：</p><ul class="vc-gaps">${blockedLines}</ul>` : ''}
    <p class="vc-premise"><strong>成立前提</strong>：${esc(premises.join(' · '))}</p>
    <p class="vc-invalidate"><strong>作废条件</strong>：${invalidations.map(item => esc(item)).join('；')}</p>
-   <p class="vc-unverified"><strong>系统没有验证的</strong>：${UNVERIFIED.map(item => esc(item)).join('、')}——这三项要你自己判断，机器链条走通不代表它们通过。</p>
+   ${qualBlock}${unverifiedLine}
   </div>`;
  }
 
@@ -1514,16 +1517,30 @@ window.ValuationScenarios = (() => {
     + `<td>${target === null ? '—' : '¥' + num(target)}</td>`
     + `<td>${(row.business_quality || {}).ready === true ? '门禁通过' : '生意质量未通过'}</td></tr>`;
   }).join('');
-  const skippedRows = skipped.map(item => `<tr><td>${esc(item.code)}</td><td>${esc(item.name || '—')}</td><td>${esc((item.missing || []).join('；') || '该口径不可用')}</td></tr>`).join('');
+  const skippedRows = skipped.map(item => `<tr><td>${esc(item.code)}</td><td>${esc(item.name || '—')}</td><td><div class="prose-cell">${esc((item.missing || []).join('；') || '该口径不可用')}</div></td></tr>`).join('');
+
+  // 定性证据强度的合计：这几家在定性层上有多少项可核验、多少项没人核过。
+  // 写死「三项没验证」是旧口径；现在这个数是算出来的，会随年报与人工清单变。
+  const qualTotals=actionable.concat(blocked).reduce((acc,row)=>{
+   const q=(row.business_quality||{}).qualitative;
+   if(!q||!q.evidence)return acc;
+   const c=q.evidence.counts||{};
+   acc.machine+=(c.machine||0); acc.human+=(c.human||0); acc.unknown+=(c.unknown||0);
+   return acc;
+  },{machine:0,human:0,unknown:0});
+  const qualText=qualTotals.machine||qualTotals.human||qualTotals.unknown
+   ? `定性层另有 ${qualTotals.machine} 项可核验（公开年报算出）、${qualTotals.human} 项已人工核验并留了出处、`
+     + `<strong>${qualTotals.unknown} 项没有依据</strong>——这几项要你自己判断，机器链条走通不代表它们通过（每张卡里逐轴写清了）。`
+   : '定性层的五轴依据与证据强度见每张卡。';
 
   return `<div class="panel"><h3>系统结论 · 机器链条现在能支持什么</h3>
-  <p class="small muted"><strong>结论是有条件的</strong>：下面每一条都写清「在什么价位、依据是什么、成立前提是什么、什么条件下作废」。机器链条走通只说明<strong>价格条件、预测/估值门禁、生意质量门禁</strong>这三道都过了，护城河、控制人品行、关联交易这三项<strong>系统没有验证</strong>，要你自己判断。</p>
+  <p class="small muted"><strong>结论是有条件的</strong>：下面每一条都写清「在什么价位、依据是什么、成立前提是什么、什么条件下作废」。机器链条走通只说明<strong>价格条件、预测/估值门禁、生意质量门禁</strong>这三道都过了。${esc(qualText)}</p>
   <p class="small muted">数据与「批量测算」同一批（保守正式排名口径，已定档 ${MID_LABEL} 永续增长率），不另算一遍。</p>
   <div class="vc-steps"><span><strong>${rows.length}</strong>家可测算</span><span>→</span><span><strong>${actionable.length + blocked.length}</strong>家价格条件达线</span><span>→</span><span><strong>${actionable.length}</strong>家机器链条走通</span><span>→</span><span><strong>0</strong>家完成人工核查（人工那一步还没做）</span></div>
   ${actionable.length ? `<h4>可以执行到这一步</h4><div class="vc-cards">${actionable.map(row => conclusionCard(row, threshold, validThreshold)).join('')}</div>` : ''}
   ${blocked.length ? `<h4>价格够了，但门禁还没放行</h4><div class="vc-cards">${blocked.map(row => conclusionCard(row, threshold, validThreshold)).join('')}</div>` : ''}
   ${below.length ? `<h4>其余 ${below.length} 家：当前不满足价格条件</h4><div class="scroll"><table><thead><tr><th>公司</th><th>现价</th><th>主情景每股</th><th>安全边际</th><th>价格条件线</th><th>生意质量</th></tr></thead><tbody>${belowRows}</tbody></table></div>` : ''}
-  ${skipped.length ? `<h4>${skipped.length} 家这轮算不出来</h4><div class="scroll"><table><thead><tr><th>代码</th><th>公司</th><th>原因</th></tr></thead><tbody>${skippedRows}</tbody></table></div>` : ''}
+  ${skipped.length ? `<h4>${skipped.length} 家这轮算不出来</h4><div class="scroll"><table class="prose-table"><thead><tr><th>代码</th><th>公司</th><th>原因</th></tr></thead><tbody>${skippedRows}</tbody></table></div>` : ''}
   ${droppedRows.length ? droppedPanel(droppedRows) : ''}
   </div>`;
  }

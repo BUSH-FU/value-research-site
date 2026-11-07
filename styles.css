@@ -446,7 +446,7 @@ a.nav{cursor:pointer}
 /* 生意质量与终值可持续性：一家一张图。
    上半 ROIC 轨迹 + WACC 门槛 + 十年中位（带）；下半毛利率与营业利润率轨迹。
    带子上沿高过门槛＝持续创造超额回报；空心点＝并表口径跳变年（不可比，已剔除）。 */
-.bq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:16px;margin:16px 0}
+.bq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin:16px 0}
 .bq-card{border:1px solid var(--line);border-radius:9px;background:#fbfcfa;padding:13px 14px}
 .bq-card.watch{border-color:#e0c9a8;background:#fdfaf4}
 .bq-head{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:4px}
@@ -469,6 +469,36 @@ a.nav{cursor:pointer}
 .bq-gmedian{stroke:#2f5580;stroke-width:1.2;stroke-dasharray:4 3}
 .bq-jump{fill:#fff;stroke:#a8663f;stroke-width:1.6}
 .bq-tick{fill:#829087;font-size:9px;font-family:inherit;font-variant-numeric:tabular-nums}
+
+/* 定性五轴：机器可核验 / 已人工核验 / 未核验。
+   强度只用类表示（服务器 CSP 是 style-src 'self'，行内 style 会被静默忽略）。
+   「不能证明什么」那一行不是免责声明，是这一轴的边界说明——不给它写清楚，
+   代理指标就会被当成结论用。 */
+.qual-block{margin:9px 0 0;padding-top:8px;border-top:1px dashed var(--line)}
+.qual-head{margin:0 0 5px;font-size:12px;font-weight:600;color:var(--ink)}
+.qual-head .muted{font-weight:400}
+.qual-axes{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px}
+.qual-axis{display:grid;grid-template-columns:auto auto;gap:3px 8px;align-items:baseline}
+.qual-axis-name{font-size:12px;font-weight:600;white-space:nowrap}
+/* 实测项与「不能证明什么」都独占一行：挤进第三列会被卡宽压成窄条，读不出来。 */
+.qual-axis-items{grid-column:1/-1;font-size:11px;line-height:1.55;color:#4b5a52}
+.qual-str{font-size:10px;border-radius:4px;padding:1px 6px;white-space:nowrap;border:1px solid transparent}
+.qual-str.machine{background:#e4efe7;color:#245e49;border-color:#c3d9c9}
+.qual-str.human{background:#e4ecf4;color:#2f5580;border-color:#c6d6e6}
+.qual-str.unknown{background:#f6f0e3;color:#8c6331;border-color:#e0c9a8}
+.qual-str.mixed{background:#eef1eb;color:#5f6d64;border-color:#d8ded4}
+.qual-str.partial{background:#eef1eb;color:#5f6d64;border-color:#d8ded4}
+.qual-cannot{grid-column:1/-1;font-size:10.5px;line-height:1.5;color:#7a6a55;margin:0}
+.qual-more{grid-column:1/-1;font-size:10.5px;color:var(--muted);margin:1px 0 0}
+.qual-more summary{cursor:pointer}
+.qual-items{margin:3px 0 0;padding-left:16px;font-size:10.5px;line-height:1.5;color:#4b5a52}
+.qual-items li{margin:1px 0}
+.qual-items .qual-str{margin-right:3px}
+.qual-unknown{margin:5px 0 0;font-size:11px;line-height:1.55;color:#8a5a3c}
+.qual-unknown li{margin:1px 0}
+.qual-redline{margin:8px 0 0;padding:7px 9px;border:1px solid #e0c9a8;border-radius:6px;background:#fdf6ec;font-size:11.5px;line-height:1.55;color:#8a5a3c}
+.qual-redline strong{color:#7a4a26}
+.vc-qual{margin:9px 0 0;padding-top:8px;border-top:1px dashed var(--line)}
 @media(max-width:680px){.bq-grid{grid-template-columns:minmax(0,1fr)}}
 
 /* 系统结论：机器链条走通就给出有条件的结论——价位、依据、前提、作废条件、
@@ -615,17 +645,24 @@ tr.btl-dim{opacity:.42}
 .btl-dot.net{right:-4px;top:3px;width:9px;height:9px;background:#bb9b5d;border:2px solid #fff}
 .btl-dot.net.hollow{background:#fbfcfa;border:2px solid #bb9b5d}
 .btl-slot{position:absolute;left:0;right:0}
-.btl-card{background:#fff;border:1px solid var(--line);border-left:3px solid var(--green);border-radius:7px;padding:6px 11px;height:76px;overflow:hidden}
+.btl-card{background:#fff;border:1px solid var(--line);border-left:3px solid var(--green);border-radius:7px;padding:6px 11px;height:76px;overflow:hidden;position:relative;cursor:pointer}
+.btl-card:focus-visible,.btl-nw:focus-visible{outline:2px solid var(--green);outline-offset:1px}
+.btl-card:hover{border-color:#c6d6c9;box-shadow:0 2px 8px rgba(24,58,42,.10)}
 .btl-card-head{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
 .btl-badge{width:20px;height:20px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;line-height:1;flex:none;background:var(--sec-tint);border:1px solid rgba(0,0,0,.05)}
 .btl-sec-tag{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:4px;font-size:10px;color:var(--sec);background:var(--sec-tint);white-space:nowrap}
 .btl-card-head b{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .btl-card-period{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
 .btl-card-logic{font-size:12px;color:#4b5a52;line-height:1.45;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.btl-card-meta{font-size:10px;color:#8b968e;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btl-card-meta{font-size:10px;color:#8b968e;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:36px}
+/* 「详情」提示：卡片上的字是压缩过的，点开才有全文。
+   提示绝对定位在右下角，源那一行留出 36px 让它不压住文字。 */
+.btl-hint{position:absolute;right:9px;bottom:5px;font-size:10px;color:var(--green);opacity:0;pointer-events:none;transition:opacity .12s}
+.btl-card:hover .btl-hint,.btl-card:focus-visible .btl-hint,.btl-nw:hover .btl-hint,.btl-nw:focus-visible .btl-hint{opacity:1}
 /* 右轨：不是一列数字卡片，而是一条轨道——金额条（对数刻度）+ 骑在条尾的数值 + 来源。
    条长与数值位置用 CSSOM 赋值（行内 style 会被 CSP 静默忽略），刻度线走固定百分比类。 */
-.btl-nw{position:relative;height:46px;padding:0 12px 0 0;overflow:hidden}
+.btl-nw{position:relative;height:46px;padding:0 12px 0 0;overflow:hidden;cursor:pointer}
+.btl-nw:hover .btl-nw-src{color:#5f6d64}
 .btl-nw-track{position:relative;width:var(--btl-track);height:15px}
 .btl-nw-bar{position:absolute;left:0;top:3px;right:0;height:9px;background:#e9efe6;border-radius:2px;overflow:hidden}
 .btl-nw-fill{position:absolute;left:0;top:0;bottom:0;box-sizing:border-box;background:rgba(36,94,73,.22);border-right:2px solid var(--green)}
@@ -634,7 +671,43 @@ tr.btl-dim{opacity:.42}
 .btl-nw-g.g2{left:50%}
 .btl-nw-g.g3{left:75%}
 .btl-nw-val{position:absolute;left:0;top:-3px;margin-left:8px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap}
-.btl-nw-src{display:block;margin-top:2px;font-size:10px;color:#8b968e;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4}
+.btl-nw-src{display:block;margin-top:2px;font-size:10px;color:#8b968e;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;padding-right:34px}
+/* 点开看详情：卡片上的字是压缩过的（固定行高、一行一句），长逻辑与长来源一定会被
+   「…」截掉。截掉不是丢掉——详情层里给全，内容和卡片、明细表读同一批数组。
+   样式一律走 CSS 类：服务器 CSP 是 style-src 'self'，行内 style 会被静默忽略。 */
+.btl-d-overlay{position:fixed;inset:0;z-index:60;background:rgba(18,28,23,.45);display:flex;align-items:center;justify-content:center;padding:26px}
+.btl-d-panel{position:relative;background:#fff;border:1px solid var(--line);border-radius:11px;width:100%;max-width:660px;max-height:82vh;overflow:auto;padding:20px 22px 18px;box-shadow:0 18px 48px rgba(15,32,24,.26)}
+.btl-d-close{position:absolute;top:12px;right:14px;width:28px;height:28px;padding:0;line-height:1;font-size:16px;color:var(--muted);border-radius:6px}
+.btl-d-close:hover{color:var(--ink);border-color:var(--green)}
+.btl-d-head{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-right:38px}
+.btl-d-title{margin:0;font-size:17px;font-weight:600;color:var(--ink)}
+.btl-d-dl{margin:0}
+.btl-d-row{display:grid;grid-template-columns:72px minmax(0,1fr);gap:3px 14px;padding:8px 0;border-top:1px solid var(--line)}
+.btl-d-row:first-child{border-top:none;padding-top:0}
+.btl-d-label{font-size:12px;color:var(--muted)}
+.btl-d-val{margin:0;font-size:13px;line-height:1.65;color:var(--ink);overflow-wrap:anywhere}
+.btl-d-sub{color:var(--muted);font-size:12px}
+.btl-d-missing{color:var(--amber)}
+.btl-d-link{color:var(--green);text-decoration:none;border-bottom:1px solid rgba(36,94,73,.35);margin-left:4px;white-space:nowrap}
+.btl-d-link:hover{border-bottom-color:var(--green)}
+.btl-d-block{margin-top:14px;padding:11px 13px;background:#f8f9f6;border-left:3px solid var(--green);border-radius:0 7px 7px 0}
+.btl-d-block-label{font-size:11px;color:var(--muted);margin-bottom:5px}
+.btl-d-quote{margin:0;font-size:12px;line-height:1.7;color:#3d4b43}
+.btl-d-ul{margin:0;padding-left:18px;font-size:12px;line-height:1.7;color:#3d4b43}
+body.btl-d-open{overflow:hidden}
+/* 表格里带长说明的列要能折行。
+   基础样式是 table{white-space:nowrap}——一条「原因」能铺成一行，把一张表撑到
+   3514px，读者得横拖三千多像素才看得到右边。用限宽的盒子把长句收进可读宽度。 */
+.prose-table td{white-space:normal}
+.prose-cell{max-width:520px;white-space:normal;line-height:1.65;overflow-wrap:anywhere}
+/* 限宽必须落在内层盒子上：Chrome 的表格自动布局不认 td 上的 max-width
+   （实测 td 上写 520px，列还是 967px 宽）。 */
+/* 长说明段落分两栏：中文一行超过 ~70 字就不好读了（实测最长一行铺到 1524px），
+   但把宽度砍到 700px 又会在右边空出一大块（版式空洞）。
+   两栏同时解决这两件事——行宽回到可读范围，宽度也用满了。 */
+.prose-2col{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 26px}
+.prose-2col>p{margin:0}
+@media(max-width:1100px){.prose-2col{grid-template-columns:minmax(0,1fr);gap:0}}
 .btl-notice{border-left:3px solid #c1a570;background:#f3efe5;padding:10px 14px;color:#7e693f;font-size:12px;border-radius:3px;margin-top:12px}
 .btl-tables{margin-top:16px}
 .btl-table-wrap{overflow:auto;border:1px solid var(--line);border-radius:8px;margin-bottom:14px;background:#fff}

@@ -32,6 +32,101 @@ const cnDate=value=>window.ValueReport?.fmtCnDate?window.ValueReport.fmtCnDate(v
 const stamp=value=>window.ValueReport?.fmtStamp?window.ValueReport.fmtStamp(value):value;
 // 检查项数值的单位后缀：门槛与实测值都来自同一份政策，避免同一个数在两处读法不同。
 const unitText=u=>u==='%'?'%':u==='个百分点'?' 个百分点':u==='年'?' 年':u==='倍'?' 倍':'';
+// ── 长说明段落分两栏 ───────────────────────────────────────────────────────
+//
+// 为什么分栏：中文一行超过 ~70 字就不好读了（实测工作台里最长的说明一行铺到
+// 1524px，一屏塞不下，眼睛要来回拉）。但把宽度砍到 700px 又会在右边空出
+// 一大块——那是另一种毛病（版式空洞），本项目已经修过一次。
+// 分两栏同时解决这两件事：行宽回到可读范围，宽度也用满。
+//
+// 断点自己切，不交给 CSS：CSS 的 column-count 会在句子中间断开（实测出现过
+// 「…画成斜纹带，写」／「明无公开一手来源」），读者接不上。这里按 DOM 文本
+// 切，断点永远落在句读（。；！？）之后。
+const PROSE_MIN_WIDTH=900;      // 行宽超过这个数才需要分栏
+const PROSE_MIN_BOX=1150;       // 容器窄于此就别分栏了（两栏各挤一半更难看）
+const PROSE_MIN_CHARS=80;       // 太短的句子不必分（12px 字号下约 80 字＝800px，与行宽门槛对齐）
+const PROSE_BREAKS='。；！？';   // 句读：断点只能落在这几个字后面
+
+// 断点取最接近中点的句读，返回断点后的下标；不该切就返回 -1。
+// 分号也算：实测工作台里最长的那几段说明整段只有一个句号，
+// 内部全靠分号分句（「① 严格财务预筛（…）；② 生意质量门禁（…）。」），
+// 只认句号就找不到中间断点，整段还是铺成一行。
+function proseSplitPoint(text){
+ const full=String(text||'');
+ if(full.length<PROSE_MIN_CHARS)return -1;
+ const mid=full.length/2;
+ let cut=-1;
+ for(let i=0;i<full.length;i++){
+  if(!PROSE_BREAKS.includes(full[i]))continue;
+  if(cut<0||Math.abs(i-mid)<Math.abs(cut-mid))cut=i;
+ }
+ if(cut<0)return -1;
+ const splitAt=cut+1;
+ // 两栏长度差太多就不切：一栏长一栏短，短的那栏底下就空一块——那是新的空洞。
+ // 底线按「短栏至少填到长栏的一半」定：33%～67%，短栏/长栏 ≥ 50%，
+ // 留白不超过整块面积的四分之一（版式空洞的判定线）。
+ if(splitAt<full.length*0.33||splitAt>full.length*0.67)return -1;
+ return splitAt;
+}
+
+// 找到第 index 个字符落在哪个文本节点上。
+function locateTextOffset(root,index){
+ let seen=0;
+ const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+ let node;
+ while((node=walker.nextNode())){
+  const len=node.textContent.length;
+  if(seen+len>=index)return{node,offset:index-seen};
+  seen+=len;
+ }
+ return null;
+}
+
+// 把一个段落切成两半：后半截搬进新段落，两段并排放进 .prose-2col。
+// 返回 true 表示切了；没切返回 false（调用方不需要管）。
+function proseSplitParagraph(p){
+ const full=p.textContent||'';
+ const splitAt=proseSplitPoint(full);
+ if(splitAt<0)return false;
+ const loc=locateTextOffset(p,splitAt);
+ if(!loc)return false;
+ const range=document.createRange();
+ range.setStart(loc.node,loc.offset);
+ range.setEnd(p,p.childNodes.length);
+ if(range.collapsed)return false;             // 后半截是空的
+ const tail=range.cloneContents();
+ range.deleteContents();
+ const wrap=document.createElement('div');
+ wrap.className='prose-2col';
+ p.parentNode.insertBefore(wrap,p);
+ wrap.appendChild(p);
+ const second=document.createElement('p');
+ second.className=p.className;
+ while(tail.firstChild)second.appendChild(tail.firstChild);
+ wrap.appendChild(second);
+ return true;
+}
+
+// 扫一遍容器里的长说明段落，把够长的分两栏。
+// 已经分过栏的（.prose-2col 里）跳过，所以这个函数可以反复调用。
+function applyProseColumns(root){
+ if(!root||!root.querySelectorAll)return 0;
+ let split=0;
+ for(const p of [...root.querySelectorAll('p')]){
+  if(p.closest('.prose-2col'))continue;
+  if((p.textContent||'').length<PROSE_MIN_CHARS)continue;
+  const box=p.getBoundingClientRect();
+  if(box.width<PROSE_MIN_BOX)continue;        // 容器不够宽，分栏反而更难看
+  const range=document.createRange();
+  range.selectNodeContents(p);
+  const rects=[...range.getClientRects()].filter(r=>r.width>0&&r.height>0);
+  if(!rects.length)continue;
+  const left=Math.min(...rects.map(r=>r.left)),right=Math.max(...rects.map(r=>r.right));
+  if(right-left<=PROSE_MIN_WIDTH)continue;     // 行宽还够，不用分
+  if(proseSplitParagraph(p))split+=1;
+ }
+ return split;
+}
 const reviewFields=[['business','商业模式简单可理解'],['moat','护城河有事实支撑'],['roe_stability','十年 ROE 波动可接受'],['integrity','管理层诚信'],['related_transactions','无异常大额关联交易'],['delisting_risk','退市风险公告已核验']];
 function feedback(message){$('feedback').textContent=message;}
 // 表单就地反馈：成功、失败、逐项不合格都显示在表单末尾（提交按钮旁），不藏在页面顶部。
@@ -125,7 +220,7 @@ async function saveChecklistSection(section){
  }
 }
 async function api(path,body){const r=await fetch(path.startsWith('/api/')?path.slice(1):path,body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const data=await r.json();if(!r.ok)throw Error(data.error||'请求失败');return data;}
-function view(id){const inCompany=id==='research';$('company-workspace').hidden=!inCompany;for(const el of document.querySelectorAll('.view'))el.hidden=el.id!==id;for(const el of document.querySelectorAll('.nav'))el.classList.toggle('active',el.dataset.view===(inCompany?companyOrigin:id));if(currentView!==id)window.scrollTo(0,0);currentView=id;if(id==='research'&&window.echarts)requestAnimationFrame(()=>{const target=$('management-graph');if(target)echarts.getInstanceByDom(target)?.resize();ValueReport.resizeCharts();window.Cyclicality?.resizeCharts();window.WaccHistory?.resizeCharts();if(klinePending)renderPriceChart(klineDays,klinePeriod);else priceChart?.resize();});if(id==='mood'){loadMood();requestAnimationFrame(()=>{window.MarketMood?.renderCharts(moodData);});}if(id==='scenarios'||id==='candidates')loadScenarios();}
+function view(id){const inCompany=id==='research';$('company-workspace').hidden=!inCompany;for(const el of document.querySelectorAll('.view'))el.hidden=el.id!==id;for(const el of document.querySelectorAll('.nav'))el.classList.toggle('active',el.dataset.view===(inCompany?companyOrigin:id));if(currentView!==id)window.scrollTo(0,0);currentView=id;if(id==='research'&&window.echarts)requestAnimationFrame(()=>{const target=$('management-graph');if(target)echarts.getInstanceByDom(target)?.resize();ValueReport.resizeCharts();window.Cyclicality?.resizeCharts();window.WaccHistory?.resizeCharts();if(klinePending)renderPriceChart(klineDays,klinePeriod);else priceChart?.resize();});if(id==='mood'){loadMood();requestAnimationFrame(()=>{window.MarketMood?.renderCharts(moodData);});}if(id==='scenarios'||id==='candidates')loadScenarios();requestAnimationFrame(()=>applyProseColumns(document));}
 // 市场情绪取数：服务端按天缓存，这里最多五分钟取一次，免得轮询时反复拉。
 async function loadMood(force){
  if(moodLoading)return;
@@ -149,6 +244,7 @@ function renderMoodView(){
  box.innerHTML=window.MarketMood?.render(moodData)||'';
  window.MarketMood?.paintBandStrip(moodData);
  if(currentView==='mood')window.MarketMood?.renderCharts(moodData);
+ applyProseColumns(box);
 }
 // 批量测算取数：服务端按政策实时算，这里最多五分钟取一次，免得来回切页反复拉。
 async function loadScenarios(force){
@@ -169,6 +265,7 @@ function renderScenarios(){
  box.className='';
  if(scenariosData.error){box.innerHTML='<div class="empty">测算结果取不到：'+esc(scenariosData.error)+'</div>';return;}
  box.innerHTML=window.ValuationScenarios?window.ValuationScenarios.render(scenariosData):'<p class="muted">测算模块未加载。</p>';
+ applyProseColumns(box);
 }
 async function load(){
  state=await api('/api/state');
@@ -381,10 +478,13 @@ function bqCard(row,gate,watchCodes){
  const reason=isWatch?((gate.blockers||[])[0]||(gate.gaps||[])[0]||{}).text:'';
  const head=`<div class="bq-head"><strong>${esc(row.name||row.symbol)}</strong> <span class="code">${esc(row.symbol)}</span>${isWatch?'<span class="pill warning">观察</span>':''}</div>`;
  const watchLine=isWatch&&reason?`<p class="bq-watch">${esc(reason)}</p>`:'';
+ // 定性五轴：与结论卡共用同一块渲染（window.QualitativePanel），
+ // 不在这里另写一遍——同一个数两处两个口径迟早出问题。
+ const qual=(window.QualitativePanel&&window.QualitativePanel.render)?window.QualitativePanel.render(gate,{compact:true}):'';
  return `<div class="bq-card${isWatch?' watch':''}">${head}`
   + (charts.roic?`<p class="bq-sub">ROIC 与 WACC 门槛（上市以来全量 · 浅色区间＝判据窗口近十年）</p>${charts.roic}`:'')
   + (charts.margin?`<p class="bq-sub">毛利率与营业利润率（上市以来全量 · 浅色区间＝判据窗口近十年）</p>${charts.margin}`:'')
-  + lines.join('') + watchLine + '</div>';
+  + lines.join('') + watchLine + qual + '</div>';
 }
 // 生意质量面板：这层门禁的证据长什么样。一家一张卡，合格池在前、观察名单在后。
 function renderBusinessQuality(){
@@ -417,6 +517,7 @@ function renderBusinessQuality(){
  <p class="small muted"><strong>哪几条真在筛公司</strong>：A1 近十年 ROIC 中位数高于 WACC、A2 近五年增量 ROIC 高于 WACC、终值隐含再投资率小于 1，这三条当前池内全部通过——它们是<strong>守门</strong>，价值在于挡住将来不合格的，不负责区分谁好谁坏；真正筛出公司的是<strong>盈利可预测性</strong>（营业利润率波动 ≤ 5 个百分点）与<strong>毛利率趋势</strong>（最近可比年 vs 十年中位数 ≤ 5 个百分点）。</p>
  <div class="bq-grid">${ordered}</div>
  <p class="small muted">护城河目前是「有说法」不是「有量化证据」：全部公司都缺可量化的市占率，这是系统级缺口，不是某家的毛病；缺行业研究的公司按失败关闭处理。</p></div>`;
+ applyProseColumns(box);
 }
 // 池子会变，变化要能查：合格池、观察名单、进出记录、下次自动重评。
 function renderPoolStatus(){
@@ -424,7 +525,7 @@ function renderPoolStatus(){
  const box=$('pool-status');
  if(!box)return;
  if(!pool){box.innerHTML='';return;}
- const watch=(pool.watch||[]).map(item=>`<tr><td><strong>${esc(item.name||item.code)}</strong> <span class="code">${esc(item.code)}</span></td><td>${(item.reasons||[]).map(reason=>esc(reason)).join('<br>')||'<span class="muted">原因待补</span>'}</td></tr>`).join('');
+ const watch=(pool.watch||[]).map(item=>`<tr><td><strong>${esc(item.name||item.code)}</strong> <span class="code">${esc(item.code)}</span></td><td><div class="prose-cell">${(item.reasons||[]).map(reason=>esc(reason)).join('<br>')||'<span class="muted">原因待补</span>'}</div></td></tr>`).join('');
  const changes=(pool.changes||[]).map(change=>{
   const added=(change.added||[]).map(item=>esc(item.name||item.code)).join('、');
   const removed=(change.removed||[]).map(item=>esc(item.name||item.code)).join('、');
@@ -436,7 +537,7 @@ function renderPoolStatus(){
  <p class="small muted"><strong>合格池 ${pool.pool_size||0} 家</strong>：两道门都过——① 严格财务预筛（水平：十年 ROE、ROIC、负债率、扣非与现金流年份、分红闸门）；② 生意质量门禁（持续性：近十年 ROIC 中位数高于 WACC、增量 ROIC、盈利可预测性、毛利率趋势、终值隐含再投资率）。</p>
  <p class="small muted"><strong>观察名单 ${(pool.watch||[]).length} 家</strong>：过了财务预筛、但生意质量门禁没过。它们<strong>不进池子</strong>（不参与价格门槛与最终候选），但仍然跟踪、仍然测算、仍然日更报价——条件修好了，下一轮自动回池。</p>
  <p class="small muted"><strong>名单什么时候会变</strong>：池子不是名单，是每次现算的结果。系统每天收盘后自动重评池子成员、观察名单与「只差一条」的候选，不达标的出去、达标的进来；池子进出记录在下面，可复查。</p>
- ${watch?`<div class="scroll"><table><thead><tr><th>观察名单</th><th>差在哪一条（自带实测值）</th></tr></thead><tbody>${watch}</tbody></table></div>`:''}
+ ${watch?`<div class="scroll"><table class="prose-table"><thead><tr><th>观察名单</th><th>差在哪一条（自带实测值）</th></tr></thead><tbody>${watch}</tbody></table></div>`:''}
  ${changes?`<details><summary>池子进出记录（最近 ${(pool.changes||[]).length} 次）</summary><div class="scroll"><table><thead><tr><th>时间</th><th>出去</th><th>进来</th></tr></thead><tbody>${changes}</tbody></table></div></details>`:'<p class="small muted">还没有进出记录——名单从建立至今没有变过。</p>'}
  <p class="small muted">最近一次更新：${esc((pool.updated_at||'').replace('T',' ').slice(0,16)||'—')}。每行「筛选日期」是那次判定的日期，年报更新后自动重评。</p></div>`;
 }
@@ -506,6 +607,7 @@ function renderPool(){
  const sorted=sortPoolRows(rows);
  $('pool-table').innerHTML=sorted.length?`<table><thead><tr>${poolSortHead()}</tr></thead><tbody>${sorted.map(r=>`<tr><td><strong>${esc(r.name)}</strong><br><span class="code">${esc(r.symbol)}</span></td><td>${esc(r.industry||'—')}</td><td>${esc(cnDate(r.list_date))}</td><td>${r.roe?num(r.roe.mean)+'%'+(r.roe.complete?'':'（不完整）'):r.quality?.metrics?.roe_mean!=null?num(r.quality.metrics.roe_mean)+'%':'尚未拉取'}</td><td>${window.Cyclicality?.poolCell(r.cyclicality)||'<span class="muted">待补</span>'}</td><td>${dividendCell(r)}</td><td>${businessQualityCell(r)}</td><td>${esc(r.quality?.as_of||'—')}</td><td title="${esc([...(r.quality?.reasons||[]),...(r.quality?.missing||[]),...r.screen.reasons].join('；'))}">${statusCell(r)}</td><td><button data-company="${esc(r.symbol)}">查看公司</button></td></tr>`).join('')}</tbody></table><div class="small muted">共 ${sorted.length} 家${poolSortKey?`，已按「${poolSortLabel(poolSortKey)}」${poolSortDir>0?'升序':'降序'}`:''}；点击表头可切换排序，缺数据的排在最后；表内可按列筛选</div>`:'<div class="empty">当前筛选下没有匹配公司。未扫描和缺数据不会被误认为通过。</div>';
  renderPoolStatus();
+ applyProseColumns(document);
  // 页内事件统一委托，所有来源文本转义后渲染。
 }
 function renderCandidates(){
@@ -519,7 +621,9 @@ function renderCandidates(){
   else if(scenariosData.error){box.innerHTML='<div class="panel empty">测算结果取不到：'+esc(scenariosData.error)+'</div>';}
   else{box.innerHTML=window.ValuationScenarios?window.ValuationScenarios.conclusions(scenariosData):'';}
  }
- $('candidate-table').innerHTML=rows.length?`<p class="small muted">价格条件达标 ${rows.length} 家；其中清单全部人工核实且仍有效 ${((state&&state.counts.candidates)||0)} 家。清单完成表示可进入最终判断，不是买入指令。导出的 CSV 与这张表是同一批行，并单列标出最终核查是否通过。</p><div class="scroll"><table><thead><tr><th>公司</th><th>收盘日期</th><th>收盘价</th><th>基准价值 / 股</th><th>安全边际</th><th>逐项清单</th><th>最终核查</th></tr></thead><tbody>${rows.map(r=>`<tr><td><button data-company="${esc(r.symbol)}">${esc(r.name)}</button> <span class="code">${esc(r.symbol)}</span></td><td>${esc(r.comparison.quote_date)}</td><td>¥${num(r.comparison.price)}</td><td>¥${num(r.valuation.result.per_share)}</td><td>${pct(r.comparison.margin)}</td><td>${esc(r.checklist_summary?.yes||0)}/${esc(r.checklist_summary?.total||0)} 已核 · ${esc(r.checklist_summary?.stale||0)} 待复核</td><td><span class="pill ${r.investment_ready?'':'warning'}">${r.investment_ready?'核查就绪':'尚未完成'}</span></td></tr>`).join('')}</tbody></table></div>`:`<div class="candidate-blockers"><h3>人工核查这一步还没做</h3><div class="progress-steps"><span><strong>${((state&&state.quality_counts.passed)||0)}</strong>家等待定性审核</span><span><strong>${((state&&state.counts.approved)||0)}</strong>家已完成定性审核</span><span><strong>${((state&&state.counts.price_candidates)||0)||0}</strong>家满足价格条件</span><span><strong>${((state&&state.counts.candidates)||0)}</strong>家完成全部清单</span></div><p class="small muted">机器能核的部分已经在上面给出结论；这一段是人工核查的存档位——定性审核有效、逐项清单全部核实之后才会有人进来。数据缺失或未审核的公司不会自动入选。</p></div>`; }
+ $('candidate-table').innerHTML=rows.length?`<p class="small muted">价格条件达标 ${rows.length} 家；其中清单全部人工核实且仍有效 ${((state&&state.counts.candidates)||0)} 家。清单完成表示可进入最终判断，不是买入指令。导出的 CSV 与这张表是同一批行，并单列标出最终核查是否通过。</p><div class="scroll"><table><thead><tr><th>公司</th><th>收盘日期</th><th>收盘价</th><th>基准价值 / 股</th><th>安全边际</th><th>逐项清单</th><th>最终核查</th></tr></thead><tbody>${rows.map(r=>`<tr><td><button data-company="${esc(r.symbol)}">${esc(r.name)}</button> <span class="code">${esc(r.symbol)}</span></td><td>${esc(r.comparison.quote_date)}</td><td>¥${num(r.comparison.price)}</td><td>¥${num(r.valuation.result.per_share)}</td><td>${pct(r.comparison.margin)}</td><td>${esc(r.checklist_summary?.yes||0)}/${esc(r.checklist_summary?.total||0)} 已核 · ${esc(r.checklist_summary?.stale||0)} 待复核</td><td><span class="pill ${r.investment_ready?'':'warning'}">${r.investment_ready?'核查就绪':'尚未完成'}</span></td></tr>`).join('')}</tbody></table></div>`:`<div class="candidate-blockers"><h3>人工核查这一步还没做</h3><div class="progress-steps"><span><strong>${((state&&state.quality_counts.passed)||0)}</strong>家等待定性审核</span><span><strong>${((state&&state.counts.approved)||0)}</strong>家已完成定性审核</span><span><strong>${((state&&state.counts.price_candidates)||0)||0}</strong>家满足价格条件</span><span><strong>${((state&&state.counts.candidates)||0)}</strong>家完成全部清单</span></div><p class="small muted">机器能核的部分已经在上面给出结论；这一段是人工核查的存档位——定性审核有效、逐项清单全部核实之后才会有人进来。数据缺失或未审核的公司不会自动入选。</p></div>`;
+ applyProseColumns(document);
+}
 async function openCompany(code,navigate=true){if(navigate&&currentView!=='research')companyOrigin=['pool','scenarios','candidates'].includes(currentView)?currentView:'pool';if(selected!==code){graphMode='recent';historyCategory='all';}selected=code;cycleRecord=null;detail=await api('/api/company/'+encodeURIComponent(code));document.body.dataset.assistantCode=code;document.body.dataset.assistantName=detail.stock?.name||'';$('company-code').value=code;$('company-workspace-name').textContent=detail.stock.name+' · 公司详情';$('company-back').textContent='← 返回'+({pool:'精选标的',scenarios:'批量测算',candidates:'最终候选'}[companyOrigin]);if(navigate)view('research');renderCompany();loadCyclicality(code);window.ResearchAssistant?.refreshContext();if(detail.financial_archive){api('/api/risk-free-rate').then(rate=>{if(selected===code){detail.risk_free_rate=rate;window.WaccCalculator?.applyRiskFree(rate);}}).catch(()=>{if(selected===code)window.WaccCalculator?.applyRiskFree({status:'unavailable'});});api('/api/cost-of-capital?code='+encodeURIComponent(code)).then(block=>{if(selected===code){detail.cost_of_capital=block;window.WaccCalculator?.applyCostOfCapital(block);}}).catch(()=>{});}}
 // 周期数据单独取：它要重算 12 年行业序列，混进 /api/company 会把公司页拖慢。
 async function loadCyclicality(code){
