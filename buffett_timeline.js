@@ -34,14 +34,60 @@ window.BuffettTimeline = (() => {
   const GAP = 8;
   const HEAD_H = 42;        // 顶部表头高度（年份·年龄、金额条刻度尺）
   const NW_DECADES = [1e8, 1e9, 1e10, 1e11, 1e12];  // 金额条刻度：1 亿 → 1 万亿
+  // 持有状态：矩阵图的列，也是履历标记的形状。口径与明细表一致。
+  const HOLD_STATES = [
+    { key: 'open', label: '仍在持有' },
+    { key: 'exit', label: '已了结' },
+    { key: 'unknown', label: '时点未披露' },
+  ];
   const esc = x => String(x ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
   const num = (x, n = 0) => x == null ? '—' : Number(x).toLocaleString('zh-CN', { minimumFractionDigits: n, maximumFractionDigits: n });
 
   // 一笔投资的持有状态：数据里只有「持续／已退出」两种明确口径，
   // 其余（没写、写了别的）一律算「时点未披露」，不许猜成「仍在持有」。
-  // 履历标记的形状、表格里的状态栏都读这一个函数——同一个数不许在两处各判一次。
+  // 履历标记的形状、矩阵图的格子都读这一个函数——同一个数不许在两处各判一次。
   function holdState(item) {
     return item.holding === '持续' ? 'open' : (item.holding === '已退出' ? 'exit' : 'unknown');
+  }
+
+  // ── 筛选 ──────────────────────────────────────────────────────────────────
+  // 关键词、行业、持有状态，三件事同时成立才算命中。
+  //
+  // 关键词查名称、核心逻辑、类型、代码、金额、来源：读者想找的是「标的」，
+  // 但常常只记得一句逻辑（不记得名字，只记得「可乐的护城河」）。
+  //
+  // 键用的是**没转义的原始名字**：浏览器里 el.dataset.name 读到的就是解码后的
+  // 原文（名字里有 & 和 '，转义形态和原文不是一回事），两边必须同一个键空间。
+  function matchFilter(item, filter) {
+    const query = String((filter && filter.query) || '').trim().toLowerCase();
+    if (query) {
+      const haystack = [item.name, item.logic, item.type, item.ticker, item.amount, item.source]
+        .map(value => String(value || '')).join(' ').toLowerCase();
+      if (!haystack.includes(query)) return false;
+    }
+    if (filter && filter.sector && item.sector !== filter.sector) return false;
+    if (filter && filter.hold && holdState(item) !== filter.hold) return false;
+    return true;
+  }
+
+  // 返回命中条数与命中名字集合。**不命中的一条都不删**——只是淡化。
+  // 「展示层给全量」这条规矩在筛选时同样成立：读者永远看得见全量，
+  // 只是知道哪几条命中。
+  function filterHits(investments, filter) {
+    const list = investments || [];
+    const names = new Set();
+    let count = 0;
+    for (const item of list) {
+      if (!matchFilter(item, filter)) continue;
+      count += 1;
+      names.add(String(item.name));
+    }
+    return {
+      count,
+      total: list.length,
+      names,
+      active: !!(filter && (String(filter.query || '').trim() || filter.sector || filter.hold)),
+    };
   }
 
   // 净资产单位统一用美元：正文给「亿美元」，小字给完整美元数。
@@ -152,11 +198,25 @@ window.BuffettTimeline = (() => {
       label: (sectors[key] || {}).label || key,
       icon: (sectors[key] || {}).icon || '',
     })).sort((a, b) => b.count - a.count);
+    // 矩阵：行业 × 持有状态。每个格子的笔数由这批投资直接数出来，
+    // 不是另存一份数字——矩阵、图例、明细表必然是同一个口径。
+    const investments = data.investments || [];
+    const matrix = legend.map(row => ({
+      key: row.key, label: row.label, icon: row.icon, total: row.count,
+      cells: HOLD_STATES.map(state => ({
+        key: state.key, label: state.label,
+        count: investments.filter(item => item.sector === row.key && holdState(item) === state.key).length,
+      })),
+    }));
+    const matrixColumns = HOLD_STATES.map(state => ({
+      key: state.key, label: state.label,
+      total: investments.filter(item => holdState(item) === state.key).length,
+    }));
     const ticks = [];
     for (let year = 1950; year <= YEAR_MAX; year += 10) {
       ticks.push({ year, x: ovYearX(year) });
     }
-    return { points, marks, legend, ticks, gapFrom, gapTo };
+    return { points, marks, legend, ticks, gapFrom, gapTo, matrix, matrixColumns };
   }
 
   // 曲线上只标关键几个点：标多了就成了一堵字墙。
@@ -228,6 +288,157 @@ window.BuffettTimeline = (() => {
       + '<div class="ov-legend">' + legend + '</div>'
       + '<div class="ov-legend-note">颜色＝行业；空心＝仍在持有，实心＝已了结，半透明＝退出时点未披露或非持有类条目。'
       + '点标记可定位到下方那张卡片。</div>';
+  }
+
+  // 矩阵图的色阶：**固定**分档，不按当前数据的最大值缩放。
+  // 理由和金额条一样——刻度一缩放，同一个颜色在不同时候意思就变了。
+  const MX_LEVELS = [
+    { max: 0, cls: 'lvl0', label: '0 笔' },
+    { max: 2, cls: 'lvl1', label: '1—2 笔' },
+    { max: 5, cls: 'lvl2', label: '3—5 笔' },
+    { max: 9, cls: 'lvl3', label: '6—9 笔' },
+    { max: Infinity, cls: 'lvl4', label: '10 笔以上' },
+  ];
+
+  function mxLevel(count) {
+    const n = Number(count) || 0;
+    for (const level of MX_LEVELS) if (n <= level.max) return level;
+    return MX_LEVELS[MX_LEVELS.length - 1];
+  }
+
+  // 「找标的」面板：一张行业 × 持有状态的矩阵图，配一个搜索框。
+  //
+  // 矩阵既是图也是控件：格子里写笔数，颜色深浅＝笔数多少。
+  // 点格子＝按「行业 ＋ 持有状态」筛选；点行尾合计＝只看这个行业；
+  // 点列头＝只看这个状态。矩阵与图例、明细表同源，格里的数是数出来的，不是另存的。
+  function renderFinder(box, data) {
+    if (!box) return;
+    const spec = overviewSpec(data);
+    const total = (data.investments || []).length;
+    const head = '<span class="btl-mx-corner">行业 ＼ 持有状态</span>'
+      + spec.matrixColumns.map(col =>
+        `<button type="button" class="btl-mx-col" data-hold="${esc(col.key)}"`
+        + ` title="只看「${esc(col.label)}」的 ${col.total} 笔">${esc(col.label)}<em>${col.total}</em></button>`).join('')
+      + '<span class="btl-mx-col btl-mx-total">合计</span>';
+    const rows = spec.matrix.map(row => {
+      const cells = row.cells.map(cell => {
+        const level = mxLevel(cell.count);
+        return `<button type="button" class="btl-mx-cell ${level.cls} btl-s-${esc(row.key)}"`
+          + ` data-sector="${esc(row.key)}" data-hold="${esc(cell.key)}"`
+          + ` title="${esc(row.label)} · ${esc(cell.label)}：${cell.count} 笔">`
+          + `<i class="btl-mx-fill"></i><b>${cell.count}</b></button>`;
+      }).join('');
+      return '<div class="btl-mx-row">'
+        + `<button type="button" class="btl-mx-rowlab" data-sector="${esc(row.key)}"`
+        + ` title="只看「${esc(row.label)}」的 ${row.total} 笔">${esc(row.icon)} ${esc(row.label)}</button>`
+        + cells
+        + `<button type="button" class="btl-mx-rowtotal" data-sector="${esc(row.key)}"`
+        + ` title="「${esc(row.label)}」合计 ${row.total} 笔">${row.total}</button>`
+        + '</div>';
+    }).join('');
+    const foot = '<div class="btl-mx-row btl-mx-foot">'
+      + '<span class="btl-mx-rowlab">合计</span>'
+      + spec.matrixColumns.map(col => `<span class="btl-mx-footcell">${col.total}</span>`).join('')
+      + `<span class="btl-mx-rowtotal">${total}</span></div>`;
+    const scale = MX_LEVELS.map(level =>
+      `<span class="btl-mx-scale"><i class="btl-mx-cell ${level.cls}"><i class="btl-mx-fill"></i></i>${esc(level.label)}</span>`).join('');
+    box.innerHTML = '<div class="btl-finder-bar">'
+      + '<input type="search" class="btl-q" placeholder="搜标的、核心逻辑、类型或代码"'
+      + ' aria-label="在巴菲特的投资履历里搜索">'
+      + `<span class="btl-hit-count" role="status">全部 ${total} 笔</span>`
+      + '<button type="button" class="btl-jump" hidden>跳到第一条命中</button>'
+      + '<button type="button" class="btl-clear" hidden>清除筛选</button>'
+      + '</div>'
+      + '<div class="btl-mx" role="group" aria-label="行业与持有状态分布，点格子筛选">'
+      + `<div class="btl-mx-row btl-mx-head">${head}</div>${rows}${foot}</div>`
+      + `<div class="btl-mx-scale-row">${scale}`
+      + '<span class="btl-mx-scale-note">颜色深浅＝笔数多少（色阶固定，不随筛选变）</span></div>'
+      + '<p class="btl-finder-note">点格子按「行业 ＋ 持有状态」筛选，点行尾合计只看这个行业，点列头只看这个状态；'
+      + '搜索框查标的、核心逻辑、类型与代码。筛选只淡化不删除，全量始终在页面上。'
+      + '行业分类是阅读用的标注，不承担估值或选股含义；只筛投资，右侧净资产节点不受影响。</p>';
+  }
+
+  // 把筛选结果落到三处：卡片、总览标记、明细表行。不命中的一律淡化，不删。
+  function applyFilter(root, data, filter) {
+    const hits = filterHits(data.investments, filter);
+    const dim = name => hits.active && !hits.names.has(name);
+    for (const el of root.querySelectorAll('.btl-card')) {
+      el.classList.toggle('btl-dim', dim(el.dataset.name));
+    }
+    for (const el of root.querySelectorAll('.ov-mark')) {
+      el.classList.toggle('btl-dim', dim(el.dataset.name));
+    }
+    for (const el of root.querySelectorAll('.btl-tables tbody tr[data-name]')) {
+      el.classList.toggle('btl-dim', dim(el.dataset.name));
+    }
+    // 矩阵上标出当前选中的地方：格子（行业＋状态）、行（只看行业）、列（只看状态）。
+    for (const cell of root.querySelectorAll('.btl-mx-cell[data-sector]')) {
+      cell.classList.toggle('sel',
+        cell.dataset.sector === filter.sector && cell.dataset.hold === filter.hold);
+    }
+    for (const lab of root.querySelectorAll('.btl-mx-rowlab[data-sector], .btl-mx-rowtotal[data-sector]')) {
+      lab.classList.toggle('sel',
+        !!filter.sector && !filter.hold && lab.dataset.sector === filter.sector);
+    }
+    for (const col of root.querySelectorAll('.btl-mx-col[data-hold]')) {
+      col.classList.toggle('sel',
+        !!filter.hold && !filter.sector && col.dataset.hold === filter.hold);
+    }
+    const count = root.querySelector('.btl-hit-count');
+    if (count) {
+      count.textContent = hits.active ? `命中 ${hits.count} 笔（共 ${hits.total} 笔）` : `全部 ${hits.total} 笔`;
+    }
+    const clear = root.querySelector('.btl-clear');
+    if (clear) clear.hidden = !hits.active;
+    const jump = root.querySelector('.btl-jump');
+    if (jump) jump.hidden = !(hits.active && hits.count > 0);
+    return hits;
+  }
+
+  // 搜索框与矩阵格的接线。筛选状态只存在这一份里，不另存一份到 DOM 上。
+  function bindFinder(root, data) {
+    const box = root.querySelector('.btl-finder');
+    if (!box) return;
+    const scroll = root.querySelector('.btl-scroll');
+    const state = { query: '', sector: '', hold: '' };
+    const apply = () => applyFilter(root, data, state);
+    const input = box.querySelector('.btl-q');
+    if (input) {
+      input.addEventListener('input', () => { state.query = input.value; apply(); });
+    }
+    const clear = box.querySelector('.btl-clear');
+    if (clear) {
+      clear.addEventListener('click', () => {
+        state.query = ''; state.sector = ''; state.hold = '';
+        if (input) input.value = '';
+        apply();
+      });
+    }
+    const jump = box.querySelector('.btl-jump');
+    if (jump) {
+      jump.addEventListener('click', () => {
+        const hits = filterHits(data.investments, state);
+        if (!hits.count || !scroll) return;
+        for (const card of root.querySelectorAll('.btl-card')) {
+          if (!hits.names.has(card.dataset.name)) continue;
+          scrollCardIntoView(scroll, card, 140);
+          card.classList.add('btl-hit');
+          break;
+        }
+      });
+    }
+    for (const cell of box.querySelectorAll(
+      '.btl-mx-cell[data-sector], .btl-mx-rowlab[data-sector], .btl-mx-rowtotal[data-sector], .btl-mx-col[data-hold]')) {
+      cell.addEventListener('click', () => {
+        const sector = cell.dataset.sector || '';
+        const hold = cell.dataset.hold || '';
+        // 再点同一个地方＝取消这一格。
+        if (state.sector === sector && state.hold === hold) { state.sector = ''; state.hold = ''; }
+        else { state.sector = sector; state.hold = hold; }
+        apply();
+      });
+    }
+    apply();
   }
 
   // 逐年排版：同一年多笔依次下移，行高按内容撑开——这样年份与净资产落点
@@ -432,7 +643,7 @@ window.BuffettTimeline = (() => {
       }
       return parts.join(' ');
     };
-    const invest = (data.investments || []).map(item => `<tr data-year="${esc(item.year)}" data-holding="${esc(item.holding || '')}">`
+    const invest = (data.investments || []).map(item => `<tr data-year="${esc(item.year)}" data-holding="${esc(item.holding || '')}" data-name="${esc(item.name)}" data-sector="${esc(item.sector || '')}">`
       + `<td>${esc(item.year)}</td><td class="btl-td-age">${esc(ageOf(item.year))}</td>`
       + `<td><b>${esc(item.name)}</b>${item.ticker ? ' <span class="small muted">' + esc(item.ticker) + '</span>' : ''}`
       + (item.sector ? `<span class="btl-sec-tag btl-s-${esc(item.sector)}">${esc(sectorMeta(data.sectors, item.sector).icon)} ${esc(sectorMeta(data.sectors, item.sector).label)}</span>` : '')
@@ -539,15 +750,18 @@ window.BuffettTimeline = (() => {
     const canvas = root.querySelector('.btl-canvas');
     const tables = root.querySelector('.btl-tables');
     const overview = root.querySelector('.btl-overview');
+    const finder = root.querySelector('.btl-finder');
     const notice = root.querySelector('.btl-notice');
     const note = root.querySelector('.btl-note');
     if (head) renderSummary(head, data);
     if (note) note.textContent = (data.meta && data.meta.note) || '';
     if (overview) renderOverview(overview, data);
+    if (finder) renderFinder(finder, data);
     if (canvas) { canvas.innerHTML = ''; renderCanvas(canvas, data); }
     if (tables) renderTables(tables, data);
     if (notice) { notice.textContent = ''; notice.hidden = true; }
     linkOverviewAndTrack(root);
+    bindFinder(root, data);
   }
 
   function fail(root, message) {
@@ -585,5 +799,5 @@ window.BuffettTimeline = (() => {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 
-  return { load, render, layout, yiText, usdText, ageOf, periodOf, nwBarPct, overviewSpec, scrollCardIntoView, BIRTH_YEAR, YEAR_MIN, YEAR_MAX, NW_DECADES };
+  return { load, render, layout, yiText, usdText, ageOf, periodOf, nwBarPct, overviewSpec, scrollCardIntoView, matchFilter, filterHits, holdState, HOLD_STATES, BIRTH_YEAR, YEAR_MIN, YEAR_MAX, NW_DECADES };
 })();

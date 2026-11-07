@@ -516,6 +516,57 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:250px;
 .ov-key{display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--sec);flex:none}
 .ov-legend-note{margin-top:5px;font-size:10px;color:#93a098;line-height:1.6}
 
+/* 「找标的」：行业 × 持有状态矩阵 + 搜索框。
+   矩阵既是图也是控件——格里的笔数是数出来的，颜色深浅＝笔数多少。
+   色阶走 CSS 变量（--sec 是行业色，--btl-mx-op 是固定档位），
+   不用行内 style：服务器 CSP 是 style-src 'self'，行内 style 会被静默忽略。 */
+.btl-finder{margin-top:14px;border:1px solid var(--line);border-radius:10px;background:#fbfcfa;padding:14px 16px 12px}
+.btl-finder-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btl-finder-bar .btl-q{flex:1;min-width:190px;padding:7px 11px;font-size:13px}
+.btl-hit-count{font-size:12px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.btl-finder-bar .btl-jump,.btl-finder-bar .btl-clear{padding:6px 11px;font-size:12px}
+.btl-mx{margin-top:12px;display:grid;gap:3px}
+.btl-mx-row{display:grid;grid-template-columns:minmax(112px,186px) repeat(3,minmax(58px,1fr)) minmax(46px,62px);gap:3px;align-items:stretch}
+.btl-mx-corner{font-size:11px;color:var(--muted);display:flex;align-items:center;justify-content:flex-end;padding-right:2px}
+.btl-mx-col{background:none;border:none;padding:3px 4px;font-size:11px;color:var(--muted);cursor:pointer;border-radius:4px;display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap}
+.btl-mx-col em{font-style:normal;font-variant-numeric:tabular-nums;color:#a3aea6}
+.btl-mx-col:hover{color:var(--green);background:#eff3ed}
+.btl-mx-col.sel{color:var(--green);background:#e4efe6;font-weight:600}
+.btl-mx-col.btl-mx-total{cursor:default}
+.btl-mx-col.btl-mx-total:hover{background:none;color:var(--muted)}
+.btl-mx-cell{position:relative;border:1px solid var(--line);border-radius:5px;background:#fff;padding:0;height:26px;display:grid;place-items:center;cursor:pointer;overflow:hidden}
+.btl-mx-cell .btl-mx-fill{position:absolute;inset:0;background:var(--sec);opacity:var(--btl-mx-op,.06);pointer-events:none}
+.btl-mx-cell b{position:relative;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink)}
+.btl-mx-cell.lvl0{--btl-mx-op:.05}
+.btl-mx-cell.lvl1{--btl-mx-op:.17}
+.btl-mx-cell.lvl2{--btl-mx-op:.31}
+.btl-mx-cell.lvl3{--btl-mx-op:.47}
+.btl-mx-cell.lvl4{--btl-mx-op:.66}
+.btl-mx-cell:hover{border-color:var(--green)}
+.btl-mx-cell.sel{outline:2px solid var(--ink);outline-offset:-2px}
+.btl-mx-rowlab{background:none;border:none;padding:0 6px 0 0;text-align:left;font-size:12px;color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btl-mx-rowlab:hover{color:var(--green)}
+.btl-mx-rowlab.sel{color:var(--green);font-weight:600}
+.btl-mx-rowtotal{background:none;border:none;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;cursor:pointer;border-radius:4px}
+.btl-mx-rowtotal:hover{color:var(--green)}
+.btl-mx-rowtotal.sel{color:var(--green);font-weight:600}
+.btl-mx-foot .btl-mx-rowlab{color:var(--muted);cursor:default}
+.btl-mx-foot .btl-mx-rowlab:hover{color:var(--muted)}
+.btl-mx-footcell{display:grid;place-items:center;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.btl-mx-foot .btl-mx-rowtotal{color:var(--ink);font-weight:600;cursor:default}
+.btl-mx-scale-row{display:flex;gap:13px;align-items:center;flex-wrap:wrap;margin-top:9px;font-size:11px;color:var(--muted)}
+.btl-mx-scale{display:inline-flex;align-items:center;gap:5px}
+.btl-mx-scale .btl-mx-cell{width:17px;height:14px;cursor:default;border-radius:3px;flex:none}
+.btl-mx-scale .btl-mx-fill{background:var(--muted)}
+.btl-mx-scale-note{color:#9aa59d}
+.btl-finder-note{margin:10px 0 0;font-size:11px;color:#8b968e;line-height:1.7}
+
+/* 筛选：只淡化，不删除。全量始终在页面上，读者永远看得见没命中的那些。 */
+.btl-dim{opacity:.24}
+.btl-card.btl-hit,.ov-mark.btl-hit{opacity:1}
+tr.btl-dim{opacity:.42}
+@media(max-width:900px){.btl-mx-row{grid-template-columns:minmax(88px,1fr) repeat(3,minmax(46px,1fr)) minmax(40px,52px)}.btl-mx-col{font-size:10px}.btl-mx-cell b{font-size:11px}}
+
 /* 巴菲特双时间轴：年份竖排，中间一根脊轴写「年份 · 年龄」。
    同一年份用同一条底纹带，左边投资、右边净资产，年龄与年份因此互相对应。
    颜色与宽度一律走 CSS 类（服务器 CSP 是 style-src 'self'，行内 style 会被静默忽略）。 */
