@@ -486,6 +486,21 @@ function bqCard(row,gate,watchCodes){
   + (charts.margin?`<p class="bq-sub">毛利率与营业利润率（上市以来全量 · 浅色区间＝判据窗口近十年）</p>${charts.margin}`:'')
   + lines.join('') + watchLine + qual + '</div>';
 }
+// 护城河量化覆盖：两个数都来自**服务端判过**的结果，前端只读不重算——
+//   covered = 门禁 metrics 里 moat_market_share_count > 0 的公司（公告正文抽出过口径齐全的市占率）
+//   missing = 门禁 system_gaps 里挂着 market_share_not_quantified 的公司（系统级缺口）
+// 写死一句「全部公司都缺可量化的市占率」是不行的：一旦真有一家抽出来，
+// 那句话就跟卡片里的证据自相矛盾——同一个事实两处两个口径。
+function moatShareCoverage(rows){
+ const covered=[];let missing=0;
+ for(const row of rows){
+  const gate=row.business_quality||{};
+  const count=gate.metrics?.moat_market_share_count;
+  if(typeof count==='number'&&isFinite(count)&&count>0)covered.push(row);
+  if((gate.system_gaps||[]).some(gap=>gap&&gap.kind==='market_share_not_quantified'))missing+=1;
+ }
+ return {covered,missing};
+}
 // 生意质量面板：这层门禁的证据长什么样。一家一张卡，合格池在前、观察名单在后。
 function renderBusinessQuality(){
  const box=$('business-quality');
@@ -510,13 +525,25 @@ function renderBusinessQuality(){
  });
  const ordered=sorted.map(row=>cards.get(row.symbol)||'').join('');
  const watchCount=watchCodes.size;
+ // 护城河覆盖那句必须跟着数据走：覆盖数取自门禁 metrics，缺口数取自门禁 system_gaps，
+ // 前端不自己重算，也不再写死「全部公司都缺」——那是上一轮没有真市占率时才成立的话。
+ const shownRows=rows.filter(row=>cards.has(row.symbol));
+ const moatCover=moatShareCoverage(shownRows);
+ const coveredNames=moatCover.covered.map(row=>`${esc(row.name||row.symbol)}（${esc(row.symbol)}）`).join('、');
+ const moatLine=moatCover.covered.length
+  ? `护城河量化覆盖：${shownRows.length} 家里有 ${moatCover.covered.length} 家从公告正文抽到口径齐全的市占率（${coveredNames}）`
+    + (moatCover.missing
+      ? `，其余 ${moatCover.missing} 家仍缺——这是系统级缺口，不是某家的毛病；`
+      : '，全部公司都有量化证据；')
+    + '缺行业研究的公司按失败关闭处理。'
+  : `护城河目前是「有说法」不是「有量化证据」：${shownRows.length} 家全部缺可量化的市占率，这是系统级缺口，不是某家的毛病；缺行业研究的公司按失败关闭处理。`;
  box.innerHTML=`<div class="panel"><h3>生意质量与终值可持续性 · 这生意 20 年后还在吗</h3>
  <p class="small muted"><strong>这一层回答 DCF 公式答不了的东西</strong>：公式只把 WACC 与永续增长率代进去，70～85% 的答案由终值决定，而终值假设的正是「这生意 20 年后还在，赚的钱再投回去还能维持超额回报」——公式对这两件事一个字都没说。这里的 ${cards.size} 家是过了严格财务预筛的公司（合格池 ${(pool.pool_size)||0} 家 + 观察名单 ${watchCount} 家），每家一张图。</p>
  <p class="small muted"><strong>怎么读</strong>：上半是 ROIC 十年实测轨迹（深绿实线）、WACC 门槛（琥珀虚线，就是 DCF 用的同一个数）与 ROIC 十年中位（蓝实线）——<strong>中位线与门槛线之间那条带就是「持续超额回报」的幅度</strong>，带上沿高过门槛就是赚得到超额回报，最新一年的点是现在站在哪儿；下半是毛利率（深绿）与营业利润率（灰蓝）轨迹，毛利率中位数用点线标出，<strong>空心点＝并表口径跳变年</strong>（那年不可比，判据里已经剔除，不是恶化）。</p>
  <p class="small muted"><strong>口径</strong>：判断窗口是近十年（<strong>图上浅色区间</strong>，判据据此下结论），图上画的是上市以来全量，区间外只是背景——展示给全量、判断保持严格，两者不混。ROIC ＝ 息前税后利润 ÷ 投入资本，与经营驱动的股权桥同一套定义；WACC 取当前口径，与主情景同一个数；永续增长率取主情景那一档 1%。阈值一个没新造：5 个百分点沿用既有「十年 ROE 标准差」的尺度。</p>
  <p class="small muted"><strong>哪几条真在筛公司</strong>：A1 近十年 ROIC 中位数高于 WACC、A2 近五年增量 ROIC 高于 WACC、终值隐含再投资率小于 1，这三条当前池内全部通过——它们是<strong>守门</strong>，价值在于挡住将来不合格的，不负责区分谁好谁坏；真正筛出公司的是<strong>盈利可预测性</strong>（营业利润率波动 ≤ 5 个百分点）与<strong>毛利率趋势</strong>（最近可比年 vs 十年中位数 ≤ 5 个百分点）。</p>
  <div class="bq-grid">${ordered}</div>
- <p class="small muted">护城河目前是「有说法」不是「有量化证据」：全部公司都缺可量化的市占率，这是系统级缺口，不是某家的毛病；缺行业研究的公司按失败关闭处理。</p></div>`;
+ <p class="small muted">${moatLine}</p></div>`;
  applyProseColumns(box);
 }
 // 池子会变，变化要能查：合格池、观察名单、进出记录、下次自动重评。
