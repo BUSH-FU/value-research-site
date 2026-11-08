@@ -500,6 +500,8 @@ a.nav{cursor:pointer}
 .qual-items{margin:3px 0 0;padding-left:16px;font-size:10.5px;line-height:1.5;color:#4b5a52}
 .qual-items li{margin:1px 0}
 .qual-items .qual-str{margin-right:3px}
+.qual-src{font-size:10px;color:#2f5580;text-decoration:underline;word-break:break-all}
+.qual-src:hover{color:#1d3c5e}
 .qual-unknown{margin:5px 0 0;font-size:11px;line-height:1.55;color:#8a5a3c}
 .qual-unknown li{margin:1px 0}
 .qual-redline{margin:8px 0 0;padding:7px 9px;border:1px solid #e0c9a8;border-radius:6px;background:#fdf6ec;font-size:11.5px;line-height:1.55;color:#8a5a3c}

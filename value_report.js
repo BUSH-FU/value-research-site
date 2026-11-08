@@ -155,7 +155,13 @@ function roicZoneMeaningList(){return ROIC_ZONES.map(zone=>`${zone.range}＝${zo
 let activeYearWacc=null,activeLatestYear=null;
  // 逐年 WACC：每一年的资金成本都按那一年的市场数据算，不能用今天的一个数套历史。
  function yearWacc(row){const item=activeWaccHistory?.get(Number(row?.year));return item||null;}
- function fieldValue(key,value){if(value==null)return '—';if(key==='total_share')return num(value/1e8,4)+' 亿股';
+ function fieldValue(key,value){if(value==null)return '—';
+ // 说明文字不是数值：原样显示，不能拿 Number() 去算——「股东权益合计 − 归母净资产」
+ // 这种字符串被当成金额换算，出来的是「NaN 亿」（2026-11-08 实测，11 个年度中招）。
+ if(typeof value==='string')return value;
+ // NaN / Infinity 也不编数：显示「—」，不显示「NaN 亿」。
+ if(typeof value!=='number'||!Number.isFinite(value))return '—';
+ if(key==='total_share')return num(value/1e8,4)+' 亿股';
  if(key==='pe_year_end')return num(value,2)+' 倍';if(['roic_spread_pct','roe_roic_gap_pct'].includes(key))return (value>=0?'+':'')+num(value)+' 个百分点';if(ratioFields.has(key)||key==='wacc_pct'||key==='wacc_year_pct')return num(value)+'%';if(perShareFields.has(key)||key==='market_bvps')return '¥'+num(value,4);if(multipleFields.has(key)||key==='price_to_book')return num(value,3)+' 倍';return yi(value)+' 亿';}
  function metricButton(row,key){const value=metricValues[key](row,activeArchive),reading=['cash_profit_reading','roe_roic_reading','roic_reading'].includes(key),label=reading?esc(value):fieldValue(key,value),basisNote=['cash_profit_ratio','cash_profit_gap'].includes(key)&&value!=null&&!profitBasis(row).exact?'<small class="basis-note">归母参考</small>':key==='wacc_pct'&&value!=null?'<small class="basis-note">当前情景 · 非当年实测</small>':key==='wacc_year_pct'&&value!=null?'<small class="basis-note">按当年数据推算</small>':key==='pe_year_end'&&value==null?'<small class="basis-note">'+esc(peUnavailableReason(row))+'</small>':key==='cash_dividend_total'&&value==null?'<small class="basis-note">分红数据待补</small>':key==='cash_dividend_total'&&value===0?'<small class="basis-note">当年无已实施分红</small>':'';return `<button type="button" class="metric-value-button${reading?' reading-badge':''}" data-financial-metric="${key}" data-financial-year="${row.year}" aria-label="查看 ${row.year} 年${overviewMetrics[key].title}的含义和计算过程">${label}${basisNote}</button>`;}
  function metricHeader(key){return `<button type="button" class="metric-head-button" data-financial-metric="${key}" aria-label="了解${overviewMetrics[key].title}">${overviewMetrics[key].title}<span aria-hidden="true"> ⓘ</span></button>`;}
@@ -825,5 +831,5 @@ function renderCurrentWaccLine(){
   requestAnimationFrame(()=>chartInstances.forEach(chart=>chart.resize()));
  }
  function resizeCharts(){for(const chart of chartInstances)chart.resize();}
- return {renderFinancial,explainFinancialMetric,renderIndustry,renderChecklist,collectChecklist,checklistProblems,showChecklistProblems,showChecklistError,applyChecklistSaved,addCustomItem,disposeCharts,renderCharts,resizeCharts,renderCurrentWaccLine,capitalReturnModel,capitalReturnCaption,capitalReturnOption,renderBalanceAudit,fmtCnDate,fmtStamp};
+ return {renderFinancial,explainFinancialMetric,renderIndustry,renderChecklist,collectChecklist,checklistProblems,showChecklistProblems,showChecklistError,applyChecklistSaved,addCustomItem,disposeCharts,renderCharts,resizeCharts,renderCurrentWaccLine,capitalReturnModel,capitalReturnCaption,capitalReturnOption,renderBalanceAudit,renderFilingLineage,fieldValue,fmtCnDate,fmtStamp};
 })();

@@ -37,6 +37,20 @@ window.QualitativePanel = (() => {
     return machine.map(item => item.text).join('；');
   }
 
+  // 机器项的出处：有官方 PDF 链接就把链接摆出来。
+  // 「机器可核验」这四个字要能复核才成立——读者得能顺着链接翻到原文那一页。
+  function sourceLinks(item) {
+    const sources = (item.sources || []).filter(source => source && source.url);
+    if (!sources.length) return '';
+    return sources.map(source => {
+      const title = source.title || '公告';
+      const when = source.published_at ? `（${source.published_at}）` : '';
+      const page = source.page ? ` 第 ${source.page} 页` : '';
+      return `<a class="qual-src" href="${esc(source.url)}" target="_blank" rel="noopener"`
+        + `>${esc(title)}${esc(when)}${esc(page)}</a>`;
+    }).join('　');
+  }
+
   function render(gate, options) {
     const opts = options || {};
     const qualitative = (gate || {}).qualitative;
@@ -50,9 +64,9 @@ window.QualitativePanel = (() => {
     const axisRows = qualitative.axes.map(axis => {
       const items = (axis.items || []).map(item => {
         const tag = STRENGTH_LABEL[item.strength] || item.strength;
-        const sources = (item.sources || []).length
-          ? `<span class="muted">（出处 ${item.sources.length} 条）</span>` : '';
-        return `<li><span class="qual-str ${item.strength}">${esc(tag)}</span> ${esc(item.text)}${sources}</li>`;
+        const links = sourceLinks(item);
+        return `<li><span class="qual-str ${item.strength}">${esc(tag)}</span> ${esc(item.text)}`
+          + (links ? ` ${links}` : '') + `</li>`;
       }).join('');
       return `<li class="qual-axis">`
         + `<span class="qual-axis-name">${esc(axis.label)}</span>`
