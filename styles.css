@@ -442,6 +442,12 @@ a.nav{cursor:pointer}
 .vs-disclosure{display:block;font-size:11px;line-height:1.55;color:#6b6b6b;border-left:2px solid #d8d8d8;padding-left:6px;margin-top:2px}
 .vs-flat-evidence{margin-top:8px}
 .vs-flat-evidence h5{margin:10px 0 4px}
+/* 表格单元格里那个「点开看依据」的折叠块：折叠时不能把整张表撑宽。
+   摘要本身是短句，展开后的内容在单元格里横向滚动。 */
+.vs-evidence-fold{margin-top:6px}
+.vs-evidence-fold>summary{cursor:pointer;font-size:11px;color:var(--green);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vs-evidence-fold[open]>summary{margin-bottom:2px}
+.vs-evidence-fold .vs-flat-evidence{font-size:11px}
 
 /* 生意质量与终值可持续性：一家一张图。
    上半 ROIC 轨迹 + WACC 门槛 + 十年中位（带）；下半毛利率与营业利润率轨迹。

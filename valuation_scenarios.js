@@ -726,8 +726,12 @@ window.ValuationScenarios = (() => {
    const label = forecast.basis === 'latest' ? `${esc(forecast.source_year)} 年` :
     (forecast.basis === 'mean' ? '五年均值' : '五年中位数');
    const medianNote = isNum(forecast.five_year_median_yi) ? `；五年中位数 ${num(forecast.five_year_median_yi)} 亿` : '';
+   // 证据面板一律折叠起来：展开着塞在表格单元格里，会把整张表撑宽 400px
+   // （实测 2793px → 折叠后 2405px）、把这一行撑到 600px 高。
+   // 折叠后信息一点还在，和「经营驱动」那支的 <details> 是同一个动作。
+   const evidence = flatEvidencePanel(forecast);
    return `${num(forecast.fcff_yi)} 亿<br><span class="small muted">${label}${medianNote}；${esc(forecast.method||'历史 FCFF 平推（方法未标注）')}</span>`
-    + flatEvidencePanel(forecast);
+    + (evidence ? `<details class="vs-evidence-fold"><summary>平推法自己的回测 · 证据来源（点开看回测窗口与误差带）</summary>${evidence}</details>` : '');
   }
   const body = rows.map(r => `<tr><td>${esc(r.year)}</td><td>${num(r.revenue/1e8)}</td><td>${num(r.revenue_growth_pct,1)}%</td><td>${num(r.ebit/1e8)}</td><td>${num(r.nopat/1e8)}</td><td>${num(r.depreciation/1e8)}</td><td>${num(r.capex/1e8)}</td><td>${num(r.change_nwc/1e8)}</td><td><strong>${num(r.fcff/1e8)}</strong></td></tr>`).join('');
   const lineage = forecast.data_lineage || {};
